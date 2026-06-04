@@ -1863,9 +1863,10 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   const[expFrom,setExpFrom]=useState('');
   const[expTo,setExpTo]=useState('');
   function exportExcelRange(from,to){
+    function tDate(t){return t.created||t.received||t.receivedAt||t.createdAt||t.date||t.Date||t.dateCreated||t.receivedDate||t.Created||t.loggedAt||t.timestamp||t.Timestamp||'';}
     var src=tickets.slice();
-    if(from)src=src.filter(function(t){return(t.created||'')>=from;});
-    if(to)src=src.filter(function(t){return(t.created||'')<=to;});
+    if(from)src=src.filter(function(t){return String(tDate(t)).slice(0,10)>=from;});
+    if(to)src=src.filter(function(t){return String(tDate(t)).slice(0,10)<=to;});
     exportExcelFull(src,(from&&to)?from+'_to_'+to:(from?'from_'+from:(to?'to_'+to:'All')));
     setShowExportDlg(false);
   }

@@ -1382,9 +1382,10 @@ function AllComplaints({agent,allTix,onUpdate,onDelete,onDeleteBulk,showToast}){
   }
   function exportExcel(from,to){
     if(typeof XLSX==='undefined'){showToast('Excel library not loaded yet — try again in a moment.','error');return;}
+    function tDate(t){return t.created||t.received||t.receivedAt||t.createdAt||t.date||t.Date||t.dateCreated||t.receivedDate||t.Created||t.loggedAt||t.timestamp||t.Timestamp||'';}
     var src=allTix.slice();
-    if(from)src=src.filter(function(t){return(t.created||'')>=from;});
-    if(to)src=src.filter(function(t){return(t.created||'')<=to;});
+    if(from)src=src.filter(function(t){return String(tDate(t)).slice(0,10)>=from;});
+    if(to)src=src.filter(function(t){return String(tDate(t)).slice(0,10)<=to;});
     var headers=['#','Ticket No','Customer Name','Phone','Meter/Account','BU','Category','Responsible Party','Status','Description','Action Taken','Created','Logged At','Agent'];
     function row(t){return[t.num,t.num,t.name,t.phone,t.meter||t.account||'',t.bu,t.category||'',t.resp||'',t.status,t.issue||'',t.note||'',t.created||'',t.loggedAt||'',t.agentId||t.agent||''];}
     var all=src.map(row);
