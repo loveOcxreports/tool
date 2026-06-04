@@ -1385,49 +1385,20 @@ function AllComplaints({agent,allTix,onUpdate,onDelete,onDeleteBulk,showToast}){
     var src=allTix.slice();
     if(from)src=src.filter(function(t){return(t.created||'')>=from;});
     if(to)src=src.filter(function(t){return(t.created||'')<=to;});
-    var resolved=src.filter(function(t){return t.status==='resolved';});
-    var inprog=src.filter(function(t){return t.status==='progress';});
-    var unresolv=src.filter(function(t){return t.status==='unresolved';});
-    // Build category summary
-    var cats={};var catOrder=[];
-    src.forEach(function(t){
-      var c=(t.category||'UNCATEGORISED').toUpperCase();
-      if(!cats[c]){cats[c]={res:0,prg:0,unr:0,resp:t.resp||''};catOrder.push(c);}
-      if(t.status==='resolved')cats[c].res++;
-      else if(t.status==='progress')cats[c].prg++;
-      else cats[c].unr++;
-    });
-    var resPct=src.length?Math.round(resolved.length/src.length*100):0;
-    var prgPct=src.length?Math.round(inprog.length/src.length*100):0;
-    var unrPct=src.length?Math.round(unresolv.length/src.length*100):0;
-    var now=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
-    var timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var dStr=timeStr+', '+days[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
-    var todayStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-    var rows=[
-      ['COMPLAINT CATEGORY REPORT','','','','','',''],
-      ['S/N','Complaint Category','Responsible Party','Resolved','In Progress','Unresolved','Grand Total'],
-    ];
-    catOrder.forEach(function(cat,i){
-      var v=cats[cat];
-      rows.push([i+1,cat,v.resp,v.res,v.prg,v.unr,v.res+v.prg+v.unr]);
-    });
-    rows.push(['TOTAL','','',resolved.length,inprog.length,unresolv.length,src.length]);
-    rows.push(['','','','','','','']);
-    rows.push(['EXECUTIVE SUMMARY','','','','','','']);
-    rows.push(['As at '+dStr,'','','','','','']);
-    rows.push(['','','','','','','']);
-    rows.push(['A total of '+src.length+' complaints were received and processed across all categories.','','','','','','']);
-    rows.push([resolved.length+' ('+resPct+'%) have been fully resolved. '+inprog.length+' ('+prgPct+'%) are currently in progress. '+unresolv.length+' ('+unrPct+'%) remain unresolved and require urgent attention.','','','','','','']);
-    var ws=XLSX.utils.aoa_to_sheet(rows);
-    ws['!cols']=[{wch:5},{wch:46},{wch:30},{wch:10},{wch:12},{wch:12},{wch:12}];
-    ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:6}}];
-    var label=(from&&to)?from+'_to_'+to:(from?'from_'+from:(to?'to_'+to:'all'));
+    var headers=['#','Ticket No','Customer Name','Phone','Meter/Account','BU','Category','Responsible Party','Status','Description','Action Taken','Created','Logged At','Agent'];
+    function row(t){return[t.num,t.num,t.name,t.phone,t.meter||t.account||'',t.bu,t.category||'',t.resp||'',t.status,t.issue||'',t.note||'',t.created||'',t.loggedAt||'',t.agentId||t.agent||''];}
+    var all=src.map(row);
+    var res=src.filter(function(t){return t.status==='resolved';}).map(row);
+    var prg=src.filter(function(t){return t.status==='progress';}).map(row);
+    var unr=src.filter(function(t){return t.status==='unresolved';}).map(row);
     var wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'Complaint Category Report');
-    XLSX.writeFile(wb,'EKEDP_Complaints_'+label+'_'+todayStr+'.xlsx');
+    [['All Tickets',all],['Resolved',res],['In Progress',prg],['Unresolved',unr]].forEach(function(pair){
+      var ws=XLSX.utils.aoa_to_sheet([headers].concat(pair[1]));
+      ws['!cols']=headers.map(function(_,i){return{wch:i===10||i===9?35:18};});
+      XLSX.utils.book_append_sheet(wb,ws,pair[0]);
+    });
+    var label=(from&&to)?from+'_to_'+to:(from?'from_'+from:(to?'to_'+to:'all'));
+    XLSX.writeFile(wb,'EKEDP_Complaints_'+label+'.xlsx');
     showToast('Excel exported — '+src.length+' tickets ✓');
     setShowExportDlg(false);
   }
@@ -2388,27 +2359,8 @@ function CloudSync({agent,tickets,setTickets,showToast,agentShift}){
     if(!pullUrl){showToast('Set your Pull URL first','error');return;}
     setSaving(true);setStatus({msg:'Pulling from SharePoint via Power Automate…',ok:true});
     try{
-      let res,lastErr;
-      for(let attempt=1;attempt<=3;attempt++){
-        try{
-          if(attempt>1){
-            const wait=(attempt-1)*4000;
-            setStatus({msg:'Retry '+attempt+'/3 — waiting '+( wait/1000)+'s…',ok:true});
-            await new Promise(function(r){setTimeout(r,wait);});
-          }
-          const ctrl=new AbortController();
-          const tid=setTimeout(function(){ctrl.abort();},30000);
-          res=await fetch(pullUrl,{method:'POST',signal:ctrl.signal});
-          clearTimeout(tid);
-          if(res.ok||res.status===404)break;
-          lastErr=new Error('HTTP '+res.status+(res.status===502?' (gateway timeout)':res.status===503?' (service unavailable)':''));
-          if(res.status<500)break;
-        }catch(err){
-          lastErr=err.name==='AbortError'?new Error('Request timed out after 30 s'):err;
-          if(attempt===3)throw lastErr;
-        }
-      }
-      if(!res||!res.ok)throw lastErr||new Error('HTTP '+(res?res.status:'no response'));
+      const res=await fetch(pullUrl,{method:'POST'});
+      if(!res.ok)throw new Error('HTTP '+res.status+' — check your Pull URL');
       const cloud1=await res.json();
 
       // Normalise {manager:[...]} format from Pull All Tickets flow
@@ -2518,62 +2470,25 @@ function CloudSync({agent,tickets,setTickets,showToast,agentShift}){
 
   async function pushNow(){
     if(!pushUrl){showToast('Set your Push URL first','error');return;}
-    setSaving(true);
+    setSaving(true);setStatus({msg:'Pushing to SharePoint via Power Automate…',ok:true});
     try{
       const watNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
       const todayStr=watNow.getFullYear()+'-'+String(watNow.getMonth()+1).padStart(2,'0')+'-'+String(watNow.getDate()).padStart(2,'0');
       const todayTix=tickets.filter(function(t){return !t._baseline&&inDutyWindow(t,agentShift);});
-      if(!todayTix.length){showToast('No tickets in duty window to push.','error');setSaving(false);return;}
-
       function toSpStatus(s){return s==='resolved'?'Closed':s==='progress'?'Assigned':'Pending';}
-
-      let pushed=0,failed=0;
-      for(let i=0;i<todayTix.length;i++){
-        const t=todayTix[i];
-        setStatus({msg:'Pushing ticket '+(i+1)+'/'+todayTix.length+' (#'+t.num+')…',ok:true});
-
-        // Payload matches the flow's trigger schema exactly (single-ticket)
-        const payload={
-          num:       t.num||'',
-          status:    toSpStatus(t.status),
-          responsible: t.resp||t.responsible||'',
-          actionTaken: t.note||'',
-          resolvedBy:  t.status==='resolved'?(t.resp||agent.name):'',
-          resolvedDate:t.status==='resolved'?todayStr:'',
-          agentName:   agent.name,
-          updatedBy:   agent.name,
-        };
-
-        let res,lastErr;
-        for(let attempt=1;attempt<=3;attempt++){
-          try{
-            if(attempt>1){
-              await new Promise(function(r){setTimeout(r,(attempt-1)*4000);});
-              setStatus({msg:'Ticket '+(i+1)+'/'+todayTix.length+' — retry '+attempt+'/3…',ok:true});
-            }
-            const ctrl=new AbortController();
-            const tid=setTimeout(function(){ctrl.abort();},30000);
-            res=await fetch(pushUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
-            clearTimeout(tid);
-            if(res.ok||res.status===404)break;
-            lastErr=new Error('HTTP '+res.status+(res.status===502?' (gateway timeout)':res.status===503?' (unavailable)':''));
-            if(res.status<500)break;
-          }catch(err){
-            lastErr=err.name==='AbortError'?new Error('Timed out after 30 s'):err;
-            if(attempt===3){lastErr=lastErr;break;}
-          }
-        }
-        if(res&&res.ok){pushed++;}
-        else{failed++;console.warn('[Push] ticket #'+t.num+' failed:',lastErr?.message||res?.status);}
-      }
-
+      const mappedTix=todayTix.map(function(t){return Object.assign({},t,{spStatus:toSpStatus(t.status)});});
+      const payload={agentId:agent.id,agentName:agent.name,date:todayStr,tickets:mappedTix,pushedAt:new Date().toISOString()};
+      const res=await fetch(pushUrl,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
+      if(!res.ok)throw new Error('HTTP '+res.status+' — check your Push URL');
       const now=new Date().toLocaleString('en-GB',{timeZone:'Africa/Lagos'});
       setLastSync(now);localStorage.setItem('ek_last_sync',now);
-      const msg=failed===0
-        ?'✅ Pushed '+pushed+' ticket'+(pushed!==1?'s':'')+' to SharePoint.'
-        :'⚠️ '+pushed+' pushed, '+failed+' failed — check flow logs.';
-      setStatus({msg,ok:failed===0});showToast(msg,failed>0?'error':undefined);
-    }catch(e){setStatus({msg:'Push failed: '+e.message,ok:false});showToast('Push failed: '+e.message,'error');}
+      const msg='✅ Pushed '+todayTix.length+' tickets to SharePoint.';
+      setStatus({msg,ok:true});showToast(msg);
+    }catch(e){setStatus({msg:'Push failed: '+e.message,ok:false});showToast('Push failed','error');}
     finally{setSaving(false);}
   }
 
@@ -3046,17 +2961,6 @@ function App(){
     setSyncTick(function(n){return n+1;});
   }
 
-  const swipeRef=useRef({});
-  function onTouchStart(e){swipeRef.current.x=e.touches[0].clientX;swipeRef.current.y=e.touches[0].clientY;}
-  function onTouchEnd(e){
-    const dx=e.changedTouches[0].clientX-swipeRef.current.x;
-    const dy=e.changedTouches[0].clientY-swipeRef.current.y;
-    if(Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;
-    const idx=SCREEN_ORDER.indexOf(screen);
-    if(dx<0&&idx<SCREEN_ORDER.length-1)setScreen(SCREEN_ORDER[idx+1]);
-    if(dx>0&&idx>0)setScreen(SCREEN_ORDER[idx-1]);
-  }
-
   if(!agent)return <Signin onSignIn={onSignIn}/>;
 
   const agentShift=shifts[agent.id]||'day';
@@ -3072,10 +2976,8 @@ function App(){
     settings: <AgentSettings agent={agent} tickets={tickets} setTickets={setTickets} showToast={showToast}/>,
   };
 
-  const SCREEN_ORDER=['dashboard','all','tickets','slot','guide','photos','data','sync'];
-  
   return(
-    <div style={{'--agent':agent.color,'--agent-tint':agent.tint}} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div style={{'--agent':agent.color,'--agent-tint':agent.tint}}>
       {/* NAV */}
       <nav className="nav">
         <div className="nav-top">
