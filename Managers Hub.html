@@ -85,12 +85,12 @@ body[data-theme="bright"] .inp:focus{border-color:#F97316!important;}
 body[data-theme="bright"] .sel{background:#F5F7FF!important;border-color:#D8DFFF!important;color:#080F2E!important;}
 body[data-theme="bright"] .btn{border-color:#D8DFFF!important;color:#1A2560!important;background:rgba(68,85,168,.05)!important;}
 body[data-theme="bright"] .btn:hover{background:rgba(68,85,168,.12)!important;border-color:#7082D0!important;}
-body[data-theme="bright"] .btn-gold,.btn-agent{background:linear-gradient(135deg,#F97316,#EA6C0A)!important;color:#fff!important;border-color:#F97316!important;}
+body[data-theme="bright"] .btn-gold,body[data-theme="bright"] .btn-agent{background:linear-gradient(135deg,#F97316,#EA6C0A)!important;color:#fff!important;border-color:#F97316!important;}
 body[data-theme="bright"] .badge-res{background:rgba(22,163,74,.1)!important;color:#15803D!important;border-color:rgba(22,163,74,.2)!important;}
 body[data-theme="bright"] .badge-prg{background:rgba(217,119,6,.1)!important;color:#B45309!important;border-color:rgba(217,119,6,.2)!important;}
 body[data-theme="bright"] .badge-unr{background:rgba(220,38,38,.1)!important;color:#B91C1C!important;border-color:rgba(220,38,38,.2)!important;}
-body[data-theme="bright"] .bu-tag,.bu-pill{background:rgba(26,37,96,.1)!important;color:#1A2560!important;border-color:rgba(26,37,96,.2)!important;}
-body[data-theme="bright"] .agent-card,.roster-card{background:#fff!important;border-color:#D8DFFF!important;box-shadow:0 2px 10px rgba(68,85,168,.08)!important;}
+body[data-theme="bright"] .bu-tag,body[data-theme="bright"] .bu-pill{background:rgba(26,37,96,.1)!important;color:#1A2560!important;border-color:rgba(26,37,96,.2)!important;}
+body[data-theme="bright"] .agent-card,body[data-theme="bright"] .roster-card{background:#fff!important;border-color:#D8DFFF!important;box-shadow:0 2px 10px rgba(68,85,168,.08)!important;}
 body[data-theme="bright"] .agent-pick{border-color:#D8DFFF!important;background:#F5F7FF!important;}
 body[data-theme="bright"] .agent-pick:hover{border-color:#F97316!important;}
 body[data-theme="bright"] .agent-pick.on{border-color:#F97316!important;background:rgba(249,115,22,.08)!important;}
@@ -125,7 +125,7 @@ body[data-theme="bright"] .wg-cell{border-color:#D8DFFF!important;color:#1A2560!
 body[data-theme="bright"] .stat-bar{border-color:#D8DFFF!important;}
 body[data-theme="bright"] .sbar-item{border-color:#D8DFFF!important;background:#F5F7FF!important;}
 body[data-theme="bright"] .sbar-lbl{color:#5060A0!important;}
-body[data-theme="bright"] .xls-inp,.xls-sel{background:rgba(26,37,96,.9)!important;color:#fff!important;}
+body[data-theme="bright"] .xls-inp,body[data-theme="bright"] .xls-sel{background:rgba(26,37,96,.9)!important;color:#fff!important;}
 .xls-hint{display:none;font-size:9px;color:var(--muted);opacity:.5;margin-left:4px;font-style:italic;}
 .xls-cell:hover .xls-hint{display:inline;}
 /* Bright theme: report screens readable text */
@@ -1706,6 +1706,7 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   const[fFrom,setFFrom]=useState('');
   const[fTo,setFTo]=useState('');
   const[sort,setSort]=useState('newest');
+  const[fRepeat,setFRepeat]=useState('all');
   const[expanded,setExpanded]=useState(null);
   const[edits,setEdits]=useState({});
   const[selected,setSelected]=useState([]); // checked ticket ids
@@ -1782,8 +1783,15 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   },[lastChecked,paged]);
   const cats=[...new Set(tickets.map(function(t){return t.category;}))].filter(Boolean).sort();
   const respOpts=[...new Set(tickets.map(function(t){return t.resp;}).filter(Boolean))].sort();
+  // ── Repeat complainant detection (full set, used by filter + badge) ──
+  const phoneFreqAC={};const meterFreqAC={};
+  tickets.forEach(function(t){const p=String(t.phone||'').trim();const m=String(t.meter||'').trim();if(p)phoneFreqAC[p]=(phoneFreqAC[p]||0)+1;if(m&&m!=='0')meterFreqAC[m]=(meterFreqAC[m]||0)+1;});
+  function repeatCountAC(t){const p=String(t.phone||'').trim();const m=String(t.meter||'').trim();const pc=phoneFreqAC[p]||0;const mc=(meterFreqAC[m]&&m!=='0')?meterFreqAC[m]:0;return Math.max(pc,mc);}
+  function isRepeatAC(t){return repeatCountAC(t)>1;}
   const filtered=tickets.filter(function(t){
     if(fSt!=='all'&&t.status!==fSt)return false;
+    if(fRepeat==='repeat'&&!isRepeatAC(t))return false;
+    if(fRepeat==='unique'&&isRepeatAC(t))return false;
     if(fBu!=='all'&&t.bu!==fBu)return false;
     if(fCat!=='all'&&t.category!==fCat)return false;
     if(fResp!=='all'&&(t.resp||'')!==fResp)return false;
@@ -1808,11 +1816,6 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   const prg=filtered.filter(function(t){return t.status==='progress';}).length;
   const unr=filtered.filter(function(t){return t.status==='unresolved'||t.status==='pending';}).length;
 
-  // ── Repeat complainant detection ──
-  const phoneFreqAC={};const meterFreqAC={};
-  tickets.forEach(function(t){const p=String(t.phone||'').trim();const m=String(t.meter||'').trim();if(p)phoneFreqAC[p]=(phoneFreqAC[p]||0)+1;if(m&&m!=='0')meterFreqAC[m]=(meterFreqAC[m]||0)+1;});
-  function repeatCountAC(t){const p=String(t.phone||'').trim();const m=String(t.meter||'').trim();const pc=phoneFreqAC[p]||0;const mc=(meterFreqAC[m]&&m!=='0')?meterFreqAC[m]:0;return Math.max(pc,mc);}
-  function isRepeatAC(t){return repeatCountAC(t)>1;}
   const repeatTotalAC=filtered.filter(isRepeatAC).length;
 
   const watNowAC=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
@@ -1962,6 +1965,48 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   const pageIds=paged.map(function(t){return t.id;});
   const allPageSel=pageIds.length&&pageIds.every(function(id){return selected.includes(id);});
 
+  // ── Excel-style per-column filter popover ──
+  const[openCol,setOpenCol]=useState(null);
+  const[popPos,setPopPos]=useState({top:0,left:0,right:0,align:'left'});
+  React.useEffect(function(){
+    if(!openCol)return;
+    function close(){setOpenCol(null);}
+    document.addEventListener('click',close);
+    window.addEventListener('resize',close);
+    return function(){document.removeEventListener('click',close);window.removeEventListener('resize',close);};
+  },[openCol]);
+  function HeadFilter({label,colKey,value,setValue,options,align,extra,activeOverride}){
+    var active=activeOverride!=null?activeOverride:(value&&value!=='all'&&value!=='newest');
+    var open=openCol===colKey;
+    function toggle(e){
+      e.stopPropagation();
+      if(open){setOpenCol(null);return;}
+      var r=e.currentTarget.getBoundingClientRect();
+      setPopPos({top:r.bottom+4,left:r.left,right:window.innerWidth-r.right,align:align==='right'?'right':'left'});
+      setOpenCol(colKey);
+    }
+    return(
+      <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:align==='right'?'flex-end':'flex-start'}}>
+        <span>{label}</span>
+        <span onClick={toggle} title="Filter column"
+          style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:16,height:16,borderRadius:4,cursor:'pointer',flexShrink:0,background:active?'var(--ek-gold)':'rgba(255,255,255,.12)',color:active?'#0A1628':'rgba(255,255,255,.75)',font:'700 9px Sora,sans-serif',lineHeight:1}}>▾</span>
+        {open&&(
+          <div onClick={function(e){e.stopPropagation();}}
+            style={{position:'fixed',top:popPos.top,left:popPos.align==='right'?'auto':popPos.left,right:popPos.align==='right'?popPos.right:'auto',zIndex:9000,background:'var(--surface)',border:'1.5px solid var(--bsoft)',borderRadius:8,boxShadow:'0 10px 30px rgba(0,0,0,.5)',minWidth:170,maxHeight:340,overflowY:'auto',padding:4,textTransform:'none',letterSpacing:0}}>
+            {extra&&<div style={{padding:'4px 6px 8px',borderBottom:options&&options.length?'1px solid var(--bsoft)':'none',marginBottom:options&&options.length?4:0}}>{extra}</div>}
+            {(options||[]).map(function(o){
+              var on=value===o.v;
+              return <div key={o.v} onClick={function(){setValue(o.v);setOpenCol(null);}}
+                style={{padding:'7px 10px',borderRadius:5,cursor:'pointer',font:on?'700 12px Sora,sans-serif':'500 12px Sora,sans-serif',color:on?'#0A1628':'var(--fg)',background:on?'var(--ek-gold)':'transparent',whiteSpace:'nowrap'}}
+                onMouseEnter={function(e){if(!on)e.currentTarget.style.background='rgba(255,255,255,.08)';}}
+                onMouseLeave={function(e){if(!on)e.currentTarget.style.background='transparent';}}>{o.l}</div>;
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return(
     <div>
       {/* Hero / filters */}
@@ -1980,30 +2025,7 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
             <span style={{position:'absolute',left:11,top:'50%',transform:'translateY(-50%)',color:'rgba(255,255,255,.5)',display:'flex'}}>{Ico.search}</span>
             <input className="inp" style={{paddingLeft:34,height:36}} value={search} onChange={function(e){setSearch(e.target.value);}} placeholder="Search ticket #, customer, phone, address…"/>
           </div>
-          <select className="sel" style={{flex:'0 0 130px',height:36}} value={fSt} onChange={function(e){setFSt(e.target.value);}}>
-            <option value="all">All statuses</option>
-            <option value="resolved">Resolved</option>
-            <option value="progress">In Progress</option>
-            <option value="unresolved">Unresolved</option>
-          </select>
-          <select className="sel" style={{flex:'0 0 110px',height:36}} value={fBu} onChange={function(e){setFBu(e.target.value);}}>
-            <option value="all">All BUs</option>
-            {EK_BUS.map(function(b){return <option key={b} value={b}>{b}</option>;})}
-          </select>
-          <select className="sel" style={{flex:'0 0 150px',height:36}} value={fCat} onChange={function(e){setFCat(e.target.value);}}>
-            <option value="all">All categories</option>
-            {cats.map(function(c){return <option key={c} value={c}>{c.split('/')[0].trim()}</option>;})}
-          </select>
-          <select className="sel" style={{flex:'0 0 140px',height:36}} value={sort} onChange={function(e){setSort(e.target.value);}}>
-            <option value="newest">↓ Newest first</option>
-            <option value="oldest">↑ Oldest first</option>
-            <option value="num_desc">Ticket # high → low</option>
-            <option value="num_asc">Ticket # low → high</option>
-          </select>
-          <select className="sel" style={{flex:'0 0 170px',height:36}} value={fResp} onChange={function(e){setFResp(e.target.value);}}>
-            <option value="all">All resp. parties</option>
-            {respOpts.map(function(r){return <option key={r} value={r}>{r}</option>;})}
-          </select>
+          <span style={{font:'600 11px Sora,sans-serif',color:'rgba(255,255,255,.5)',display:'flex',alignItems:'center',gap:5,flexShrink:0,whiteSpace:'nowrap'}}>▾ Filters are on the column headers</span>
           {(function(){
             function todayStr(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
             var PRESETS=[
@@ -2052,7 +2074,7 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
               </>)}
             </>);
           })()}
-          {(search||fSt!=='all'||fBu!=='all'||fCat!=='all'||fResp!=='all'||fFrom||fTo||sort!=='newest')&&<button className="btn btn-sm btn-danger" onClick={function(){setSearch('');setFSt('all');setFBu('all');setFCat('all');setFResp('all');setFFrom('');setFTo('');setSort('newest');}} style={{height:36}}>Clear</button>}
+          {(search||fSt!=='all'||fBu!=='all'||fCat!=='all'||fResp!=='all'||fRepeat!=='all'||fFrom||fTo||sort!=='newest')&&<button className="btn btn-sm btn-danger" onClick={function(){setSearch('');setFSt('all');setFBu('all');setFCat('all');setFResp('all');setFRepeat('all');setFFrom('');setFTo('');setSort('newest');}} style={{height:36}}>Clear</button>}
           <button onClick={function(){var now=new Date();var y=now.getFullYear();var m=String(now.getMonth()+1).padStart(2,'0');setExpFrom(y+'-'+m+'-01');var last=new Date(y,now.getMonth()+1,0);setExpTo(y+'-'+m+'-'+String(last.getDate()).padStart(2,'0'));setShowExportDlg(true);}} style={{height:36,padding:'0 14px',background:'#059669',color:'#fff',border:'none',borderRadius:8,font:'700 11px Sora,sans-serif',cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>⬇ Excel</button>
         </div>
       </div>
@@ -2159,7 +2181,25 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
                   <th style={{width:36,padding:'8px 6px'}}>
                     <input type="checkbox" checked={allPageSel} onChange={toggleAll} style={{cursor:'pointer',width:14,height:14,accentColor:'var(--ek-gold)'}}/>
                   </th>
-                  <th>Date</th><th>Ticket</th><th>Time</th><th>Customer</th><th>Phone</th><th>BU</th><th style={{minWidth:120}}>CATEGORY✏</th><th>STATUS ↻</th><th>RESPONSIBLE✏</th><th style={{minWidth:180}}>COMPLAINT DESCRIPTION</th><th style={{minWidth:160}}>ACTION TAKEN✏</th><th>Details</th>
+                  <th><HeadFilter label="Date" colKey="date" value={sort} setValue={setSort} activeOverride={sort!=='newest'||!!fFrom||!!fTo}
+                    extra={<div onClick={function(e){e.stopPropagation();}} style={{display:'flex',flexDirection:'column',gap:6}}>
+                      <div style={{font:'700 9px Sora,sans-serif',color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em'}}>Filter by date</div>
+                      <input type="date" value={fFrom} onChange={function(e){setFFrom(e.target.value);}} style={{background:'var(--bg2)',color:'var(--fg)',border:'1px solid var(--bsoft)',borderRadius:6,padding:'6px 8px',font:'600 11px Sora,sans-serif',colorScheme:'dark'}}/>
+                      <input type="date" value={fTo} onChange={function(e){setFTo(e.target.value);}} style={{background:'var(--bg2)',color:'var(--fg)',border:'1px solid var(--bsoft)',borderRadius:6,padding:'6px 8px',font:'600 11px Sora,sans-serif',colorScheme:'dark'}}/>
+                      <div style={{display:'flex',gap:4}}>
+                        <button onClick={function(){var n=new Date();var s=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');setFFrom(s);setFTo(s);}} style={{flex:1,padding:'5px',background:'rgba(255,255,255,.08)',color:'var(--fg)',border:'1px solid var(--bsoft)',borderRadius:5,font:'600 10px Sora,sans-serif',cursor:'pointer'}}>Today</button>
+                        <button onClick={function(){setFFrom('');setFTo('');}} style={{flex:1,padding:'5px',background:'rgba(255,255,255,.08)',color:'var(--fg)',border:'1px solid var(--bsoft)',borderRadius:5,font:'600 10px Sora,sans-serif',cursor:'pointer'}}>Clear</button>
+                      </div>
+                    </div>}
+                    options={[{v:'newest',l:'↓ Newest first'},{v:'oldest',l:'↑ Oldest first'},{v:'num_desc',l:'Ticket # high → low'},{v:'num_asc',l:'Ticket # low → high'}]}/></th>
+                  <th>Ticket</th><th>Time</th>
+                  <th><HeadFilter label="Customer" colKey="repeat" value={fRepeat} setValue={setFRepeat} options={[{v:'all',l:'All customers'},{v:'repeat',l:'🔁 Repeats only ('+repeatTotalAC+')'},{v:'unique',l:'Unique only'}]}/></th>
+                  <th>Phone</th>
+                  <th><HeadFilter label="BU" colKey="bu" value={fBu} setValue={setFBu} options={[{v:'all',l:'All BUs'}].concat(EK_BUS.map(function(b){return {v:b,l:b};}))}/></th>
+                  <th style={{minWidth:120}}><HeadFilter label="CATEGORY✏" colKey="cat" value={fCat} setValue={setFCat} options={[{v:'all',l:'All categories'}].concat(cats.map(function(c){return {v:c,l:c.split('/')[0].trim()};}))}/></th>
+                  <th><HeadFilter label="STATUS ↻" colKey="status" value={fSt} setValue={setFSt} options={[{v:'all',l:'All statuses'},{v:'resolved',l:'Resolved'},{v:'progress',l:'In Progress'},{v:'unresolved',l:'Unresolved'}]}/></th>
+                  <th><HeadFilter label="RESPONSIBLE✏" colKey="resp" value={fResp} setValue={setFResp} options={[{v:'all',l:'All resp. parties'}].concat(respOpts.map(function(r){return {v:r,l:r};}))}/></th>
+                  <th style={{minWidth:180}}>COMPLAINT DESCRIPTION</th><th style={{minWidth:160}}>ACTION TAKEN✏</th><th>Details</th>
                 </tr>
               </thead>
               <tbody>
