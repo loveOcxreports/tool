@@ -922,6 +922,7 @@ function Nav({active,onChange,collapsed,onToggle,onSettings,onSignOut,onReset,us
         })}
       </div>
       <div className="nav-foot">
+        <a href="Agents_Hub.html" className="nav-foot-btn" title="Agent Hub" style={{textDecoration:'none',display:'flex',alignItems:'center',gap:8,width:'100%',boxSizing:'border-box'}}><span style={{display:'flex'}}><svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/><path d="M2 21c0-4 3.134-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="17" cy="15" r="4" stroke="currentColor" strokeWidth="2"/><path d="M17 12v3l2 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span>{!collapsed&&<span>Agent Hub</span>}</a>
         <button className="nav-foot-btn" onClick={onSignOut} title="Sign out"><span style={{display:'flex'}}>{Ico.logout}</span>{!collapsed&&<span>Sign out</span>}</button>
       </div>
     </nav>
@@ -5292,7 +5293,7 @@ function Settings({theme,onTheme,onClose,onReset,onResetMonth,onDedup,onPurge,ac
 // ── APP ────────────────────────────────────────────────────────────
 // ── LOADING SPLASH ───────────────────────────────────────────────
 function App(){
-  const[signedIn,setSignedIn]=useState(()=>localStorage.getItem('ek_v2_auth')==='1');
+  const[signedIn,setSignedIn]=useState(false);
   const[signedInName,setSignedInName]=useState(()=>localStorage.getItem('ek_v2_name')||'');
   const[readOnly,setReadOnly]=useState(()=>localStorage.getItem('ek_v2_readonly')==='1');
   const[screen,setScreen]=useState('dashboard');
@@ -5429,6 +5430,7 @@ function App(){
     showToast('🔄 Entire app reset to zero.');
   }
 
+  const swipeRef=useRef({});
   if(!signedIn)return <Signin onSignIn={onSignIn}/>;
   const W=collapsed?64:220;
   const screens={
@@ -5451,7 +5453,6 @@ function App(){
   const SCREEN_ORDER=['dashboard','daily','all','log','cumulative','slot','agents','sync','data','rpt_verify','rpt_anomaly','rpt_executive','rpt_weekly','rpt_monthly'];
 
   // Swipe left/right to navigate between screens
-  const swipeRef=useRef({});
   function onTouchStart(e){swipeRef.current.x=e.touches[0].clientX;swipeRef.current.y=e.touches[0].clientY;}
   function onTouchEnd(e){
     const dx=e.changedTouches[0].clientX-swipeRef.current.x;
