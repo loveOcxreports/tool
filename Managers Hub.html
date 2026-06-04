@@ -994,6 +994,116 @@ function DashTrendChart({ series, xLabels, fullLabels, height }) {
 
 }
 
+
+function WeekScheduleGrid() {
+  var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // Re-render when CSV import fires ek_sched_updated (same-tab event)
+  var [tick, setTick] = useState(0);
+  useEffect(function () {
+    function onUpdate() {setTick(function (n) {return n + 1;});}
+    window.addEventListener('ek_sched_updated', onUpdate);
+    return function () {window.removeEventListener('ek_sched_updated', onUpdate);};
+  }, []);
+  var SHIFT_META = {
+    day: { emoji: '☀️', label: 'Day', color: '#FCD34D' },
+    shadow: { emoji: '🌙', label: 'Night', color: '#818CF8' },
+    off: { emoji: '', label: 'Off', color: 'rgba(148,163,184,.5)' },
+    leave: { emoji: '🏖', label: 'Leave', color: '#34D399' }
+  };
+
+  // Week offset state (0 = this week)
+  var [weekOffset, setWeekOffset] = useState(0);
+
+  // Derive the Monday of the selected week in WAT
+  var watNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+  var dow = watNow.getDay() || 7; // 1=Mon … 7=Sun
+  var monday = new Date(watNow);
+  monday.setDate(watNow.getDate() - dow + 1 + weekOffset * 7);
+  monday.setHours(0, 0, 0, 0);
+
+  // Build date strings for the 7 days
+  var weekDates = DAYS.map(function (_, i) {
+    var d = new Date(monday);d.setDate(monday.getDate() + i);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  });
+  var todayStr = watNow.getFullYear() + '-' + String(watNow.getMonth() + 1).padStart(2, '0') + '-' + String(watNow.getDate()).padStart(2, '0');
+
+  function getShift(agentId, dateStr) {
+    // Prefer per-date CSV key, fall back to ek_v2_shifts for today
+    var v = localStorage.getItem('ek_sched_' + agentId + '_' + dateStr);
+    if (v) return v;
+    if (dateStr === todayStr) {
+      try {var s = JSON.parse(localStorage.getItem('ek_v2_shifts') || '{}');if (s[agentId]) return s[agentId];} catch (e) {}
+    }
+    if (typeof EK_ROSTER_SEED !== 'undefined' && EK_ROSTER_SEED[agentId] && EK_ROSTER_SEED[agentId][dateStr]) return EK_ROSTER_SEED[agentId][dateStr];
+    return 'off';
+  }
+
+  // Label: "WEEK OF 1 JUN" using Monday's date
+  var weekLabel = 'WEEK OF ' + monday.getDate() + ' ' + monday.toLocaleString('en-GB', { month: 'short' }).toUpperCase();
+
+  return (
+    <div className="card" style={{ padding: 0, marginBottom: 0 }}>
+      <div className="card-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h3 style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span style={{ fontSize: 14 }}>📅</span> {weekLabel}
+        </h3>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button className="btn btn-sm" onClick={function () {setWeekOffset(function (o) {return o - 1;});}} style={{ padding: '4px 10px', fontSize: 11 }}>← Prev</button>
+          <button className="btn btn-sm" onClick={function () {setWeekOffset(0);}} style={{ padding: '4px 10px', fontSize: 11, background: weekOffset === 0 ? 'var(--ek-gold)' : '', color: weekOffset === 0 ? '#000' : '' }}>This Week</button>
+          <button className="btn btn-sm" onClick={function () {setWeekOffset(function (o) {return o + 1;});}} style={{ padding: '4px 10px', fontSize: 11 }}>Next →</button>
+        </div>
+      </div>
+      <div style={{ overflowX: 'auto', padding: '12px 14px' }}>
+        <table className="week-grid">
+          <thead>
+            <tr>
+              <th className="wg-head" style={{ textAlign: 'left', minWidth: 120 }}>AGENT</th>
+              {DAYS.map(function (day, i) {
+                var isToday = weekDates[i] === todayStr;
+                return (
+                  <th key={day} className={'wg-head' + (isToday ? ' today' : '')}>
+                    {day}<br />
+                    <span style={{ fontSize: 13, fontWeight: 800, fontFamily: 'JetBrains Mono,monospace', letterSpacing: 0 }}>
+                      {new Date(weekDates[i] + 'T12:00:00').getDate()}
+                    </span>
+                  </th>);
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {EK_AGENTS.map(function (a) {
+              return (
+                <tr key={a.id}>
+                  <td className="wg-agent">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <AgentPhoto id={a.id} name={a.name} color={a.color} size={26} />
+                      <div>
+                        <div style={{ font: '700 11px/1 Sora,sans-serif', color: 'var(--text)' }}>{a.name.split(' ')[0]}</div>
+                        <div style={{ font: '500 9px/1 Sora,sans-serif', color: 'var(--muted)', marginTop: 2 }}>{a.name.split(' ').slice(1).join(' ')}</div>
+                      </div>
+                    </div>
+                  </td>
+                  {weekDates.map(function (dateStr, i) {
+                    var shift = getShift(a.id, dateStr);
+                    var meta = SHIFT_META[shift] || SHIFT_META.off;
+                    var isToday = dateStr === todayStr;
+                    return (
+                      <td key={dateStr} className={'wg-cell' + (isToday ? ' today' : '')}>
+                        <div style={{ height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, lineHeight: 1, textShadow: shift === 'shadow' ? '0 0 11px rgba(129,140,248,.95),0 0 5px rgba(129,140,248,.75)' : shift === 'day' ? '0 0 12px rgba(252,211,77,.95),0 0 5px rgba(251,191,36,.8)' : 'none' }}>{shift === 'off' ? <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(148,163,184,.32)' }} /> : meta.emoji}</div>
+                        <div style={{ marginTop: 3, color: meta.color, fontWeight: 700, fontSize: 9 }}>{meta.label}</div>
+                      </td>);
+                  })}
+                </tr>);
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>);
+
+}
+
+
 // ── DASHBOARD ──────────────────────────────────────────────────────
 const SLOTS=[{id:'9am',label:'9AM Handover',start:9,end:10},{id:'12pm',label:'12PM Update',start:12,end:13},{id:'cob',label:'4PM COB',start:16,end:17}];
 
