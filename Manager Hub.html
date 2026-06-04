@@ -111,6 +111,13 @@ body[data-theme="bright"] .wg-head{background:#EDF0FF!important;color:#4455A8!im
 body[data-theme="bright"] .wg-head.today{background:#E5EAFF!important;color:#1A2560!important;}
 body[data-theme="bright"] .wg-agent{background:#F5F7FF!important;border-color:#D8DFFF!important;}
 body[data-theme="bright"] .wg-cell{border-color:#D8DFFF!important;color:#1A2560!important;}
+/* Week schedule grid */
+.week-grid{width:100%;border-collapse:collapse;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;}
+.wg-head{padding:8px 10px;text-align:center;font:700 10px/1 Sora,sans-serif;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);}
+.wg-head.today{background:rgba(99,102,241,.25);color:#A5B4FC;}
+.wg-agent{padding:8px 10px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.07);white-space:nowrap;}
+.wg-cell{padding:8px 6px;text-align:center;border:1px solid rgba(255,255,255,.07);font:600 10px/1.3 Sora,sans-serif;color:rgba(255,255,255,.55);}
+.wg-cell.today{background:rgba(99,102,241,.1);}
 .stat-bar{display:flex;gap:8px;flex-wrap:wrap;}
 .sbar-item{flex:1;min-width:100px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:4px;}
 .sbar-lbl{font:700 9px/1 Sora,sans-serif;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;}
@@ -290,13 +297,15 @@ border:1px solid var(--border);border-radius:12px;padding:9px 14px;}
 
 /* KPI */
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:16px 28px 0;}
-.kpi-card{background:rgba(0,0,0,.22);border:1px solid var(--bsoft);border-radius:12px;
-padding:13px 14px;display:flex;align-items:center;gap:12px;transition:all .15s;cursor:default;}
-.kpi-card:hover{transform:translateY(-2px);}
-.kpi-ring-wrap{position:relative;flex-shrink:0;}
-.kpi-num{font:800 22px/1 'JetBrains Mono',monospace;color:#fff;}
-.kpi-label{font:700 9px/1 'Sora',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.10em;margin-bottom:4px;}
-.kpi-sub{font:500 10px/1.2 'Sora',sans-serif;color:var(--sub);margin-top:3px;}
+.kpi-card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.035) 0%,rgba(0,0,0,.20) 100%);border:1px solid var(--bsoft);border-radius:12px;
+padding:15px 15px 13px;display:flex;flex-direction:column;transition:all .18s;cursor:default;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kc,#60A5FA);opacity:.9;}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.38);}
+.kpi-num{font:800 34px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.01em;}
+.kpi-label{font:700 9.5px/1 'Sora',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;}
+.kpi-sub{font:500 10px/1.2 'Sora',sans-serif;color:var(--sub);margin-top:5px;}
+.kpi-bar{height:4px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:11px;}
+.kpi-bar>i{display:block;height:100%;border-radius:3px;background:var(--kc);box-shadow:0 0 8px var(--kc);transition:width .6s ease;}
 
 /* CARDS */
 .card{background:linear-gradient(180deg,var(--card2) 0%,var(--card) 100%);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
@@ -312,6 +321,11 @@ body[data-theme="bright"] .tbl th{color:#fff;}
 .tbl td{padding:9px 12px;border-bottom:1px solid var(--bsoft);color:var(--text2);vertical-align:middle;}
 .tbl tbody tr:hover td{background:rgba(255,255,255,.04);}
 .tbl-num{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--info);}
+.xls-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+.xls-scroll>.tbl{min-width:1240px;}
+.xls-scroll::-webkit-scrollbar{height:10px;}
+.xls-scroll::-webkit-scrollbar-thumb{background:var(--sub);border-radius:6px;}
+.xls-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,.2);}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font:700 10px/1 'Sora',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
@@ -413,19 +427,16 @@ var EK_AGENTS=[
   {id:'esther', name:'Esther Okafor',    email:'esther.okafor@ekedp.com',    color:'#DC2626',tint:'rgba(220,38,38,.18)', initials:'EO',role:'CX Agent'},
   {id:'loveth', name:'Loveth Okpara',    email:'loveth.okpara@ekedp.com',    color:'#F59E0B',tint:'rgba(245,158,11,.18)',initials:'LO',role:'CX Agent'},
 ];
-var EK_AGENTS_KEY='ek_v3_agents';
-var EK_AGENTS_DEFAULTS=EK_AGENTS.slice();
-function loadAgents(){
-  try{
-    var s=localStorage.getItem(EK_AGENTS_KEY);
-    if(s){var arr=JSON.parse(s);if(Array.isArray(arr)&&arr.length){EK_AGENTS.length=0;arr.forEach(function(a){EK_AGENTS.push(a);});return;}}
-  }catch(e){}
-}
-function saveAgents(arr){
-  try{localStorage.setItem(EK_AGENTS_KEY,JSON.stringify(arr));}catch(e){}
-  EK_AGENTS.length=0;arr.forEach(function(a){EK_AGENTS.push(a);});
-}
-loadAgents();
+// ── BUILT-IN ROSTER (auto-populated from June schedule) ───────────
+// shift ids: day · shadow(=night) · off · leave. Manual overrides in
+// localStorage (ek_sched_* / ek_v2_shifts) take precedence over this.
+var EK_ROSTER_SEED={
+  matthew:{"2026-06-04":"day","2026-06-05":"day","2026-06-06":"off","2026-06-07":"shadow","2026-06-08":"off","2026-06-09":"day","2026-06-10":"day","2026-06-11":"day","2026-06-12":"day","2026-06-13":"off","2026-06-14":"shadow","2026-06-15":"off","2026-06-16":"day","2026-06-17":"day","2026-06-18":"day","2026-06-19":"day","2026-06-20":"off","2026-06-21":"shadow","2026-06-22":"off","2026-06-23":"day","2026-06-24":"day","2026-06-25":"day","2026-06-26":"day","2026-06-27":"off","2026-06-28":"shadow","2026-06-29":"off","2026-06-30":"day"},
+  racheal:{"2026-06-04":"leave","2026-06-05":"leave","2026-06-06":"off","2026-06-07":"off","2026-06-08":"shadow","2026-06-09":"off","2026-06-10":"day","2026-06-11":"day","2026-06-12":"shadow","2026-06-13":"day","2026-06-14":"off","2026-06-15":"day","2026-06-16":"day","2026-06-17":"day","2026-06-18":"day","2026-06-19":"shadow","2026-06-20":"day","2026-06-21":"off","2026-06-22":"day","2026-06-23":"day","2026-06-24":"day","2026-06-25":"day","2026-06-26":"shadow","2026-06-27":"day","2026-06-28":"off","2026-06-29":"day","2026-06-30":"day"},
+  tomina:{"2026-06-03":"shadow","2026-06-04":"off","2026-06-05":"day","2026-06-06":"shadow","2026-06-07":"day","2026-06-08":"day","2026-06-09":"off","2026-06-10":"day","2026-06-11":"shadow","2026-06-12":"day","2026-06-13":"day","2026-06-14":"day","2026-06-15":"day","2026-06-16":"day","2026-06-17":"shadow","2026-06-18":"day","2026-06-19":"day","2026-06-20":"day","2026-06-21":"day","2026-06-22":"day","2026-06-23":"shadow","2026-06-24":"day","2026-06-25":"day","2026-06-26":"day","2026-06-27":"day","2026-06-28":"day","2026-06-29":"shadow","2026-06-30":"day"},
+  esther:{"2026-06-04":"day","2026-06-05":"shadow","2026-06-06":"day","2026-06-07":"off","2026-06-08":"off","2026-06-09":"shadow","2026-06-10":"day","2026-06-11":"day","2026-06-12":"day","2026-06-13":"shadow","2026-06-14":"day","2026-06-15":"off","2026-06-16":"shadow","2026-06-17":"day","2026-06-18":"day","2026-06-19":"day","2026-06-20":"shadow","2026-06-21":"day","2026-06-22":"off","2026-06-23":"shadow","2026-06-24":"day","2026-06-25":"day","2026-06-26":"day","2026-06-27":"shadow","2026-06-28":"day","2026-06-29":"off","2026-06-30":"shadow"},
+  loveth:{"2026-06-04":"shadow","2026-06-05":"off","2026-06-06":"off","2026-06-07":"off","2026-06-08":"leave","2026-06-09":"leave","2026-06-10":"leave","2026-06-11":"leave","2026-06-12":"leave","2026-06-13":"leave","2026-06-14":"leave","2026-06-15":"leave","2026-06-16":"leave","2026-06-17":"leave","2026-06-18":"leave","2026-06-19":"leave","2026-06-20":"leave","2026-06-21":"leave","2026-06-22":"leave","2026-06-23":"leave","2026-06-24":"leave","2026-06-25":"leave","2026-06-26":"leave","2026-06-27":"off","2026-06-28":"off","2026-06-29":"day","2026-06-30":"day"},
+};
 var EK_BUS=['ISLAND','IJORA','MUSHIN','AJAH','LEKKI','APAPA','AGBARA','AJELE','OJO','FESTAC','ORILE','IBEJU-LEKKI'];
 var EK_RESP_DEFAULTS=[
   {sn:1,name:'Holyland Umude',         cat:'Metering',                       color:'#60A5FA'},
@@ -469,6 +480,40 @@ function saveResp(arr){try{localStorage.setItem(EK_RESP_KEY,JSON.stringify(arr))
 var EK_RESP=loadResp();
 var EK_CATS=['Band Reclassification','Billing','Interruption / Voltage / Safety','Metering','PPM Support','PPM Maintenance','Onboarding','MYCRON','AMISA','General'];
 
+// ── SMART COMPLAINT CLASSIFIER ────────────────────────────────────
+// Reads complaint text → best-matching category (keyword scoring).
+function classifyComplaint(text){
+  var s=' '+String(text||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ')+' ';
+  if(!s.trim())return null;
+  var RULES=[
+    {cat:'MYCRON',kw:['mycron']},
+    {cat:'AMISA',kw:['amisa']},
+    {cat:'Band Reclassification',kw:['band reclass','reclassif','reclassification','service band','band migration','wrong band','band a','band b','band c','band d','hours of supply','supply hours','migrate band']},
+    {cat:'Onboarding',kw:['new connection','onboard','new customer','new account','new meter application','application for','enrol','enroll','register','sign up','new supply','fresh connection','apply for meter']},
+    {cat:'Billing',kw:['bill','overbill','over bill','estimated bill','tariff','arrears','wrong bill','high bill','debit','refund','payment','invoice','account balance','outstanding','over charge','overcharge','double charge']},
+    {cat:'PPM Maintenance',kw:['replace meter','meter replacement','reinstall','swap meter','meter damaged','burnt meter','damaged meter','meter repair','faulty installation','reconfigure meter','meter maintenance']},
+    {cat:'Metering',kw:['meter','token','recharge','prepaid','unit','vend','unable to load','cannot load','can not load','no token','credit not','not supplying','faulty meter','meter reading','blank meter','bypass','tamper','not dispensing','low credit']},
+    {cat:'PPM Support',kw:['ppm','prepaid meter program','ppm support','prepayment support']},
+    {cat:'Interruption / Voltage / Safety',kw:['no light','no power','power outage','outage','interruption','no supply','blackout','voltage','low voltage','high voltage','fluctuat','cable','burning','spark','fire','shock','fallen wire','broken pole','transformer','tripped','fault','pole','wire','electrocut','explosion','dangling','no electricity','restore power','power failure']},
+  ];
+  var best=null,bestScore=0;
+  RULES.forEach(function(r){
+    var score=0;
+    r.kw.forEach(function(k){if(s.indexOf(' '+k)>=0||s.indexOf(k+' ')>=0||s.indexOf(k)>=0)score+=(k.indexOf(' ')>=0?2:1);});
+    if(score>bestScore){bestScore=score;best=r.cat;}
+  });
+  return best;
+}
+// category → responsible-party name (tolerant of spacing/slash differences)
+function respForCat(cat){
+  if(!cat)return null;
+  var norm=function(x){return String(x||'').toLowerCase().replace(/[^a-z]/g,'');};
+  var nc=norm(cat);
+  var r=EK_RESP.find(function(x){return norm(x.cat)===nc;});
+  if(!r)r=EK_RESP.find(function(x){var n=norm(x.cat);return n&&(n.indexOf(nc)>=0||nc.indexOf(n)>=0);});
+  return r?r.name:null;
+}
+
 // ── SHAREPOINT BASE DATA (populated via Gist pull) ─────────────────
 window.EK_BASELINE_TICKETS=[];
 
@@ -510,6 +555,7 @@ function loadShifts(){
     ['matthew','racheal','tomina','esther','loveth'].forEach(function(id){
       var v=localStorage.getItem('ek_sched_'+id+'_'+d);
       if(v)base[id]=v;
+      else if(typeof EK_ROSTER_SEED!=='undefined'&&EK_ROSTER_SEED[id]&&EK_ROSTER_SEED[id][d])base[id]=EK_ROSTER_SEED[id][d];
     });
   }catch(e){}
   return base;
@@ -562,19 +608,13 @@ function dedupTickets(existing,incoming){
 
 var stripEmoji=function(s){return(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FEFF}\u{200D}\u{20E3}]+/gu,'').replace(/\s{2,}/g,' ').trim();};
 function fmtDay(t){
-  var raw=t.created||t.received||t.receivedAt||t.createdAt||t.date||t.Date||t.dateCreated||t.receivedDate||t.Created||t.loggedAt||t.timestamp||t.Timestamp||'';
-  var d=String(raw).slice(0,10);
+  var d=String(t.created||t.received||'').slice(0,10);
   if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d)){
     var p=d.split('-');
     var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(p[1],10)-1]||'';
     return mn+' '+parseInt(p[2],10);
   }
-  if(t.day&&t.day>0){
-    var now=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
-    var mn2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()]||'';
-    return mn2+' '+t.day;
-  }
-  return '—';
+  return(t.day&&t.day>0)?'Day '+t.day:'—';
 }
 function matchBU(val){var v=stripEmoji(val).trim().toUpperCase().replace(/\s+/g,' ');var exact=EK_BUS.find(function(b){return b.toUpperCase()===v;});if(exact)return exact;var partial=EK_BUS.find(function(b){return v.includes(b.toUpperCase())||b.toUpperCase().includes(v.split(' ')[0]);});return partial||null;}
 function parseSingle(txt){
@@ -815,10 +855,10 @@ function Signin({onSignIn}){
 
 // ── NAV ────────────────────────────────────────────────────────────
 const NAV_GROUPS=[
-  {label:'Operations',items:[{id:'dashboard',icon:'dash',label:'Dashboard'},{id:'daily',icon:'daily',label:'Monthly Report'},{id:'all',icon:'all',label:'All Complaints'}]},
-  {label:'Insights',items:[{id:'cumulative',icon:'cum',label:'Cumulative'},{id:'analytics',icon:'analy',label:'Analytics'},{id:'slot',icon:'report',label:'Slot Report',badge:'NEW'}]},
+  {label:'Operations',items:[{id:'dashboard',icon:'dash',label:'Dashboard'},{id:'all',icon:'all',label:'All Complaints'}]},
+  {label:'Reports',items:[{id:'daily',icon:'daily',label:'Monthly Report'},{id:'rpt_verify',icon:'all',label:'Verify'},{id:'rpt_anomaly',icon:'analy',label:'Anomaly'},{id:'rpt_executive',icon:'cum',label:'Executive'},{id:'rpt_weekly',icon:'daily',label:'Weekly'},{id:'rpt_monthly',icon:'report',label:'Monthly'}]},
+  {label:'Insights',items:[{id:'cumulative',icon:'cum',label:'Cumulative'},{id:'slot',icon:'report',label:'Slot Report',badge:'NEW'}]},
   {label:'Team',items:[{id:'agents',icon:'agents',label:'Agents'},{id:'sync',icon:'sync',label:'Cloud Sync'},{id:'data',icon:'report',label:'Import / Export'}]},
-  {label:'Reports',items:[{id:'rpt_verify',icon:'all',label:'Verify'},{id:'rpt_anomaly',icon:'analy',label:'Anomaly'},{id:'rpt_executive',icon:'cum',label:'Executive'},{id:'rpt_weekly',icon:'daily',label:'Weekly'},{id:'rpt_monthly',icon:'report',label:'Monthly'}]},
 ];
 
 function Nav({active,onChange,collapsed,onToggle,onSettings,onSignOut,onReset,user,activeMonth,setActiveMonth,availMonths,currentYM,tickets,readOnly}){
@@ -848,25 +888,20 @@ function Nav({active,onChange,collapsed,onToggle,onSettings,onSignOut,onReset,us
       </div>
       {!collapsed&&(availMonths||[]).length>0&&<div style={{padding:'8px 12px',borderBottom:'1px solid var(--bsoft)'}}>
         <div style={{font:'700 8px/1 Sora,sans-serif',color:'var(--sub)',textTransform:'uppercase',letterSpacing:'.14em',marginBottom:6}}>MONTH</div>
-        <div style={{display:'flex',flexDirection:'column',gap:3,maxHeight:140,overflowY:'auto'}}>
-          {(availMonths||[]).map(function(ym){
-            var on=activeMonth===ym;
-            var isCur=ym===currentYM;
-            var parts=ym.split('-');
-            var label=new Date(parseInt(parts[0]),parseInt(parts[1])-1,1).toLocaleDateString('en-GB',{month:'short',year:'numeric'});
-            var pending=(tickets||[]).filter(function(t){return shiftWatYM(t)===ym&&t.status!=='resolved';}).length;
-            var acBorder=isCur?'#22C55E':'rgba(227,6,19,.6)';
-            var acBg=isCur?'rgba(34,197,94,.1)':'rgba(227,6,19,.1)';
-            return(
-              <button key={ym} onClick={function(){setActiveMonth(ym);localStorage.setItem('ek_active_month',ym);}}
-                style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 9px',borderRadius:7,border:'1px solid '+(on?acBorder:'var(--bsoft)'),background:on?acBg:'transparent',color:on?'#fff':'var(--muted)',font:'600 11px/1 Sora,sans-serif',cursor:'pointer',transition:'all .15s',textAlign:'left'}}>
-                <span>{label}</span>
-                <span style={{fontSize:8,padding:'2px 6px',borderRadius:8,background:on?(isCur?'rgba(34,197,94,.2)':'rgba(227,6,19,.2)'):'rgba(255,255,255,.06)',color:isCur?'#4ADE80':pending>0?'#FCD34D':'var(--sub)',fontWeight:700,letterSpacing:'.06em',whiteSpace:'nowrap'}}>
-                  {isCur?'LIVE':pending>0?pending+'p':'✓'}
-                </span>
-              </button>
-            );
-          })}
+        <div style={{position:'relative'}}>
+          <select value={activeMonth||currentYM} onChange={function(e){setActiveMonth(e.target.value);localStorage.setItem('ek_active_month',e.target.value);}}
+            style={{width:'100%',appearance:'none',WebkitAppearance:'none',MozAppearance:'none',padding:'9px 30px 9px 11px',borderRadius:8,border:'1px solid '+(activeMonth===currentYM?'rgba(34,197,94,.55)':'var(--bsoft)'),background:activeMonth===currentYM?'rgba(34,197,94,.09)':'rgba(255,255,255,.03)',color:'#fff',font:'700 12px/1 Sora,sans-serif',cursor:'pointer',outline:'none'}}>
+            {(availMonths||[]).map(function(ym){
+              var parts=ym.split('-');
+              var label=new Date(parseInt(parts[0]),parseInt(parts[1])-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+              var isCur=ym===currentYM;
+              var pending=(tickets||[]).filter(function(t){return shiftWatYM(t)===ym&&t.status!=='resolved';}).length;
+              var suffix=isCur?'  ·  LIVE':pending>0?'  ·  '+pending+' pending':'  ·  closed';
+              return <option key={ym} value={ym} style={{background:'#0D1B45',color:'#fff'}}>{label+suffix}</option>;
+            })}
+          </select>
+          {activeMonth===currentYM&&<span style={{position:'absolute',right:28,top:'50%',transform:'translateY(-50%)',pointerEvents:'none',width:6,height:6,borderRadius:'50%',background:'#22C55E',boxShadow:'0 0 7px #22C55E'}}/>}
+          <span style={{position:'absolute',right:11,top:'50%',transform:'translateY(-50%)',pointerEvents:'none',color:'var(--muted)',fontSize:9}}>▾</span>
         </div>
       </div>}
       <div className="nav-body">
@@ -909,490 +944,338 @@ function ShiftBtns({agentId,shifts,onShift}){
 
 function ShiftPill({shift}){const m={day:{c:'#FCD34D',bg:'rgba(252,211,77,.15)',l:'☀ Day · 08:00–17:00'},night:{c:'#818CF8',bg:'rgba(129,140,248,.15)',l:'🌙 Night · 17:00–08:00'},off:{c:'#6B7280',bg:'rgba(107,114,128,.15)',l:'⊘ Off · Day Off'},leave:{c:'#34D399',bg:'rgba(52,211,153,.15)',l:'⛱ Leave'}};const v=m[shift]||m.off;return <span style={{display:'inline-flex',alignItems:'center',padding:'4px 10px',borderRadius:20,font:'700 11px/1 Sora,sans-serif',color:v.c,background:v.bg}}>{v.l}</span>;}
 
-
-function DashTrendChart({ series, xLabels, fullLabels, height }) {
-  const wrapRef = useRef(null);
-  const [hover, setHover] = useState(null);
-  const VBW = 1000,VBH = height || 340,PADL = 52,PADR = 28,PADT = 54,PADB = 46;
-  const n = xLabels.length;
-  const active = series.filter(function (s) {return s.on;});
-  const maxV = Math.max.apply(null, active.reduce(function (a, s) {return a.concat(s.data);}, [0]).concat([1]));
-  const niceMax = Math.max(4, Math.ceil(maxV / 4) * 4);
-  const xOf = function (i) {return n <= 1 ? PADL + (VBW - PADL - PADR) / 2 : PADL + i * (VBW - PADL - PADR) / (n - 1);};
-  const yOf = function (v) {return PADT + (1 - v / niceMax) * (VBH - PADT - PADB);};
-  function onMove(e) {
-    if (!wrapRef.current || n === 0) return;
-    const r = wrapRef.current.getBoundingClientRect();
-    const vbx = (e.clientX - r.left) / r.width * VBW;
-    let idx = Math.round((vbx - PADL) / Math.max((VBW - PADL - PADR) / Math.max(n - 1, 1), 1));
-    setHover(Math.max(0, Math.min(n - 1, idx)));
-  }
-  const gridY = [0, .25, .5, .75, 1];
-  const skip = n > 15 ? Math.ceil(n / 10) : n > 8 ? 2 : 1;
-  const hx = hover != null ? xOf(hover) : 0;
-  const topY = hover != null ? Math.min.apply(null, active.map(function (s) {return yOf(s.data[hover]);}).concat([VBH])) : 0;
-  const bottom = VBH - PADB;
-  const legItemW = 138;
-  const legY = 22;
-  return (
-    <div className="trend-chart" ref={wrapRef} style={{ position: 'relative', width: '100%' }} onMouseMove={onMove} onMouseLeave={function () {setHover(null);}}>
-      <svg width="100%" viewBox={"0 0 " + VBW + " " + VBH} style={{ display: 'block', width: '100%', height: 'auto' }}>
-        {/* inline legend top-left */}
-        {active.map(function (s, i) {
-          var lx = PADL + i * legItemW;
-          return <g key={'leg' + s.key}>
-            <circle cx={lx + 5} cy={legY} r="5" fill={s.color} />
-            <line x1={lx + 13} y1={legY} x2={lx + 30} y2={legY} stroke={s.color} strokeWidth="2.5" />
-            <text className="leg-lbl" x={lx + 36} y={legY + 4.5} fill="rgba(255,255,255,.7)" fontSize="12.5" fontFamily="Sora,sans-serif" fontWeight="600">{s.label}</text>
-          </g>;
-        })}
-        {/* grid lines */}
-        {gridY.map(function (f, i) {var y = PADT + f * (VBH - PADT - PADB);return <line key={i} className="tgrid" x1={PADL} y1={y} x2={VBW - PADR} y2={y} stroke="rgba(255,255,255,.07)" strokeWidth="1" />;})}
-        {/* Y axis labels */}
-        {gridY.map(function (f, i) {var v = Math.round(niceMax * (1 - f));return <text key={'y' + i} x={PADL - 10} y={PADT + f * (VBH - PADT - PADB) + 4} textAnchor="end" fill="rgba(255,255,255,.38)" fontSize="12" fontFamily="JetBrains Mono,monospace">{v}</text>;})}
-        {/* X axis labels */}
-        {xLabels.map(function (l, i) {if (i % skip !== 0 && i !== n - 1) return null;return <text key={'x' + i} x={xOf(i)} y={VBH - 12} textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="12" fontFamily="Sora,sans-serif">{l}</text>;})}
-        {/* area fills */}
-        {active.map(function (s) {
-          var pts = s.data.map(function (v, i) {return xOf(i).toFixed(1) + ',' + yOf(v).toFixed(1);});
-          var poly = xOf(0).toFixed(1) + ',' + bottom + ' ' + pts.join(' ') + ' ' + xOf(n - 1).toFixed(1) + ',' + bottom;
-          return <polygon key={'a' + s.key} points={poly} fill={s.color} fillOpacity=".16" />;
-        })}
-        {/* hover crosshair */}
-        {hover != null && <line className="tgrid" x1={hx} y1={PADT} x2={hx} y2={bottom} stroke="rgba(255,255,255,.2)" strokeWidth="1" strokeDasharray="4 3" />}
-        {/* lines — glow + main */}
-        {active.map(function (s) {
-          var pts = s.data.map(function (v, i) {return xOf(i).toFixed(1) + ',' + yOf(v).toFixed(1);}).join(' ');
-          return <g key={s.key}>
-            <polyline points={pts} fill="none" stroke={s.color} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" opacity=".12" />
-            <polyline points={pts} fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </g>;
-        })}
-        {/* dots */}
-        {n <= 40 && active.map(function (s) {return s.data.map(function (v, i) {return <circle key={s.key + 'd' + i} cx={xOf(i)} cy={yOf(v)} r="4.5" fill={s.color} stroke="var(--card)" strokeWidth="2" />;});})}
-        {/* hover dots */}
-        {hover != null && active.map(function (s) {return <circle key={'h' + s.key} cx={hx} cy={yOf(s.data[hover])} r="7" fill={s.color} stroke="var(--card)" strokeWidth="2.5" />;})}
-      </svg>
-      {hover != null && active.length > 0 && function () {
-        var leftPct = hx / VBW * 100,topPct = topY / VBH * 100;
-        return (
-          <div style={{ position: 'absolute', left: leftPct + '%', top: 'calc(' + topPct + '% - 14px)', transform: 'translate(-50%,-100%)', background: 'var(--card2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', boxShadow: '0 10px 30px rgba(0,0,0,.5)', pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 5, minWidth: 120 }}>
-            <div style={{ font: '700 10px/1 Sora,sans-serif', color: 'var(--muted)', marginBottom: 8, letterSpacing: '.04em' }}>{fullLabels && fullLabels[hover] || xLabels[hover]}</div>
-            <div style={{ display: 'flex', gap: 14 }}>
-              {active.map(function (s) {return (
-                  <div key={s.key} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 9, height: 9, borderRadius: '50%', background: s.color, boxShadow: '0 0 7px ' + s.color }} />
-                    <span style={{ font: "800 16px/1 'JetBrains Mono',monospace", color: '#fff' }}>{s.data[hover]}</span>
-                  </div>
-                  <span style={{ font: '600 9px/1 Sora,sans-serif', color: 'var(--muted)' }}>{s.label}</span>
-                </div>);})}
-            </div>
-          </div>);
-      }()}
-    </div>);
-
-}
-
-
-function WeekScheduleGrid() {
-  var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  // Re-render when CSV import fires ek_sched_updated (same-tab event)
-  var [tick, setTick] = useState(0);
-  useEffect(function () {
-    function onUpdate() {setTick(function (n) {return n + 1;});}
-    window.addEventListener('ek_sched_updated', onUpdate);
-    return function () {window.removeEventListener('ek_sched_updated', onUpdate);};
-  }, []);
-  var SHIFT_META = {
-    day: { emoji: '☀️', label: 'Day', color: '#FCD34D' },
-    shadow: { emoji: '🌙', label: 'Night', color: '#818CF8' },
-    off: { emoji: '', label: 'Off', color: 'rgba(148,163,184,.5)' },
-    leave: { emoji: '🏖', label: 'Leave', color: '#34D399' }
-  };
-
-  // Week offset state (0 = this week)
-  var [weekOffset, setWeekOffset] = useState(0);
-
-  // Derive the Monday of the selected week in WAT
-  var watNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
-  var dow = watNow.getDay() || 7; // 1=Mon … 7=Sun
-  var monday = new Date(watNow);
-  monday.setDate(watNow.getDate() - dow + 1 + weekOffset * 7);
-  monday.setHours(0, 0, 0, 0);
-
-  // Build date strings for the 7 days
-  var weekDates = DAYS.map(function (_, i) {
-    var d = new Date(monday);d.setDate(monday.getDate() + i);
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  });
-  var todayStr = watNow.getFullYear() + '-' + String(watNow.getMonth() + 1).padStart(2, '0') + '-' + String(watNow.getDate()).padStart(2, '0');
-
-  function getShift(agentId, dateStr) {
-    // Prefer per-date CSV key, fall back to ek_v2_shifts for today
-    var v = localStorage.getItem('ek_sched_' + agentId + '_' + dateStr);
-    if (v) return v;
-    if (dateStr === todayStr) {
-      try {var s = JSON.parse(localStorage.getItem('ek_v2_shifts') || '{}');if (s[agentId]) return s[agentId];} catch (e) {}
-    }
-    if (typeof EK_ROSTER_SEED !== 'undefined' && EK_ROSTER_SEED[agentId] && EK_ROSTER_SEED[agentId][dateStr]) return EK_ROSTER_SEED[agentId][dateStr];
-    return 'off';
-  }
-
-  // Label: "WEEK OF 1 JUN" using Monday's date
-  var weekLabel = 'WEEK OF ' + monday.getDate() + ' ' + monday.toLocaleString('en-GB', { month: 'short' }).toUpperCase();
-
-  return (
-    <div className="card" style={{ padding: 0, marginBottom: 0 }}>
-      <div className="card-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h3 style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <span style={{ fontSize: 14 }}>📅</span> {weekLabel}
-        </h3>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button className="btn btn-sm" onClick={function () {setWeekOffset(function (o) {return o - 1;});}} style={{ padding: '4px 10px', fontSize: 11 }}>← Prev</button>
-          <button className="btn btn-sm" onClick={function () {setWeekOffset(0);}} style={{ padding: '4px 10px', fontSize: 11, background: weekOffset === 0 ? 'var(--ek-gold)' : '', color: weekOffset === 0 ? '#000' : '' }}>This Week</button>
-          <button className="btn btn-sm" onClick={function () {setWeekOffset(function (o) {return o + 1;});}} style={{ padding: '4px 10px', fontSize: 11 }}>Next →</button>
-        </div>
-      </div>
-      <div style={{ overflowX: 'auto', padding: '12px 14px' }}>
-        <table className="week-grid">
-          <thead>
-            <tr>
-              <th className="wg-head" style={{ textAlign: 'left', minWidth: 120 }}>AGENT</th>
-              {DAYS.map(function (day, i) {
-                var isToday = weekDates[i] === todayStr;
-                return (
-                  <th key={day} className={'wg-head' + (isToday ? ' today' : '')}>
-                    {day}<br />
-                    <span style={{ fontSize: 13, fontWeight: 800, fontFamily: 'JetBrains Mono,monospace', letterSpacing: 0 }}>
-                      {new Date(weekDates[i] + 'T12:00:00').getDate()}
-                    </span>
-                  </th>);
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {EK_AGENTS.map(function (a) {
-              return (
-                <tr key={a.id}>
-                  <td className="wg-agent">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <AgentPhoto id={a.id} name={a.name} color={a.color} size={26} />
-                      <div>
-                        <div style={{ font: '700 11px/1 Sora,sans-serif', color: 'var(--text)' }}>{a.name.split(' ')[0]}</div>
-                        <div style={{ font: '500 9px/1 Sora,sans-serif', color: 'var(--muted)', marginTop: 2 }}>{a.name.split(' ').slice(1).join(' ')}</div>
-                      </div>
-                    </div>
-                  </td>
-                  {weekDates.map(function (dateStr, i) {
-                    var shift = getShift(a.id, dateStr);
-                    var meta = SHIFT_META[shift] || SHIFT_META.off;
-                    var isToday = dateStr === todayStr;
-                    return (
-                      <td key={dateStr} className={'wg-cell' + (isToday ? ' today' : '')}>
-                        <div style={{ height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, lineHeight: 1, textShadow: shift === 'shadow' ? '0 0 11px rgba(129,140,248,.95),0 0 5px rgba(129,140,248,.75)' : shift === 'day' ? '0 0 12px rgba(252,211,77,.95),0 0 5px rgba(251,191,36,.8)' : 'none' }}>{shift === 'off' ? <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(148,163,184,.32)' }} /> : meta.emoji}</div>
-                        <div style={{ marginTop: 3, color: meta.color, fontWeight: 700, fontSize: 9 }}>{meta.label}</div>
-                      </td>);
-                  })}
-                </tr>);
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>);
-
-}
-
-
 // ── DASHBOARD ──────────────────────────────────────────────────────
 const SLOTS=[{id:'9am',label:'9AM Handover',start:9,end:10},{id:'12pm',label:'12PM Update',start:12,end:13},{id:'cob',label:'4PM COB',start:16,end:17}];
 
-function Dashboard({ tickets, carryTix, shifts, onShift, onSettings, onNav, signedInName }) {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {const id = setInterval(() => setNow(new Date()), 1000);return () => clearInterval(id);}, []);
-  const wat = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
-  const h = wat.getHours(),m = wat.getMinutes();
-  const watTime = wat.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const watDate = wat.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-  const greetE = h < 12 ? '☀️' : h < 17 ? '🌤️' : '🌙';
-  const dayProg = Math.min(Math.round((h * 60 + m) / (17 * 60) * 100), 100);
+function Dashboard({tickets,carryTix,shifts,onShift,onSettings,onNav,signedInName}){
+  const[now,setNow]=useState(()=>new Date());
+  useEffect(()=>{const id=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(id);},[]);
+  const wat=new Date(now.toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
+  const h=wat.getHours(),m=wat.getMinutes();
+  const watTime=wat.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const watDate=wat.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const greetE=h<12?'☀️':h<17?'🌤️':'🌙';
+  const dayProg=Math.min(Math.round(((h*60+m)/(17*60))*100),100);
 
-  const carry = Array.isArray(carryTix) ? carryTix : [];
-  const carryPrg = carry.filter(function (t) {return t.status === 'progress';}).length;
-  const carryUnr = carry.filter(function (t) {return t.status === 'unresolved';}).length;
-  const all = tickets.length;
-  const res = tickets.filter(function (t) {return t.status === 'resolved';}).length;
-  const prg = tickets.filter(function (t) {return t.status === 'progress';}).length + carryPrg;
-  const unr = tickets.filter(function (t) {return t.status === 'unresolved' || t.status === 'pending';}).length + carryUnr;
-  const watTodayFull = watTodayStr();const today = tickets.filter(function (t) {if (t.created) {var d = new Date(t.created);if (!isNaN(d.getTime())) {var w = new Date(d.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));var ds = w.getFullYear() + '-' + String(w.getMonth() + 1).padStart(2, '0') + '-' + String(w.getDate()).padStart(2, '0');return ds === watTodayFull;}}if (t.day && t.day > 0) {return t.day === watDayNow() && String(t.created || '').startsWith(watTodayFull.slice(0, 7));}return false;});
-  const rate = all > 0 ? Math.round(res / all * 100) : 0;
+  const carry=Array.isArray(carryTix)?carryTix:[];
+  const carryPrg=carry.filter(function(t){return t.status==='progress';}).length;
+  const carryUnr=carry.filter(function(t){return t.status==='unresolved';}).length;
+  const all=tickets.length;
+  const res=tickets.filter(function(t){return t.status==='resolved';}).length;
+  const prg=tickets.filter(function(t){return t.status==='progress';}).length+carryPrg;
+  const unr=tickets.filter(function(t){return t.status==='unresolved'||t.status==='pending';}).length+carryUnr;
+  const watTodayFull=watTodayStr();const today=tickets.filter(function(t){if(t.created){var d=new Date(t.created);if(!isNaN(d.getTime())){var w=new Date(d.toLocaleString('en-US',{timeZone:'Africa/Lagos'}));var ds=w.getFullYear()+'-'+String(w.getMonth()+1).padStart(2,'0')+'-'+String(w.getDate()).padStart(2,'0');return ds===watTodayFull;}}if(t.day&&t.day>0){return t.day===watDayNow()&&String(t.created||'').startsWith(watTodayFull.slice(0,7));}return false;});
+  const rate=all>0?Math.round(res/all*100):0;
 
   // Responsible-party matching: prefer t.resp name match, fall back to category
-  function matchParty(t, r) {
-    var respName = (t.resp || t.responsible || '').toString().trim().toLowerCase();
-    if (respName && respName === r.name.toLowerCase()) return true;
-    if (!respName && t.category) {var key = r.cat.split('/')[0].trim().toLowerCase();return t.category.toLowerCase().includes(key);}
+  function matchParty(t,r){
+    var respName=(t.resp||t.responsible||'').toString().trim().toLowerCase();
+    if(respName&&respName===r.name.toLowerCase())return true;
+    if(!respName&&t.category){var key=r.cat.split('/')[0].trim().toLowerCase();return t.category.toLowerCase().includes(key);}
     return false;
   }
-  const cum = EK_RESP.map(function (r) {
-    var myTix = tickets.filter(function (t) {return matchParty(t, r);});
-    var myRes = myTix.filter(function (t) {return t.status === 'resolved';}).length;
-    var myPrg = myTix.filter(function (t) {return t.status === 'progress';}).length;
-    var myUnr = myTix.filter(function (t) {return t.status === 'unresolved';}).length;
-    var pct = myTix.length > 0 ? Math.round(myRes / myTix.length * 100) : 0;
-    var todayCount = myTix.filter(function (t) {return watDayOf(t) === watDayNow();}).length;
-    return Object.assign({}, r, { grand: myTix.length, res: myRes, prg: myPrg, unr: myUnr, pct: pct, todayCount: todayCount });
+  const cum=EK_RESP.map(function(r){
+    var myTix=tickets.filter(function(t){return matchParty(t,r);});
+    var myRes=myTix.filter(function(t){return t.status==='resolved';}).length;
+    var myPrg=myTix.filter(function(t){return t.status==='progress';}).length;
+    var myUnr=myTix.filter(function(t){return t.status==='unresolved';}).length;
+    var pct=myTix.length>0?Math.round(myRes/myTix.length*100):0;
+    var todayCount=myTix.filter(function(t){return watDayOf(t)===watDayNow();}).length;
+    return Object.assign({},r,{grand:myTix.length,res:myRes,prg:myPrg,unr:myUnr,pct:pct,todayCount:todayCount});
   });
 
-  const circ = 2 * Math.PI * 22;
-  function Dial({ v, total, color }) {const pct = total > 0 ? v / total : 0;const off = circ * (1 - pct);return (
-      <svg width="54" height="54" viewBox="0 0 54 54" style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx="27" cy="27" r="22" fill="none" stroke="rgba(255,255,255,.06)" strokeWidth="5" />
+  const circ=2*Math.PI*22;
+  function Dial({v,total,color}){const pct=total>0?v/total:0;const off=circ*(1-pct);return(
+    <svg width="54" height="54" viewBox="0 0 54 54" style={{transform:'rotate(-90deg)'}}>
+      <circle cx="27" cy="27" r="22" fill="none" stroke="rgba(255,255,255,.06)" strokeWidth="5"/>
       <circle cx="27" cy="27" r="22" fill="none" stroke={color} strokeWidth="5" strokeLinecap="round"
         strokeDasharray={circ} strokeDashoffset={off}
-        style={{ filter: 'drop-shadow(0 0 5px ' + color + '77)', transition: 'stroke-dashoffset .8s ease' }} />
+        style={{filter:'drop-shadow(0 0 5px '+color+'77)',transition:'stroke-dashoffset .8s ease'}}/>
     </svg>);}
 
-  const KPIs = [
-  { label: 'Total', value: all, color: '#60A5FA', sub: 'All time' },
-  { label: 'Resolved', value: res, color: '#22C55E', sub: rate + '% rate' },
-  { label: 'In Progress', value: prg, color: '#F59E0B', sub: 'Being handled' },
-  { label: 'Unresolved', value: unr, color: '#EF4444', sub: 'Action needed' },
-  { label: "Today's", value: today.length, color: '#C4B5FD', sub: 'Day ' + new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getDate() }];
+  const KPIs=[
+    {label:'Total',value:all,color:'#60A5FA',sub:'All time'},
+    {label:'Resolved',value:res,color:'#22C55E',sub:rate+'% rate'},
+    {label:'In Progress',value:prg,color:'#F59E0B',sub:'Being handled'},
+    {label:'Unresolved',value:unr,color:'#EF4444',sub:'Action needed'},
+    {label:"Today's",value:today.length,color:'#C4B5FD',sub:'Day '+new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'})).getDate()},
+  ];
 
+  const onShiftF=h<12?'day':h<17?'day':'night';
+  const onShiftAgents=EK_AGENTS.filter(function(a){return shifts[a.id]===onShiftF||shifts[a.id]==='day'||shifts[a.id]==='night';}).length;
 
-  const onShiftF = h < 12 ? 'day' : h < 17 ? 'day' : 'night';
-  const onShiftAgents = EK_AGENTS.filter(function (a) {return shifts[a.id] === onShiftF || shifts[a.id] === 'day' || shifts[a.id] === 'night';}).length;
-
-  return (
+  return(
     <div>
       {/* HERO */}
       <div className="hero">
         <div className="hero-row">
           <div>
-            <div className="hero-sub" style={{ marginBottom: 8 }}>EKEDP Customer Experience · Marina HQ</div>
+            <div className="hero-sub" style={{marginBottom:8}}>EKEDP Customer Experience · Marina HQ</div>
             <div className="hero-greeting">{greet}, {signedInName} {greetE}</div>
-            <div style={{ font: '500 12px/1.3 Sora,sans-serif', color: 'var(--muted)', marginTop: 8 }}>
-              {`📊 Analytics Dashboard · Day ${new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getDate()} · ${watDate}`}
+            <div style={{font:'500 12px/1.3 Sora,sans-serif',color:'var(--muted)',marginTop:8}}>
+              {`📊 Daily Roll-up · Day ${new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'})).getDate()} · ${watDate}`}
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:8}}>
             <div className="hero-clock-box">
-              <span className="live-dot" />
-              <span className="hero-clock" style={{ color: "rgb(26, 12, 12)" }}>{watTime}</span>
+              <span className="live-dot"/>
+              <span className="hero-clock">{watTime}</span>
               <span className="hero-clock-label">WAT</span>
-              <button onClick={onSettings} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', display: 'flex', marginLeft: 4 }}>{Ico.settings}</button>
+              <button onClick={onSettings} style={{background:'none',border:'none',cursor:'pointer',color:'var(--muted)',display:'flex',marginLeft:4}}>{Ico.settings}</button>
             </div>
-            <div style={{ font: '600 11px/1 Sora,sans-serif', color: 'var(--muted)' }}>{onShiftAgents} of {EK_AGENTS.length} agents on shift</div>
+            <div style={{font:'600 11px/1 Sora,sans-serif',color:'var(--muted)'}}>{onShiftAgents} of {EK_AGENTS.length} agents on shift</div>
           </div>
         </div>
         {/* Slot timeline removed — covered by Success Scorecard below */}
       </div>
 
-      {/* SUCCESS SCORECARD (compact) */}
-      {function () {
-        const watTodayStr2 = wat.toISOString().slice(0, 10);
-        function ticketDate2(t) {
-          if (t.created) return String(t.created).slice(0, 10);
-          return null;
-        }
-        const todayList2 = tickets.filter(function (t) {return ticketDate2(t) === watTodayStr2;});
-        const todayResolved2 = todayList2.filter(function (t) {return t.status === 'resolved';}).length;
-        const todayRate2 = todayList2.length ? Math.round(todayResolved2 / todayList2.length * 100) : 0;
-        const reportsSent2 = (h >= 9 ? 1 : 0) + (h >= 12 ? 1 : 0) + (h >= 17 ? 1 : 0);
-        const isCOB2 = h >= 17;
-        const SCORE2 = [
-        { l: 'Same-day Resolution', v: todayList2.length ? todayRate2 + '%' : '—', ok: todayRate2 >= 80 && todayList2.length > 0, warn: todayList2.length > 0 && todayRate2 < 80, c: '#22C55E' },
-        { l: 'Tickets Today', v: todayList2.length, ok: todayList2.length > 0, warn: false, c: '#60A5FA' },
-        { l: 'Reports Sent', v: reportsSent2 + ' / 3', ok: reportsSent2 === 3, warn: isCOB2 && reportsSent2 < 3, c: '#FBBF24' }];
-
-        return (
-          <div style={{ padding: '10px 28px 0' }}>
-            <div style={{ background: 'rgba(0,0,0,.18)', border: '1px solid var(--bsoft)', borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-                <div style={{ font: '700 10px/1 Sora,sans-serif', color: 'var(--ek-gold)', letterSpacing: '.18em', textTransform: 'uppercase' }}>Success Scorecard · Today</div>
-                <a href="Success Criteria.html" target="_blank" style={{ font: '600 10px/1 Sora,sans-serif', color: 'var(--muted)', textDecoration: 'none' }}>View targets →</a>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-                {SCORE2.map(function (s) {
-                  const dot = s.ok ? '#22C55E' : s.warn ? '#EF4444' : '#94A3B8';
-                  const mark = s.ok ? '✓' : s.warn ? '✕' : '·';
-                  return (
-                    <div key={s.l} style={{ background: 'rgba(0,0,0,.18)', borderRadius: 10, padding: '10px 12px', border: '1px solid var(--bsoft)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-                        <span style={{ font: '600 9px/1 Sora,sans-serif', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.1em' }}>{s.l}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                        <span style={{ font: "800 20px/1 'JetBrains Mono',monospace", color: s.c }}>{s.v}</span>
-                        <span style={{ font: '700 12px/1 Sora,sans-serif', color: dot }}>{mark}</span>
-                      </div>
-                    </div>);
-
-                })}
-              </div>
-            </div>
-          </div>);
-
-      }()}
-
-      {/* DAILY VOLUME TREND */}
-      {function () {
-        var dayN2 = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getDate();
-        var mo2 = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getMonth();
-        var yr2 = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getFullYear();
-        var MON2 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        var phoneFreqD = {};var meterFreqD = {};
-        tickets.forEach(function (t) {var p = String(t.phone || '').trim();var m = String(t.meter || '').trim();if (p) phoneFreqD[p] = (phoneFreqD[p] || 0) + 1;if (m && m !== '0') meterFreqD[m] = (meterFreqD[m] || 0) + 1;});
-        function isRepeatD(t) {var p = String(t.phone || '').trim();var m = String(t.meter || '').trim();var pc = phoneFreqD[p] || 0;var mc = meterFreqD[m] && m !== '0' ? meterFreqD[m] : 0;return Math.max(pc, mc) > 1;}
-        var byDay2 = [];for (var d2 = 1; d2 <= dayN2; d2++) {var tx2 = tickets.filter(function (t) {return watDayOf(t) === d2;});byDay2.push({ day: d2, total: tx2.length, res: tx2.filter(function (t) {return t.status === 'resolved';}).length, unr: tx2.filter(function (t) {return t.status === 'unresolved' || t.status === 'pending';}).length, rep: tx2.filter(isRepeatD).length });}
-        var xLbls = byDay2.map(function (b) {return MON2[mo2] + ' ' + b.day;});
-        var fullLbls = byDay2.map(function (b) {return b.day + ' ' + MON2[mo2] + ' ' + yr2;});
-        var series2 = [
-        { key: 'total', label: 'Total', color: '#6366F1', on: true, data: byDay2.map(function (b) {return b.total;}) },
-        { key: 'resolved', label: 'Resolved', color: '#22C55E', on: true, data: byDay2.map(function (b) {return b.res;}) },
-        { key: 'unresolved', label: 'Unresolved', color: '#EF4444', on: true, data: byDay2.map(function (b) {return b.unr;}) },
-        { key: 'repeated', label: 'Repeated', color: '#A78BFA', on: true, data: byDay2.map(function (b) {return b.rep;}) }];
-
-        return (
-          <div style={{ padding: '16px 28px 0' }}>
-            <div className="card">
-              <div className="card-head">
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: 7 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366F1', display: 'inline-block' }} />📈 Daily Volume Trend</h3>
-              </div>
-              <div style={{ padding: '18px 16px 10px' }}>
-                <DashTrendChart series={series2} xLabels={xLbls} fullLabels={fullLbls} height={300} />
-              </div>
-            </div>
-          </div>);
-
-      }()}
-
-      {/* KPI ROW — Analytics style */}
-      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(6,1fr)' }}>
-        {[
-        { label: 'Total', value: all, color: '#60A5FA', sub: 'All time' },
-        { label: 'Resolved', value: res, color: '#22C55E', sub: rate + '% rate' },
-        { label: 'Resolution Rate', value: rate + '%', color: '#34D399', sub: 'target ≥ 80%' },
-        { label: 'In Progress', value: prg, color: '#F59E0B', sub: 'being handled' },
-        { label: 'Unresolved', value: unr, color: '#EF4444', sub: 'action needed' },
-        { label: "Today's", value: today.length, color: '#C4B5FD', sub: 'Day ' + new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getDate() }].
-        map(function (k) {return (
-            <div key={k.label} className="kpi-card" style={{ '--kc': k.color }}
-            onMouseEnter={function (e) {e.currentTarget.style.borderColor = k.color;}}
-            onMouseLeave={function (e) {e.currentTarget.style.borderColor = 'var(--bsoft)';}}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
+      {/* KPI ROW */}
+      <div className="kpi-row" style={{paddingBottom:0}}>
+        {KPIs.map(function(k){
+          var share=all>0?Math.max(Math.round(k.value/all*100),k.value>0?4:0):0;
+          return(
+          <div key={k.label} className="kpi-card" style={{'--kc':k.color}}
+            onMouseEnter={function(e){e.currentTarget.style.borderColor=k.color;}}
+            onMouseLeave={function(e){e.currentTarget.style.borderColor='var(--bsoft)';}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:9}}>
               <span className="kpi-label">{k.label}</span>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: k.color, boxShadow: '0 0 9px ' + k.color, flexShrink: 0 }} />
+              <span style={{width:8,height:8,borderRadius:'50%',background:k.color,boxShadow:'0 0 9px '+k.color,flexShrink:0}}/>
             </div>
-            <div className="kpi-num" style={{ color: k.color, fontSize: 28 }}>{k.value}</div>
+            <div className="kpi-num" style={{color:k.color}}>{k.value}</div>
             <div className="kpi-sub">{k.sub}</div>
+            <div className="kpi-bar"><i style={{width:share+'%'}}/></div>
           </div>);})}
       </div>
 
-      {/* STATUS SPLIT + BY CATEGORY */}
-      {function () {
-        var catColors2 = ['#6366F1', '#F97316', '#22C55E', '#EF4444', '#F59E0B', '#8B5CF6', '#2DD4BF', '#EC4899', '#60A5FA', '#34D399'];
-        var byCat2 = EK_CATS.map(function (c, i) {var tx = tickets.filter(function (t) {return t.category === c;});var rs = tx.filter(function (t) {return t.status === 'resolved';}).length;return { cat: c, total: tx.length, res: rs, pct: tx.length ? Math.round(rs / tx.length * 100) : 0, color: catColors2[i % catColors2.length] };}).filter(function (c) {return c.total > 0;}).sort(function (a, b) {return b.total - a.total;});
-        var maxCat2 = Math.max.apply(null, byCat2.map(function (c) {return c.total;}).concat([1]));
-        return (
-          <div style={{ padding: '16px 28px 0', display: 'grid', gridTemplateColumns: 'minmax(0,360px) 1fr', gap: 16 }}>
-            <div className="card">
-              <div className="card-head"><h3 style={{ display: 'flex', alignItems: 'center', gap: 7 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', display: 'inline-block' }} />Status Split</h3><span style={{ font: '600 10px Sora,sans-serif', color: 'var(--muted)' }}>{all} total</span></div>
-              <div style={{ padding: '18px', display: 'flex', alignItems: 'center', gap: 18 }}>                <DonutChart resolved={res} progress={prg} unresolved={unr} />
-                <div style={{ flex: 1 }}>
-                  {[{ label: 'Resolved', v: res, c: '#22C55E' }, { label: 'In Progress', v: prg, c: '#F59E0B' }, { label: 'Unresolved', v: unr, c: '#EF4444' }].map(function (s) {var tot = res + prg + unr || 1;return (
-                      <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 11 }}>
-                      <div style={{ width: 9, height: 9, borderRadius: '50%', background: s.c, flexShrink: 0, boxShadow: '0 0 6px ' + s.c }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                          <span style={{ font: '600 11px/1 Sora,sans-serif', color: 'var(--text)' }}>{s.label}</span>
-                          <span style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: s.c }}>{s.v}</span>
-                        </div>
-                        <div style={{ height: 3, background: 'rgba(255,255,255,.06)', borderRadius: 3 }}><div style={{ height: 3, width: Math.round(s.v / tot * 100) + '%', background: s.c, borderRadius: 3, transition: 'width .6s' }} /></div>
+      {/* SUCCESS SCORECARD */}
+      {(function(){
+        const watTodayStr=wat.toISOString().slice(0,10);
+        function ticketDate(t){
+          if(t.created)return String(t.created).slice(0,10);
+          if(t.received){try{return new Date(new Date(t.received).toLocaleString('en-US',{timeZone:'Africa/Lagos'})).toISOString().slice(0,10);}catch(e){return null;}}
+          return null;
+        }
+        const todayList=tickets.filter(function(t){return ticketDate(t)===watTodayStr;});
+        const todayResolved=todayList.filter(function(t){return t.status==='resolved';}).length;
+        const todayRate=todayList.length?Math.round(todayResolved/todayList.length*100):0;
+        const reportsSent=(h>=9?1:0)+(h>=12?1:0)+(h>=17?1:0);
+        const unassigned=todayList.filter(function(t){
+          const r=(t.responsible||t.resp||'').toString().trim();
+          return !r || r.toLowerCase()==='customer experience' && !t.responsible && !t.resp;
+        }).filter(function(t){return !(t.responsible||t.resp);}).length;
+        const isCOB=h>=17;
+        const SCORE=[
+          {l:'Same-day Resolution',v:todayList.length?todayRate+'%':'—',sub:'target ≥ 80%',ok:todayRate>=80&&todayList.length>0,warn:todayList.length>0&&todayRate<80,c:'#22C55E'},
+          {l:'Tickets Logged Today',v:todayList.length,sub:'received today (WAT)',ok:todayList.length>0,warn:false,c:'#60A5FA'},
+          {l:'Daily Reports Sent',v:reportsSent+' / 3',sub:'9 AM · 12 PM · 4 PM',ok:reportsSent===3,warn:isCOB&&reportsSent<3,c:'#FBBF24'},
+          {l:'Unassigned at COB',v:unassigned,sub:isCOB?'target = 0':'check at 4 PM',ok:unassigned===0,warn:isCOB&&unassigned>0,c:'#A78BFA'},
+        ];
+        return(
+          <div style={{padding:'10px 28px 0'}}>
+            <div style={{background:'rgba(0,0,0,.18)',border:'1px solid var(--bsoft)',borderRadius:12,padding:'12px 14px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:10}}>
+                <div style={{font:'700 10px/1 Sora,sans-serif',color:'var(--ek-gold)',letterSpacing:'.18em',textTransform:'uppercase'}}>Success Scorecard · Today</div>
+                <a href="Success Criteria.html" target="_blank" style={{font:'600 10px/1 Sora,sans-serif',color:'var(--muted)',textDecoration:'none'}}>View targets →</a>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+                {SCORE.map(function(s){
+                  const dot=s.ok?'#22C55E':s.warn?'#EF4444':'#94A3B8';
+                  const mark=s.ok?'✓':s.warn?'✕':'·';
+                  return(
+                    <div key={s.l} style={{background:'rgba(255,255,255,.03)',border:'1px solid var(--bsoft)',borderRadius:10,padding:'10px 12px',borderLeft:'3px solid '+dot}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                        <span style={{font:'700 9px/1 Sora,sans-serif',color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em'}}>{s.l}</span>
+                        <span style={{width:16,height:16,borderRadius:'50%',background:dot,color:'#fff',font:'900 10px/1 Sora,sans-serif',display:'inline-flex',alignItems:'center',justifyContent:'center'}}>{mark}</span>
                       </div>
-                    </div>);})}
-                  <div style={{ borderTop: '1px solid var(--bsoft)', paddingTop: 9, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <span style={{ font: '600 11px Sora,sans-serif', color: 'var(--muted)' }}>Resolution rate</span>
-                    <span style={{ font: "800 17px/1 'JetBrains Mono',monospace", color: '#4ADE80' }}>{rate}%</span>
-                  </div>
+                      <div style={{font:"800 22px/1 'JetBrains Mono',monospace",color:s.c,marginBottom:3}}>{s.v}</div>
+                      <div style={{font:'500 10px/1.3 Sora,sans-serif',color:'var(--muted)'}}>{s.sub}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* BACKLOG PROGRESS + RESPONSIBLE PARTY LEADERBOARD */}
+      {(function(){
+        var TODAY=new Date();
+        // Carry-forward: use carryTix (unresolved from prev month) passed from App
+        // allCarry = all tickets from prior months (any status), allPending = unresolved subset
+        var _watNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
+        var watNowYM=_watNow.getFullYear()+'-'+String(_watNow.getMonth()+1).padStart(2,'0');
+        var allCarry=tickets.filter(function(t){var ym=shiftWatYM(t);return ym&&ym<watNowYM;});
+        var allPending=allCarry.filter(function(t){return t.status!=='resolved';});
+        var cfTotal=allCarry.length;
+        var cfResolved=allCarry.filter(function(t){return t.status==='resolved';}).length;
+        var cfPending=cfTotal-cfResolved;
+        var cfPct=cfTotal?Math.round(cfResolved/cfTotal*100):0;
+        var cfCrit=allPending.filter(function(t){
+          var d=shiftWatDate(t);if(!d)return false;
+          return Math.floor((TODAY-new Date(d+'T00:00:00'))/86400000)>=14;
+        }).length;
+
+        // Responsible party leaderboard from ALL tickets
+        var respMap={};
+        tickets.forEach(function(t){
+          var r=(t.responsible||t.resp||'').trim();
+          if(!r||r.toLowerCase()==='customer experience')return;
+          if(!respMap[r])respMap[r]={total:0,res:0,prg:0,unr:0};
+          respMap[r].total++;
+          if(t.status==='resolved')respMap[r].res++;
+          else if(t.status==='progress')respMap[r].prg++;
+          else respMap[r].unr++;
+        });
+        var leaders=Object.entries(respMap).map(function(e){
+          var p=e[1].total?Math.round(e[1].res/e[1].total*100):0;
+          return{name:e[0],pct:p,total:e[1].total,res:e[1].res,prg:e[1].prg,unr:e[1].unr};
+        }).sort(function(a,b){return b.total-a.total;}).slice(0,8);
+        var maxTotal=Math.max.apply(null,leaders.map(function(l){return l.total;})||[1]);
+
+        return(
+          <div style={{padding:'0 28px 16px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+
+            {/* ── WEEK SCHEDULE GRID (full width) ─────────────── */}
+            <div style={{gridColumn:'1 / -1'}}>
+              <WeekScheduleGrid/>
+            </div>
+
+            {/* ── RESPONSIBLE PARTY LEADERBOARD ──────────────── */}
+            <div className="card" style={{padding:0}}>
+              <div className="card-head">
+                <h3 style={{display:'flex',alignItems:'center',gap:7}}>
+                  <span style={{width:8,height:8,borderRadius:'50%',background:'#818CF8',display:'inline-block'}}/>
+                  🎯 Resolution Leaderboard
+                </h3>
+                <span style={{font:'600 10px Sora,sans-serif',color:'var(--muted)'}}>this month</span>
+              </div>
+              <div style={{padding:'14px 18px'}}>
+                {leaders.map(function(r,idx){
+                  var col=r.pct>=80?'#4ADE80':r.pct>=50?'#FCD34D':'#FCA5A5';
+                  var barW=Math.round(r.total/maxTotal*100);
+                  return(
+                    <div key={r.name} style={{marginBottom:10}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:3}}>
+                        <div style={{display:'flex',alignItems:'center',gap:6}}>
+                          <span style={{fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:9,color:'var(--sub)',width:14}}>{idx+1}</span>
+                          <span style={{font:'600 11px/1 Sora,sans-serif',color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:140}}>{r.name.split(' ').slice(0,2).join(' ')}</span>
+                        </div>
+                        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                          <span style={{fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:10,color:'var(--muted)'}}>{r.total}t</span>
+                          <span style={{fontFamily:'JetBrains Mono,monospace',fontWeight:800,fontSize:11,color:col,minWidth:32,textAlign:'right'}}>{r.pct}%</span>
+                        </div>
+                      </div>
+                      <div style={{height:5,background:'var(--bg2)',borderRadius:3,overflow:'hidden',display:'flex'}}>
+                        <div style={{width:(r.res/Math.max(r.total,1)*100)+'%',background:'#22C55E',transition:'width .6s'}}/>
+                        <div style={{width:(r.prg/Math.max(r.total,1)*100)+'%',background:'#F59E0B'}}/>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div style={{display:'flex',gap:12,marginTop:10,borderTop:'1px solid var(--bsoft)',paddingTop:8}}>
+                  {[{c:'#22C55E',l:'Resolved'},{c:'#F59E0B',l:'In Progress'},{c:'#EF4444',l:'Unresolved'}].map(function(s){return(
+                    <div key={s.l} style={{display:'flex',alignItems:'center',gap:4}}>
+                      <div style={{width:7,height:7,borderRadius:2,background:s.c}}/>
+                      <span style={{font:'500 9px Sora,sans-serif',color:'var(--muted)'}}>{s.l}</span>
+                    </div>
+                  );})}
                 </div>
               </div>
             </div>
-            <div className="card">
-              <div className="card-head"><h3 style={{ display: 'flex', alignItems: 'center', gap: 7 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F97316', display: 'inline-block' }} />By Category</h3><span style={{ font: '600 10px Sora,sans-serif', color: 'var(--muted)' }}>{byCat2.length} active</span></div>
-              <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 11 }}>
-                {byCat2.length === 0 && <div style={{ padding: '24px', textAlign: 'center', color: 'var(--muted)', font: '500 12px Sora,sans-serif' }}>No tickets yet.</div>}
-                {byCat2.map(function (c) {return (
-                    <div key={c.cat}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                      <span style={{ font: '600 11px/1 Sora,sans-serif', color: 'var(--text)' }}>{c.cat.split('/')[0].trim()}</span>
-                      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                        <span style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: 'var(--okb)' }}>{c.res}✓</span>
-                        <span style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: 'var(--text)', minWidth: 22, textAlign: 'right' }}>{c.total}</span>
-                      </div>
+
+            {/* ── DAILY VOLUME TREND (lines, replaces donut) ── */}
+            <div className="card" style={{padding:0}}>
+              <div className="card-head">
+                <h3 style={{display:'flex',alignItems:'center',gap:7}}><span style={{width:8,height:8,borderRadius:'50%',background:'#6366F1',display:'inline-block'}}/>📈 Daily Volume Trend</h3>
+                <div style={{display:'flex',gap:12,alignItems:'center'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:5}}><div style={{width:18,height:3,borderRadius:2,background:'#6366F1'}}/><span style={{font:'600 10px Sora,sans-serif',color:'var(--muted)'}}>Total</span></div>
+                  <div style={{display:'flex',alignItems:'center',gap:5}}><div style={{width:18,height:3,borderRadius:2,background:'#22C55E'}}/><span style={{font:'600 10px Sora,sans-serif',color:'var(--muted)'}}>Resolved</span></div>
+                </div>
+              </div>
+              <div style={{padding:'16px 18px'}}>
+                {(function(){
+                  var dayN=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'})).getDate();
+                  var byDay=Array.from({length:dayN},function(_,i){var d=i+1;var tx=tickets.filter(function(t){return watDayOf(t)===d;});var rs=tx.filter(function(t){return t.status==='resolved';}).length;return{day:d,total:tx.length,res:rs,pct:tx.length?Math.round(rs/tx.length*100):0};});
+                  var maxDay=Math.max.apply(null,byDay.map(function(d){return d.total;}).concat([1]));
+                  var W=600,H=150,PAD=24,span=Math.max(dayN-1,1);
+                  var xOf=function(i){return PAD+i*(W-PAD*2)/span;};
+                  var yOf=function(v){return v?H-PAD-(v/maxDay)*(H-PAD*2):H-PAD;};
+                  var pts=byDay.map(function(d,i){return{x:xOf(i),y:yOf(d.total),day:d.day};});
+                  var ptsR=byDay.map(function(d,i){return{x:xOf(i),y:yOf(d.res)};});
+                  var lp=pts.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+                  var lpR=ptsR.map(function(p,i){return(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+                  var area=pts.length>1?lp+' L'+pts[pts.length-1].x.toFixed(1)+','+(H-PAD)+' L'+PAD+','+(H-PAD)+' Z':'';
+                  return(
+                  <div>
+                    <svg width="100%" viewBox={"0 0 "+W+" "+H} preserveAspectRatio="none" style={{height:150,display:'block'}}>
+                      {[0,.25,.5,.75,1].map(function(f,i){return <line key={i} x1={PAD} y1={PAD+(1-f)*(H-PAD*2)} x2={W-PAD} y2={PAD+(1-f)*(H-PAD*2)} stroke="rgba(255,255,255,.05)" strokeWidth="1"/>;})}
+                      {area&&<path d={area} fill="rgba(99,102,241,.13)"/>}
+                      <path d={lp} fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d={lpR} fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 2"/>
+                      {pts.map(function(p){return <circle key={'t'+p.day} cx={p.x} cy={p.y} r="3.5" fill="#6366F1" stroke="var(--card)" strokeWidth="1.5"/>;})}
+                      {ptsR.map(function(p,i){return <circle key={'r'+i} cx={p.x} cy={p.y} r="3" fill="#22C55E" stroke="var(--card)" strokeWidth="1.5"/>;})}
+                      {byDay.map(function(d,i){if(dayN>8&&i%2!==0&&i!==dayN-1)return null;var p=pts[i];return <text key={d.day} x={p.x} y={H-5} textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="9" fontFamily="JetBrains Mono,monospace">D{d.day}</text>;})}
+                    </svg>
+                    <div style={{display:'flex',gap:3,marginTop:8}}>
+                      {byDay.map(function(d){var col=d.pct>=80?'#22C55E':d.pct>=50?'#F59E0B':d.total?'#EF4444':'rgba(255,255,255,.06)';return <div key={d.day} title={'Day '+d.day+' · '+d.pct+'% resolved'} style={{flex:1,height:6,borderRadius:2,background:col,opacity:.85}}/>;})}
                     </div>
-                    <div style={{ height: 8, background: 'rgba(255,255,255,.06)', borderRadius: 4, overflow: 'hidden' }}>
-                      <div style={{ height: 8, width: Math.round(c.total / maxCat2 * 100) + '%', background: c.color, borderRadius: 4, transition: 'width .6s' }} />
-                    </div>
-                  </div>);})}
+                    <div style={{font:'600 10px Sora,sans-serif',color:'var(--sub)',marginTop:5}}>Resolution rate per day · green ≥80% · amber ≥50% · red &lt;50%</div>
+                  </div>);
+                })()}
               </div>
             </div>
-          </div>);
 
-      }()}
-
-      {/* WEEKLY ROSTER (bottom of dashboard) */}
-      <div style={{ padding: '16px 28px 0' }}>
-        <WeekScheduleGrid />
-      </div>
+          </div>
+        );
+      })()}
 
       {/* BODY */}
-      <div style={{ padding: '0 28px 18px' }}>
+      <div style={{padding:'0 28px 18px'}}>
         {/* Today's quick list */}
         <div className="card">
-          <div className="card-head"><h3>Today's Tickets — Day {watDayNow()}</h3><span style={{ font: '600 10px Sora,sans-serif', color: 'var(--muted)' }}>{today.length} logged</span></div>
-          <div style={{ maxHeight: 280, overflowY: 'auto' }}>
-            {today.length === 0 && <div style={{ padding: '32px', textAlign: 'center', color: 'var(--muted)', font: '500 12px Sora,sans-serif' }}>No tickets for today yet.</div>}
-            {today.slice(0, 20).map(function (t) {return (
-                <div key={t.id} style={{ padding: '9px 16px', borderBottom: '1px solid var(--bsoft)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: 'var(--info)', flexShrink: 0 }}>#{t.num}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ font: '600 11px/1 Sora,sans-serif', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
-                  <div style={{ font: '500 10px/1 Sora,sans-serif', color: 'var(--muted)', marginTop: 2 }}>{t.time} · {t.category && t.category.split('/')[0].trim()} · <span style={{ color: 'var(--sub)' }}>{t.agent || '—'}</span></div>
+          <div className="card-head"><h3>Today's Tickets — Day {watDayNow()}</h3><span style={{font:'600 10px Sora,sans-serif',color:'var(--muted)'}}>{today.length} logged</span></div>
+          <div style={{maxHeight:280,overflowY:'auto'}}>
+            {today.length===0&&<div style={{padding:'32px',textAlign:'center',color:'var(--muted)',font:'500 12px Sora,sans-serif'}}>No tickets for today yet.</div>}
+            {today.slice(0,20).map(function(t){return(
+              <div key={t.id} style={{padding:'9px 16px',borderBottom:'1px solid var(--bsoft)',display:'flex',alignItems:'center',gap:10}}>
+                <span style={{font:"700 11px/1 'JetBrains Mono',monospace",color:'var(--info)',flexShrink:0}}>#{t.num}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{font:'600 11px/1 Sora,sans-serif',color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.name}</div>
+                  <div style={{font:'500 10px/1 Sora,sans-serif',color:'var(--muted)',marginTop:2}}>{t.time} · {t.category&&t.category.split('/')[0].trim()} · <span style={{color:'var(--sub)'}}>{t.agent||'—'}</span></div>
                 </div>
-                <StatusBadge s={t.status} />
+                <StatusBadge s={t.status}/>
               </div>);})}</div></div>
       </div>
 
       {/* Responsible Parties */}
-      <div style={{ padding: '0 28px 24px' }}>
+      <div style={{padding:'0 28px 24px'}}>
         <div className="card">
-          <div className="card-head"><h3>🎯 Responsible Parties — Cumulative</h3><button onClick={function () {onNav('cumulative');}} className="btn btn-sm">Full view →</button></div>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="card-head"><h3>🎯 Responsible Parties — Cumulative</h3><button onClick={function(){onNav('cumulative');}} className="btn btn-sm">Full view →</button></div>
+          <div style={{overflowX:'auto'}}>
             <table className="tbl">
               <thead><tr><th>#</th><th>Party</th><th>Category</th><th>Today</th><th>Resolved</th><th>In Progress</th><th>Unresolved</th><th>Total</th><th>% Rate</th></tr></thead>
               <tbody>
-                {cum.filter(function (r) {return r.grand > 0;}).map(function (r) {const col = r.pct >= 80 ? '#4ADE80' : r.pct >= 50 ? '#FCD34D' : '#F87171';return (
-                    <tr key={r.sn}>
-                    <td><Mono style={{ color: 'var(--muted)', fontSize: 11 }}>{r.sn}</Mono></td>
-                    <td style={{ fontWeight: 700 }}>{r.name}</td>
-                    <td style={{ color: 'var(--muted)', fontSize: 11 }}>{r.cat}</td>
-                    <td><Mono style={{ color: 'var(--wnb)' }}>{r.todayCount}</Mono></td>
-                    <td><Mono style={{ color: 'var(--okb)' }}>{r.res}</Mono></td>
-                    <td><Mono style={{ color: 'var(--wnb)' }}>{r.prg || 0}</Mono></td>
-                    <td><Mono style={{ color: 'var(--bdb)' }}>{r.unr || 0}</Mono></td>
-                    <td><Mono style={{ fontWeight: 800 }}>{r.grand}</Mono></td>
-                    <td><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><div style={{ width: 50, height: 4, background: 'rgba(255,255,255,.06)', borderRadius: 3 }}><div style={{ width: r.pct + '%', height: 4, background: col, borderRadius: 3 }} /></div><Mono style={{ color: col, fontWeight: 800, fontSize: 11 }}>{r.pct}%</Mono></div></td>
+                {cum.filter(function(r){return r.grand>0;}).map(function(r){const col=r.pct>=80?'#4ADE80':r.pct>=50?'#FCD34D':'#F87171';return(
+                  <tr key={r.sn}>
+                    <td><Mono style={{color:'var(--muted)',fontSize:11}}>{r.sn}</Mono></td>
+                    <td style={{fontWeight:700}}>{r.name}</td>
+                    <td style={{color:'var(--muted)',fontSize:11}}>{r.cat}</td>
+                    <td><Mono style={{color:'var(--wnb)'}}>{r.todayCount}</Mono></td>
+                    <td><Mono style={{color:'var(--okb)'}}>{r.res}</Mono></td>
+                    <td><Mono style={{color:'var(--wnb)'}}>{r.prg||0}</Mono></td>
+                    <td><Mono style={{color:'var(--bdb)'}}>{r.unr||0}</Mono></td>
+                    <td><Mono style={{fontWeight:800}}>{r.grand}</Mono></td>
+                    <td><div style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:50,height:4,background:'rgba(255,255,255,.06)',borderRadius:3}}><div style={{width:r.pct+'%',height:4,background:col,borderRadius:3}}/></div><Mono style={{color:col,fontWeight:800,fontSize:11}}>{r.pct}%</Mono></div></td>
                   </tr>);})}
               </tbody>
             </table>
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 // ── MONTHLY REPORT (replaces Daily Report) ────────────────────────
@@ -1864,10 +1747,9 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   const[expFrom,setExpFrom]=useState('');
   const[expTo,setExpTo]=useState('');
   function exportExcelRange(from,to){
-    function tDate(t){return t.created||t.received||t.receivedAt||t.createdAt||t.date||t.Date||t.dateCreated||t.receivedDate||t.Created||t.loggedAt||t.timestamp||t.Timestamp||'';}
     var src=tickets.slice();
-    if(from)src=src.filter(function(t){return String(tDate(t)).slice(0,10)>=from;});
-    if(to)src=src.filter(function(t){return String(tDate(t)).slice(0,10)<=to;});
+    if(from)src=src.filter(function(t){return(t.created||'')>=from;});
+    if(to)src=src.filter(function(t){return(t.created||'')<=to;});
     exportExcelFull(src,(from&&to)?from+'_to_'+to:(from?'from_'+from:(to?'to_'+to:'All')));
     setShowExportDlg(false);
   }
@@ -1875,7 +1757,7 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   function getF(t,k){return edits[t.id]&&edits[t.id][k]!==undefined?edits[t.id][k]:t[k];}
   function setF(id,k,v){setEdits(function(e){return Object.assign({},e,{[id]:Object.assign({},e[id]||{},{[k]:v})});});}
   function clearEdit(id){setEdits(function(e){const c=Object.assign({},e);delete c[id];return c;});}
-  function saveEdit(t){if(!edits[t.id])return;onUpdate&&onUpdate(Object.assign({},t,edits[t.id]));clearEdit(t.id);}
+  function saveEdit(t){if(!edits[t.id])return;var merged=Object.assign({},t,edits[t.id]);if(merged.status==='resolved'&&!merged.resolvedDate)merged.resolvedDate=watTodayStr();onUpdate&&onUpdate(merged);clearEdit(t.id);}
 
   useEffect(()=>{setPage(0);},[search,fSt,fBu,fCat,fResp,fFrom,fTo,sort]);
 
@@ -1969,10 +1851,11 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   }
   function applyBulkCat(){
     if(!selected.length||!bulkCat)return;
-    const patch={category:bulkCat};
-    const ar=EK_RESP.find(function(r){return r.cat===bulkCat;});
+    var ar=EK_RESP.find(function(r){return r.cat===bulkCat;});
+    var patch={category:bulkCat};
     if(ar)patch.resp=ar.name;
     onBulkUpdate&&onBulkUpdate(selected,patch);
+    showToast&&showToast('\ud83c\udff7 Set category on '+selected.length+' ticket'+(selected.length>1?'s':'')+(ar?' \u00b7 assigned to '+ar.name.split(' ')[0]:'')+' \u2705');
     setSelected([]);
   }
   function clearSelection(){setSelected([]);}
@@ -2023,33 +1906,47 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
     const resolved=list.filter(function(t){return t.status==='resolved';});
     const inprog  =list.filter(function(t){return t.status==='progress';});
     const unresolv=list.filter(function(t){return t.status==='unresolved';});
-    const wb=XLSX.utils.book_new();
-    // Summary sheet
-    const cats={};
-    list.forEach(function(t){const c=(t.category||'Uncategorised').toUpperCase();if(!cats[c])cats[c]={res:0,prg:0,unr:0,resp:t.resp||''};if(t.status==='resolved')cats[c].res++;else if(t.status==='progress')cats[c].prg++;else cats[c].unr++;});
-    const summRows=[['COMPLAINT CATEGORY REPORT'],['S/N','Complaint Category','Responsible Party','Resolved','In Progress','Unresolved','Grand Total']];
-    let sn=1;Object.entries(cats).forEach(function([cat,v]){summRows.push([sn++,cat,v.resp,v.res,v.prg,v.unr,v.res+v.prg+v.unr]);});
-    summRows.push([null,'TOTAL',null,resolved.length,inprog.length,unresolv.length,list.length]);
-    summRows.push([]);
-    summRows.push(['EXECUTIVE SUMMARY']);
-    summRows.push(['As at '+watNowAC.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Lagos'})+', '+dStrAC]);
-    summRows.push([]);
-    summRows.push(['A total of '+list.length+' complaints were received and processed across all categories.']);
+    // Build category summary — preserve first resp seen per category
+    const cats={};const catOrder=[];
+    list.forEach(function(t){
+      const c=(t.category||'UNCATEGORISED').toUpperCase();
+      if(!cats[c]){cats[c]={res:0,prg:0,unr:0,resp:t.resp||''};catOrder.push(c);}
+      if(t.status==='resolved')cats[c].res++;
+      else if(t.status==='progress')cats[c].prg++;
+      else cats[c].unr++;
+    });
     const resPct=list.length?Math.round(resolved.length/list.length*100):0;
     const prgPct=list.length?Math.round(inprog.length/list.length*100):0;
     const unrPct=list.length?Math.round(unresolv.length/list.length*100):0;
-    summRows.push([resolved.length+' ('+resPct+'%) have been fully resolved. '+inprog.length+' ('+prgPct+'%) are currently in progress. '+unresolv.length+' ('+unrPct+'%) remain unresolved and require urgent attention.']);
-    const wsSumm=XLSX.utils.aoa_to_sheet(summRows);
-    wsSumm['!cols']=[{wch:5},{wch:46},{wch:26},{wch:10},{wch:12},{wch:12},{wch:12}];
-    XLSX.utils.book_append_sheet(wb,wsSumm,'Summary Report');
-    // Data sheets
-    function addSheet(wb,data,name){const ws=XLSX.utils.aoa_to_sheet([EXCEL_H,...buildExcelRows(data)]);ws['!cols']=EXCEL_COLS;XLSX.utils.book_append_sheet(wb,ws,name.slice(0,31));}
-    addSheet(wb,list,'All Complaints');
-    addSheet(wb,resolved,'All Resolved');
-    addSheet(wb,inprog,'In Progress');
-    addSheet(wb,unresolv,'Unresolved');
+    const timeStr=watNowAC.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Lagos'});
+    const rows=[
+      ['COMPLAINT CATEGORY REPORT','','','','','',''],
+      ['S/N','Complaint Category','Responsible Party','Resolved','In Progress','Unresolved','Grand Total'],
+    ];
+    catOrder.forEach(function(cat,i){
+      const v=cats[cat];
+      rows.push([i+1,cat,v.resp,v.res,v.prg,v.unr,v.res+v.prg+v.unr]);
+    });
+    rows.push(['TOTAL','','',resolved.length,inprog.length,unresolv.length,list.length]);
+    rows.push(['','','','','','','']);
+    rows.push(['EXECUTIVE SUMMARY','','','','','','']);
+    rows.push(['As at '+timeStr+', '+dStrAC,'','','','','','']);
+    rows.push(['','','','','','','']);
+    rows.push(['A total of '+list.length+' complaints were received and processed across all categories.','','','','','','']);
+    rows.push([resolved.length+' ('+resPct+'%) have been fully resolved. '+inprog.length+' ('+prgPct+'%) are currently in progress. '+unresolv.length+' ('+unrPct+'%) remain unresolved and require urgent attention.','','','','','','']);
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:5},{wch:46},{wch:30},{wch:10},{wch:12},{wch:12},{wch:12}];
+    // Merge title cell A1 across all 7 columns
+    ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:6}}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Complaint Category Report');
+    function detailSheet(arr){var d=XLSX.utils.aoa_to_sheet([EXCEL_H].concat(buildExcelRows(arr)));d['!cols']=EXCEL_COLS;return d;}
+    XLSX.utils.book_append_sheet(wb,detailSheet(list),'All Complaints ('+list.length+')');
+    XLSX.utils.book_append_sheet(wb,detailSheet(resolved),'Resolved ('+resolved.length+')');
+    XLSX.utils.book_append_sheet(wb,detailSheet(inprog),'In Progress ('+inprog.length+')');
+    XLSX.utils.book_append_sheet(wb,detailSheet(unresolv),'Unresolved ('+unresolv.length+')');
     XLSX.writeFile(wb,'EKEDP_'+label+'_'+todayStrAC+'.xlsx');
-    showToast&&showToast('📅 Excel exported ✅');
+    showToast&&showToast('📊 Excel exported — 5 sheets ✅');
   }
 
   function exportJSON(list,label){
@@ -2106,14 +2003,102 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
             <option value="all">All resp. parties</option>
             {respOpts.map(function(r){return <option key={r} value={r}>{r}</option>;})}
           </select>
-          <input type="date" className="sel" style={{height:36,flex:'0 0 140px'}} value={fFrom} onChange={function(e){setFFrom(e.target.value);}}/>
-          <input type="date" className="sel" style={{height:36,flex:'0 0 140px'}} value={fTo} onChange={function(e){setFTo(e.target.value);}}/>
+          {(function(){
+            function todayStr(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
+            var PRESETS=[
+              {l:'📅 Date range…',v:''},
+              {l:'Today',v:'today'},
+              {l:'Yesterday',v:'yesterday'},
+              {l:'This week',v:'week'},
+              {l:'This month',v:'month'},
+              {l:'May 1 – today',v:'may1'},
+              {l:'April',v:'apr'},
+              {l:'March',v:'mar'},
+              {l:'Custom range',v:'custom'},
+            ];
+            function applyPreset(v){
+              var n=new Date();
+              var y=n.getFullYear();var m=n.getMonth();
+              var td=todayStr();
+              if(v==='today'){setFFrom(td);setFTo(td);}
+              else if(v==='yesterday'){var y2=new Date(n-86400000);var s=y2.getFullYear()+'-'+String(y2.getMonth()+1).padStart(2,'0')+'-'+String(y2.getDate()).padStart(2,'0');setFFrom(s);setFTo(s);}
+              else if(v==='week'){var dow=n.getDay();var mon=new Date(n-(((dow+6)%7)*86400000));var ms=mon.getFullYear()+'-'+String(mon.getMonth()+1).padStart(2,'0')+'-'+String(mon.getDate()).padStart(2,'0');setFFrom(ms);setFTo(td);}
+              else if(v==='month'){setFFrom(y+'-'+String(m+1).padStart(2,'0')+'-01');setFTo(td);}
+              else if(v==='may1'){setFFrom(y+'-05-01');setFTo(td);}
+              else if(v==='apr'){setFFrom(y+'-04-01');setFTo(y+'-04-30');}
+              else if(v==='mar'){setFFrom(y+'-03-01');setFTo(y+'-03-31');}
+              else if(v===''){setFFrom('');setFTo('');}
+            }
+            var activePreset=(function(){
+              var td=todayStr();var n=new Date();var y=n.getFullYear();var m=n.getMonth();
+              if(!fFrom&&!fTo)return '';
+              if(fFrom===td&&fTo===td)return 'today';
+              if(fFrom===fTo){var yy=new Date(n-86400000);var s=yy.getFullYear()+'-'+String(yy.getMonth()+1).padStart(2,'0')+'-'+String(yy.getDate()).padStart(2,'0');if(fFrom===s)return 'yesterday';}
+              if(fFrom===y+'-05-01'&&fTo===td)return 'may1';
+              if(fFrom===y+'-'+String(m+1).padStart(2,'0')+'-01'&&fTo===td)return 'month';
+              if(fFrom===y+'-04-01'&&fTo===y+'-04-30')return 'apr';
+              if(fFrom===y+'-03-01'&&fTo===y+'-03-31')return 'mar';
+              return 'custom';
+            })();
+            return(<>
+              <select className="sel" style={{flex:'0 0 150px',height:36,color:activePreset?'var(--ek-gold)':'var(--muted)',fontWeight:activePreset?700:400}} value={activePreset} onChange={function(e){applyPreset(e.target.value);}}>
+                {PRESETS.map(function(p){return <option key={p.v} value={p.v}>{p.l}</option>;})}
+              </select>
+              {(activePreset==='custom'||(!activePreset&&(fFrom||fTo)))&&(<>
+                <input type="date" className="sel" style={{height:36,flex:'0 0 140px'}} value={fFrom} onChange={function(e){setFFrom(e.target.value);}}/>
+                <span style={{alignSelf:'center',color:'var(--muted)',fontSize:11,flexShrink:0}}>→</span>
+                <input type="date" className="sel" style={{height:36,flex:'0 0 140px'}} value={fTo} onChange={function(e){setFTo(e.target.value);}}/>
+              </>)}
+            </>);
+          })()}
           {(search||fSt!=='all'||fBu!=='all'||fCat!=='all'||fResp!=='all'||fFrom||fTo||sort!=='newest')&&<button className="btn btn-sm btn-danger" onClick={function(){setSearch('');setFSt('all');setFBu('all');setFCat('all');setFResp('all');setFFrom('');setFTo('');setSort('newest');}} style={{height:36}}>Clear</button>}
           <button onClick={function(){var now=new Date();var y=now.getFullYear();var m=String(now.getMonth()+1).padStart(2,'0');setExpFrom(y+'-'+m+'-01');var last=new Date(y,now.getMonth()+1,0);setExpTo(y+'-'+m+'-'+String(last.getDate()).padStart(2,'0'));setShowExportDlg(true);}} style={{height:36,padding:'0 14px',background:'#059669',color:'#fff',border:'none',borderRadius:8,font:'700 11px Sora,sans-serif',cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>⬇ Excel</button>
         </div>
       </div>
 
       <div style={{padding:'14px 28px 0'}}>
+        {(function(){
+          var wt=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
+          var hh=wt.getHours();
+          var wts=wt.toISOString().slice(0,10);
+          var dw=getDutyWindow();
+          function inDuty(t){var raw=t.created||t.received||'';if(!raw)return false;var d=new Date(raw);if(isNaN(d.getTime()))return false;var wd=new Date(d.toLocaleString('en-US',{timeZone:'Africa/Lagos'}));return wd>=dw.start&&wd<=dw.end;}
+          var todayList=tickets.filter(inDuty);
+          var todayResolved=todayList.filter(function(t){return t.status==='resolved';}).length;
+          var todayRate=todayList.length?Math.round(todayResolved/todayList.length*100):0;
+          var reportsSent=(hh>=9?1:0)+(hh>=12?1:0)+(hh>=17?1:0);
+          var unassigned=todayList.filter(function(t){return !(t.responsible||t.resp);}).length;
+          var isCOB=hh>=17;
+          var SCORE=[
+            {l:'Same-day Resolution',v:todayList.length?todayRate+'%':'—',sub:'target ≥ 80%',ok:todayRate>=80&&todayList.length>0,warn:todayList.length>0&&todayRate<80,c:'#22C55E'},
+            {l:'Tickets Logged Today',v:todayList.length,sub:'received today (WAT)',ok:todayList.length>0,warn:false,c:'#60A5FA'},
+            {l:'Daily Reports Sent',v:reportsSent+' / 3',sub:'9 AM · 12 PM · 4 PM',ok:reportsSent===3,warn:isCOB&&reportsSent<3,c:'#FBBF24'},
+            {l:'Unassigned at COB',v:unassigned,sub:isCOB?'target = 0':'check at 4 PM',ok:unassigned===0,warn:isCOB&&unassigned>0,c:'#A78BFA'},
+          ];
+          return(
+            <div style={{background:'rgba(0,0,0,.18)',border:'1px solid var(--bsoft)',borderRadius:12,padding:'12px 14px',marginBottom:14}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:10}}>
+                <div style={{font:'700 10px/1 Sora,sans-serif',color:'var(--ek-gold)',letterSpacing:'.18em',textTransform:'uppercase'}}>Success Scorecard · Today</div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+                {SCORE.map(function(s){
+                  var dot=s.ok?'#22C55E':s.warn?'#EF4444':'#94A3B8';
+                  var mark=s.ok?'✓':s.warn?'✕':'·';
+                  return(
+                    <div key={s.l} style={{background:'rgba(255,255,255,.03)',border:'1px solid var(--bsoft)',borderRadius:10,padding:'10px 12px',borderLeft:'3px solid '+dot}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                        <span style={{font:'700 9px/1 Sora,sans-serif',color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em'}}>{s.l}</span>
+                        <span style={{width:16,height:16,borderRadius:'50%',background:dot,color:'#fff',font:'900 10px/1 Sora,sans-serif',display:'inline-flex',alignItems:'center',justifyContent:'center'}}>{mark}</span>
+                      </div>
+                      <div style={{font:"800 22px/1 'JetBrains Mono',monospace",color:s.c,marginBottom:3}}>{s.v}</div>
+                      <div style={{font:'500 10px/1.3 Sora,sans-serif',color:'var(--muted)'}}>{s.sub}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
         {/* Stat bar — matches Agents Hub */}
         <div className="stat-bar" style={{marginBottom:14}}>
           {[{l:'Total',v:filtered.length,c:'var(--text)'},{l:'Resolved',v:res,c:'#22C55E'},{l:'In Progress',v:prg,c:'#F59E0B'},{l:'Unresolved',v:unr,c:'#EF4444'},{l:'Repeat 🔁',v:repeatTotalAC,c:'#A78BFA'}].map(function(k){return(
@@ -2138,9 +2123,9 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
             <span style={{font:'600 11px Sora,sans-serif',color:'var(--muted)'}}>Set category:</span>
             <select className="sel" style={{height:32,flex:'0 0 170px'}} value={bulkCat} onChange={function(e){setBulkCat(e.target.value);}}>
               <option value="">— pick category —</option>
-              {EK_CATS.map(function(c){return <option key={c} value={c}>{c}</option>;})}
+              {EK_CATS.map(function(c){return <option key={c} value={c}>{c.split('/')[0].trim()}</option>;})}
             </select>
-            <button onClick={applyBulkCat} disabled={!bulkCat} className="btn btn-gold btn-sm" style={{height:32,padding:'0 14px',opacity:bulkCat?1:.45}}>Apply</button>
+            <button onClick={applyBulkCat} className="btn btn-gold btn-sm" style={{height:32,padding:'0 14px',opacity:bulkCat?1:.45,cursor:bulkCat?'pointer':'not-allowed'}}>Apply</button>
             <div style={{width:1,height:24,background:'rgba(255,255,255,.15)',margin:'0 4px'}}/>
             <button onClick={function(){autoAssignResp(selected);}} style={{height:32,padding:'0 14px',background:'rgba(99,102,241,.25)',color:'var(--infob)',border:'1px solid rgba(99,102,241,.4)',borderRadius:7,font:'800 10px Sora,sans-serif',cursor:'pointer'}}>
               🧠 Auto-assign Resp.
@@ -2165,10 +2150,6 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
           </div>
         )}
 
-        <div style={{display:'flex',alignItems:'center',gap:8,padding:'7px 14px',marginBottom:8,background:'rgba(255,198,44,.08)',border:'1px solid rgba(255,198,44,.2)',borderRadius:8,font:'600 11px Sora,sans-serif',color:'rgba(255,255,255,.7)'}}>
-          <span style={{color:'#FFC72C',fontSize:13}}>⚡</span>
-          <span><b style={{color:'#FFC72C'}}>Excel mode:</b> Click STATUS to cycle · Double-click Category, Responsible, or Note to edit inline · Tab moves right · Shift+Tab left · ↑↓ arrows move rows · Enter saves · Esc cancels</span>
-        </div>
         <div className="card" style={{marginBottom:24}}>
           <div className="xls-scroll">
             <table className="tbl">
@@ -2177,7 +2158,7 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
                   <th style={{width:36,padding:'8px 6px'}}>
                     <input type="checkbox" checked={allPageSel} onChange={toggleAll} style={{cursor:'pointer',width:14,height:14,accentColor:'var(--ek-gold)'}}/>
                   </th>
-                  <th>Date</th><th>Ticket</th><th>Time</th><th>Customer</th><th>Phone</th><th>BU</th><th style={{minWidth:120}}>CATEGORY✏</th><th>STATUS ↻</th><th>RESPONSIBLE✏</th><th style={{minWidth:180}}>DESCRIPTION</th><th style={{minWidth:160}}>NOTE✏</th><th>Details</th>
+                  <th>Date</th><th>Ticket</th><th>Time</th><th>Customer</th><th>Phone</th><th>BU</th><th style={{minWidth:120}}>CATEGORY✏</th><th>STATUS ↻</th><th>RESPONSIBLE✏</th><th style={{minWidth:180}}>COMPLAINT DESCRIPTION</th><th style={{minWidth:160}}>ACTION TAKEN✏</th><th>Details</th>
                 </tr>
               </thead>
               <tbody>
@@ -2228,11 +2209,95 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
                             :<>{t.note||<span style={{opacity:.35,fontStyle:'italic'}}>—</span>}{!readOnly&&<span className="xls-hint">dbl-click</span>}</>
                           }
                         </td>
-                        <td onClick={function(){setExpanded(isExp?null:t.id);}}><span style={{font:'700 10px Sora,sans-serif',color:'var(--ek-gold)'}}>{isExp?'▲ close':'▼ details'}</span></td>
+                        <td><span style={{font:'700 10px Sora,sans-serif',color:'var(--ek-gold)'}}>{isExp?'▲ close':'▼ details'}</span></td>
                       </tr>
+                      {isExp&&(
+                        <tr><td colSpan={12} style={{padding:0,border:'none'}}>
+                          <div style={{position:'fixed',inset:0,background:'rgba(3,8,28,.72)',backdropFilter:'blur(3px)',zIndex:1200,display:'flex',alignItems:'flex-start',justifyContent:'center',padding:'40px 20px'}} onClick={function(){setExpanded(null);}}>
+                          <div onClick={function(e){e.stopPropagation();}} onKeyDown={function(e){if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA'){e.preventDefault();saveEdit(t);setExpanded(null);}else if(e.key==='Escape'){setExpanded(null);}}} style={{width:'min(780px,96vw)',background:'var(--surface)',border:'2px solid var(--ek-gold)',borderRadius:14,overflow:'hidden auto',boxShadow:'0 30px 90px rgba(0,0,0,.6)',maxHeight:'calc(100vh - 80px)'}}>
+                            {/* Header */}
+                            <div style={{background:'linear-gradient(135deg,#1E3A8A,#0F2461)',padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
+                              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                                <div style={{background:'rgba(255,255,255,.12)',borderRadius:8,padding:'5px 9px',font:'800 11px Sora,sans-serif',color:'#FFC72C',letterSpacing:'.05em'}}>EKEDP ⚡</div>
+                                <div>
+                                  <span style={{font:"800 14px/1 'JetBrains Mono',monospace",color:'#60A5FA'}}>#{t.num}</span>
+                                  <span style={{font:'500 11px Sora,sans-serif',color:'rgba(255,255,255,.6)',marginLeft:10}}>{t.name}</span>
+                                </div>
+                                <span style={{marginLeft:4}}>{t.status==='resolved'?<span style={{background:'#16A34A22',color:'#4ADE80',border:'1px solid #16A34A55',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>RESOLVED</span>:t.status==='progress'?<span style={{background:'#D9770622',color:'#FCD34D',border:'1px solid #D9770655',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>IN PROGRESS</span>:<span style={{background:'#DC262622',color:'#F87171',border:'1px solid #DC262655',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>UNRESOLVED</span>}</span>
+                              </div>
+                              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                                <button onClick={function(e){e.stopPropagation();if(window.confirm('Delete ticket #'+t.num+'?')){onDelete&&onDelete([t.id]);setExpanded(null);}}} style={{padding:'6px 12px',background:'rgba(239,68,68,.2)',color:'#F87171',border:'1px solid rgba(239,68,68,.4)',borderRadius:7,font:'800 11px Sora,sans-serif',cursor:'pointer'}}>🗑 Delete</button>
+                                <button onClick={function(e){e.stopPropagation();setExpanded(null);}} style={{background:'none',border:'none',color:'rgba(255,255,255,.5)',cursor:'pointer',font:'700 11px Sora,sans-serif'}}>✕ Close</button>
+                              </div>
+                            </div>
+                            {/* Info grid — all editable */}
+                            <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:0,borderBottom:'1px solid rgba(255,255,255,.06)'}}>
+                              {[
+                                ['👤 CUSTOMER NAME','name','text'],
+                                ['🎫 TICKET NO.','num','text'],
+                                ['📞 TELEPHONE','phone','text'],
+                                ['📧 EMAIL','email','text'],
+                                ['📍 CUSTOMER ADDRESS','addr','text'],
+                                ['⚡ METER / ACCOUNT NO.','meter','text'],
+                                ['🔗 CHANNEL','channel','text'],
+                                ['🏢 BUSINESS UNIT','bu','text'],
+                                ['📅 DATE / TIME RECEIVED','created','text'],
+                                ['✅ RESOLVED DATE','resolvedDate','date'],
+                              ].map(function(f){
+                                var val=getF(t,f[1]);if((val===undefined||val===null||val==='')&&f[1]==='addr')val=t.address;
+                                return(
+                                <div key={f[0]} style={{padding:'8px 12px',borderRight:'1px solid rgba(255,255,255,.05)',borderBottom:'1px solid rgba(255,255,255,.05)'}}>
+                                  <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:5}}>{f[0]}</div>
+                                  <input type={f[2]} value={val||''} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,f[1],e.target.value);}} placeholder="—"
+                                    style={{width:'100%',background:'rgba(255,255,255,.04)',border:'1px solid var(--bsoft)',borderRadius:6,padding:'5px 7px',font:'600 11px Sora,sans-serif',color:'var(--text)',outline:'none',colorScheme:'dark'}}
+                                    onFocus={function(e){e.target.style.borderColor='var(--ek-gold)';}} onBlur={function(e){e.target.style.borderColor='var(--bsoft)';}}/>
+                                </div>);})}
+                            </div>
+                            {/* Complaint description — editable */}
+                            <div style={{padding:'10px 14px',borderBottom:'1px solid rgba(255,255,255,.06)'}}>
+                              <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:6}}>📝 COMPLAINT DESCRIPTION ✏ <span style={{color:'var(--muted)',fontWeight:600,textTransform:'none',letterSpacing:0}}>· the customer's complaint</span></div>
+                              <textarea className="inp" rows={3} value={getF(t,'issue')||''} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'issue',e.target.value);}} placeholder="Describe the complaint…" style={{resize:'vertical',fontSize:11,marginBottom:0}}/>
+                            </div>
+                            {/* Editable section */}
+                            <div style={{padding:'14px 16px',background:'rgba(0,0,0,.15)'}}>
+                              <div style={{font:'700 9px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.12em',marginBottom:12}}>✏️ UPDATE THIS TICKET</div>
+                              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
+                                <div>
+                                  <label className="lbl">Category</label>
+                                  <select className="sel" value={getF(t,'category')||EK_CATS[0]} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();const val=e.target.value;setF(t.id,'category',val);const ar=EK_RESP.find(function(r){return r.cat===val;});if(ar)setF(t.id,'resp',ar.name);}}>
+                                    {EK_CATS.map(function(c){return <option key={c} value={c}>{c}</option>;})}
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="lbl">Responsible Party</label>
+                                  <select className="sel" value={getF(t,'resp')||EK_RESP[0].name} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'resp',e.target.value);}}>
+                                    {EK_RESP.map(function(r){return <option key={r.name} value={r.name}>{r.name}</option>;})}
+                                  </select>
+                                </div>
+                              </div>
+                              <div style={{marginBottom:10}}>
+                                <label className="lbl">Status</label>
+                                <div style={{display:'flex',gap:8}}>
+                                  {[{v:'progress',l:'⏳ In Progress',c:'#F59E0B'},{v:'resolved',l:'✅ Resolved',c:'#22C55E'},{v:'unresolved',l:'🔴 Unresolved',c:'#EF4444'}].map(function(s){const on=getF(t,'status')===s.v;return(
+                                    <button key={s.v} onClick={function(e){e.stopPropagation();setF(t.id,'status',s.v);if(s.v==='resolved'){if(!getF(t,'resolvedDate'))setF(t.id,'resolvedDate',watTodayStr());}else{setF(t.id,'resolvedDate','');}}} style={{flex:1,padding:'7px',border:'1px solid '+(on?s.c:'var(--bsoft)'),borderRadius:7,background:on?s.c+'22':'transparent',color:on?s.c:'var(--muted)',font:'700 11px Sora,sans-serif',cursor:'pointer'}}>{s.l}</button>
+                                  );})}
+                                </div>
+                              </div>
+                              <div style={{marginBottom:12}}>
+                                <label className="lbl">🛠 Action Taken <span style={{color:'var(--muted)',fontWeight:500}}>— what happened today</span></label>
+                                <textarea className="inp" rows={2} value={getF(t,'note')||''} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'note',e.target.value);}} placeholder="Add action taken or resolution note…" style={{resize:'vertical',fontSize:11}}/>
+                              </div>
+                              <div style={{display:'flex',gap:8}}>
+                                <button onClick={function(e){e.stopPropagation();saveEdit(t);setExpanded(null);}} style={{flex:1,padding:'10px',background:'var(--ek-gold)',color:'#0A1A4F',border:'none',borderRadius:8,font:'800 13px Sora,sans-serif',cursor:'pointer'}}>💾 Save Update · <span style={{opacity:.7,fontWeight:700}}>Enter</span></button>
+                                <button onClick={function(e){e.stopPropagation();if(window.confirm('Delete ticket #'+t.num+'?')){onDelete&&onDelete([t.id]);setExpanded(null);}}} style={{padding:'10px 18px',background:'rgba(239,68,68,.15)',color:'#F87171',border:'1px solid rgba(239,68,68,.35)',borderRadius:8,font:'800 12px Sora,sans-serif',cursor:'pointer'}}>🗑 Delete</button>
+                              </div>
+                            </div>
+                          </div>
+                          </div>
+                        </td></tr>)}
                     </React.Fragment>);
                 })}
-                {!paged.length&&<tr><td colSpan={13} style={{padding:'32px',textAlign:'center',color:'var(--muted)'}}>No tickets match your filters.</td></tr>}
+                {!paged.length&&<tr><td colSpan={12} style={{padding:'32px',textAlign:'center',color:'var(--muted)'}}>No tickets match your filters.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -2279,73 +2344,6 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
           </div>
         </div>
       )}
-      {(function(){
-        const mt=expanded?filtered.find(function(x){return x.id===expanded;}):null;
-        if(!mt)return null;
-        function handleKey(ev){if(ev.key==='Enter'&&!ev.shiftKey&&ev.target.tagName!=='TEXTAREA'){ev.preventDefault();saveEdit(mt);setExpanded(null);}}
-        return(
-          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.65)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={function(){setExpanded(null);}} onKeyDown={handleKey}>
-            <div style={{background:'var(--surface)',borderRadius:14,width:'min(820px,96vw)',maxHeight:'92vh',overflowY:'auto',boxShadow:'0 24px 80px rgba(0,0,0,.6)'}} onClick={function(e){e.stopPropagation();}}>
-              <div style={{background:'linear-gradient(135deg,#1E3A8A,#0F2461)',padding:'14px 18px',display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'1px solid rgba(255,255,255,.08)',borderRadius:'14px 14px 0 0'}}>
-                <div style={{display:'flex',alignItems:'center',gap:12}}>
-                  <div style={{background:'rgba(255,255,255,.12)',borderRadius:8,padding:'5px 9px',font:'800 11px Sora,sans-serif',color:'#FFC72C'}}>EKEDP ⚡</div>
-                  <span style={{font:"800 15px/1 'JetBrains Mono',monospace",color:'#60A5FA'}}>#{mt.num}</span>
-                  <span style={{font:'500 12px Sora,sans-serif',color:'rgba(255,255,255,.7)'}}>{mt.name}</span>
-                  {mt.status==='resolved'?<span style={{background:'#16A34A22',color:'#4ADE80',border:'1px solid #16A34A55',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>RESOLVED</span>:mt.status==='progress'?<span style={{background:'#D9770622',color:'#FCD34D',border:'1px solid #D9770655',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>IN PROGRESS</span>:<span style={{background:'#DC262622',color:'#F87171',border:'1px solid #DC262655',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>UNRESOLVED</span>}
-                </div>
-                <div style={{display:'flex',gap:8}}>
-                  <button onClick={function(){if(window.confirm('Delete ticket #'+mt.num+'?')){onDelete&&onDelete([mt.id]);setExpanded(null);}}} style={{padding:'6px 12px',background:'rgba(239,68,68,.2)',color:'#F87171',border:'1px solid rgba(239,68,68,.4)',borderRadius:7,font:'800 11px Sora,sans-serif',cursor:'pointer'}}>🗑 Delete</button>
-                  <button onClick={function(){setExpanded(null);}} style={{background:'none',border:'none',color:'rgba(255,255,255,.5)',cursor:'pointer',font:'700 11px Sora,sans-serif'}}>✕ Close</button>
-                </div>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:0,borderBottom:'1px solid rgba(255,255,255,.06)'}}>
-                {[['📍 ADDRESS',mt.addr||mt.address||'—'],['⚡ METER/ACCOUNT',mt.meter||'—'],['📞 PHONE',mt.phone],['📧 EMAIL',mt.email||'—'],['🔗 CHANNEL',mt.channel||'Mobile App'],['📅 RECEIVED',mt.created?mt.created.replace('T',' ').slice(0,19):'—'],['✅ RESOLVED DATE',mt.resolvedDate||'—'],['📊 STATUS',mt.status?.toUpperCase()||'—']].map(function(f){return(
-                  <div key={f[0]} style={{padding:'10px 14px',borderRight:'1px solid rgba(255,255,255,.05)',borderBottom:'1px solid rgba(255,255,255,.05)'}}>
-                    <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:4}}>{f[0]}</div>
-                    <div style={{font:'600 11px Sora,sans-serif',color:'var(--text)',wordBreak:'break-word'}}>{f[1]}</div>
-                  </div>);})}
-              </div>
-              <div style={{padding:'12px 16px',borderBottom:'1px solid rgba(255,255,255,.06)'}}>
-                <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:6}}>📝 COMPLAINT DESCRIPTION</div>
-                <textarea className="inp" rows={3} value={getF(mt,'issue')||''} onChange={function(e){setF(mt.id,'issue',e.target.value);}} placeholder="Describe the complaint…" style={{resize:'vertical',fontSize:11,marginBottom:0}}/>
-              </div>
-              <div style={{padding:'14px 16px',background:'rgba(0,0,0,.15)'}}>
-                <div style={{font:'700 9px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.12em',marginBottom:12}}>✏️ UPDATE THIS TICKET <span style={{color:'var(--muted)',fontWeight:500,fontSize:9}}>(Enter to save)</span></div>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
-                  <div>
-                    <label className="lbl">Category</label>
-                    <select className="sel" value={getF(mt,'category')||EK_CATS[0]} onChange={function(e){const val=e.target.value;setF(mt.id,'category',val);const ar=EK_RESP.find(function(r){return r.cat===val;});if(ar)setF(mt.id,'resp',ar.name);}}>
-                      {EK_CATS.map(function(c){return <option key={c} value={c}>{c}</option>;})}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="lbl">Responsible Party</label>
-                    <select className="sel" value={getF(mt,'resp')||EK_RESP[0].name} onChange={function(e){setF(mt.id,'resp',e.target.value);}}>
-                      {EK_RESP.map(function(r){return <option key={r.name} value={r.name}>{r.name}</option>;})}
-                    </select>
-                  </div>
-                </div>
-                <div style={{marginBottom:10}}>
-                  <label className="lbl">Status</label>
-                  <div style={{display:'flex',gap:8}}>
-                    {[{v:'progress',l:'⏳ In Progress',c:'#F59E0B'},{v:'resolved',l:'✅ Resolved',c:'#22C55E'},{v:'unresolved',l:'🔴 Unresolved',c:'#EF4444'}].map(function(s){const on=getF(mt,'status')===s.v;return(
-                      <button key={s.v} onClick={function(){setF(mt.id,'status',s.v);}} style={{flex:1,padding:'8px',border:'1px solid '+(on?s.c:'var(--bsoft)'),borderRadius:7,background:on?s.c+'22':'transparent',color:on?s.c:'var(--muted)',font:'700 11px Sora,sans-serif',cursor:'pointer'}}>{s.l}</button>
-                    );})}
-                  </div>
-                </div>
-                <div style={{marginBottom:14}}>
-                  <label className="lbl">Action Taken / Resolution Note</label>
-                  <textarea className="inp" rows={2} value={getF(mt,'note')||''} onChange={function(e){setF(mt.id,'note',e.target.value);}} placeholder="Add action taken or resolution note…" style={{resize:'vertical',fontSize:11}}/>
-                </div>
-                <div style={{display:'flex',gap:8}}>
-                  <button onClick={function(){saveEdit(mt);setExpanded(null);}} style={{flex:1,padding:'11px',background:'var(--ek-gold)',color:'#0A1A4F',border:'none',borderRadius:8,font:'800 13px Sora,sans-serif',cursor:'pointer'}}>💾 Save Update</button>
-                  <button onClick={function(){setExpanded(null);}} style={{padding:'11px 18px',background:'transparent',color:'var(--muted)',border:'1px solid var(--bsoft)',borderRadius:8,font:'700 12px Sora,sans-serif',cursor:'pointer'}}>Cancel</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 }
@@ -2663,6 +2661,299 @@ function Cumulative({tickets,showToast}){
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── SMOOTH INTERACTIVE LINE CHART ─────────────────────────────────
+function smoothD(pts){
+  if(!pts.length)return '';
+  if(pts.length<3)return pts.map(function(p,i){return(i?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+  var d='M'+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1),t=0.16;
+  for(var i=0;i<pts.length-1;i++){
+    var p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    var c1x=p1.x+(p2.x-p0.x)*t,c1y=p1.y+(p2.y-p0.y)*t;
+    var c2x=p2.x-(p3.x-p1.x)*t,c2y=p2.y-(p3.y-p1.y)*t;
+    d+=' C'+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);
+  }
+  return d;
+}
+function SmoothLineChart({series,xLabels,fullLabels,height}){
+  const wrapRef=useRef(null);
+  const[hover,setHover]=useState(null);
+  const VBW=1000,VBH=height||360,PADL=46,PADR=22,PADT=26,PADB=44;
+  const n=xLabels.length;
+  const active=series.filter(function(s){return s.on;});
+  const maxV=Math.max.apply(null,active.reduce(function(a,s){return a.concat(s.data);},[0]).concat([1]));
+  const niceMax=Math.max(4,Math.ceil(maxV/4)*4);
+  const xOf=function(i){return n<=1?PADL+(VBW-PADL-PADR)/2:PADL+i*(VBW-PADL-PADR)/(n-1);};
+  const yOf=function(v){return PADT+(1-v/niceMax)*(VBH-PADT-PADB);};
+  function onMove(e){
+    if(!wrapRef.current||n===0)return;
+    const r=wrapRef.current.getBoundingClientRect();
+    const vbx=((e.clientX-r.left)/r.width)*VBW;
+    let idx=Math.round((vbx-PADL)/Math.max((VBW-PADL-PADR)/Math.max(n-1,1),1));
+    setHover(Math.max(0,Math.min(n-1,idx)));
+  }
+  const gridY=[0,.25,.5,.75,1];
+  const skip=n>11?Math.ceil(n/9):1;
+  const hx=hover!=null?xOf(hover):0;
+  const topY=hover!=null?Math.min.apply(null,active.map(function(s){return yOf(s.data[hover]);}).concat([VBH])):0;
+  return(
+    <div ref={wrapRef} style={{position:'relative',width:'100%'}} onMouseMove={onMove} onMouseLeave={function(){setHover(null);}}>
+      <svg width="100%" viewBox={"0 0 "+VBW+" "+VBH} style={{display:'block',width:'100%',height:'auto'}}>
+        <defs>
+          <linearGradient id="lcArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(99,102,241,.28)"/>
+            <stop offset="100%" stopColor="rgba(99,102,241,0)"/>
+          </linearGradient>
+        </defs>
+        {gridY.map(function(f,i){var y=PADT+f*(VBH-PADT-PADB);return <line key={i} x1={PADL} y1={y} x2={VBW-PADR} y2={y} stroke="rgba(255,255,255,.06)" strokeWidth="1"/>;})}
+        {gridY.map(function(f,i){var v=Math.round(niceMax*(1-f));return <text key={'y'+i} x={PADL-10} y={PADT+f*(VBH-PADT-PADB)+4} textAnchor="end" fill="rgba(255,255,255,.4)" fontSize="13" fontFamily="JetBrains Mono,monospace">{v}</text>;})}
+        {xLabels.map(function(l,i){if(i%skip!==0&&i!==n-1)return null;return <text key={'x'+i} x={xOf(i)} y={VBH-14} textAnchor="middle" fill="rgba(255,255,255,.42)" fontSize="13" fontFamily="Sora,sans-serif">{l}</text>;})}
+        {active.map(function(s){var pts=s.data.map(function(v,i){return{x:xOf(i),y:yOf(v)};});var p=smoothD(pts);return <path key={'a'+s.key} d={p+' L'+xOf(n-1).toFixed(1)+','+(VBH-PADB)+' L'+xOf(0).toFixed(1)+','+(VBH-PADB)+' Z'} fill={s.color} fillOpacity=".10"/>;})}
+        {hover!=null&&<line x1={hx} y1={PADT} x2={hx} y2={VBH-PADB} stroke="rgba(255,255,255,.22)" strokeWidth="1" strokeDasharray="4 4"/>}
+        {active.map(function(s){var pts=s.data.map(function(v,i){return{x:xOf(i),y:yOf(v)};});var d=smoothD(pts);return <g key={s.key}>
+          <path d={d} fill="none" stroke={s.color} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" opacity=".14"/>
+          <path d={d} fill="none" stroke={s.color} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </g>;})}
+        {n<=40&&active.map(function(s){return s.data.map(function(v,i){return <circle key={s.key+'d'+i} cx={xOf(i)} cy={yOf(v)} r="3" fill={s.color} stroke="var(--card)" strokeWidth="1.5"/>;});})}
+        {hover!=null&&active.map(function(s){return <circle key={'h'+s.key} cx={hx} cy={yOf(s.data[hover])} r="6" fill={s.color} stroke="var(--card)" strokeWidth="2.5"/>;})}
+      </svg>
+      {hover!=null&&active.length>0&&(function(){
+        var leftPct=(hx/VBW)*100,topPct=(topY/VBH)*100;
+        return(
+          <div style={{position:'absolute',left:leftPct+'%',top:'calc('+topPct+'% - 14px)',transform:'translate(-50%,-100%)',background:'var(--card2)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 12px',boxShadow:'0 10px 30px rgba(0,0,0,.5)',pointerEvents:'none',whiteSpace:'nowrap',zIndex:5,minWidth:120}}>
+            <div style={{font:'700 10px/1 Sora,sans-serif',color:'var(--muted)',marginBottom:8,letterSpacing:'.04em'}}>{(fullLabels&&fullLabels[hover])||xLabels[hover]}</div>
+            <div style={{display:'flex',gap:14}}>
+              {active.map(function(s){return(
+                <div key={s.key} style={{display:'flex',flexDirection:'column',gap:3}}>
+                  <div style={{display:'flex',alignItems:'center',gap:6}}>
+                    <span style={{width:9,height:9,borderRadius:'50%',background:s.color,boxShadow:'0 0 7px '+s.color}}/>
+                    <span style={{font:"800 16px/1 'JetBrains Mono',monospace",color:'#fff'}}>{s.data[hover]}</span>
+                  </div>
+                  <span style={{font:'600 9px/1 Sora,sans-serif',color:'var(--muted)'}}>{s.label}</span>
+                </div>);})}
+            </div>
+          </div>);
+      })()}
+    </div>
+  );
+}
+
+// ── ANALYTICS DASHBOARD (new) ─────────────────────────────────────
+function AnalyticsDash({tickets,onNav,signedInName,onSettings}){
+  const[now,setNow]=useState(()=>new Date());
+  useEffect(()=>{const id=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(id);},[]);
+  const wat=new Date(now.toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
+  const watTime=wat.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const dayN=wat.getDate(),mo=wat.getMonth(),yr=wat.getFullYear();
+  const h=wat.getHours();
+  const greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const greetE=h<12?'☀️':h<17?'🌤️':'🌙';
+
+  const[period,setPeriod]=useState('month');
+  const[ddOpen,setDdOpen]=useState(false);
+  const[toggles,setToggles]=useState({total:true,resolved:true,unresolved:true,repeat:true});
+
+  const all=tickets.length;
+  const res=tickets.filter(function(t){return t.status==='resolved';}).length;
+  const prg=tickets.filter(function(t){return t.status==='progress';}).length;
+  const unr=tickets.filter(function(t){return t.status==='unresolved'||t.status==='pending';}).length;
+  const rate=all?Math.round(res/all*100):0;
+  // "Today" = operational duty window (prev day 5:01 PM → today 5:00 PM, weekend variants) — not calendar day
+  const dutyW=getDutyWindow();
+  function inDuty(t){var raw=t.created||t.received||'';if(!raw)return false;var d=new Date(raw);if(isNaN(d.getTime()))return false;var wd=new Date(d.toLocaleString('en-US',{timeZone:'Africa/Lagos'}));return wd>=dutyW.start&&wd<=dutyW.end;}
+  const today=tickets.filter(inDuty).length;
+
+  const PERIODS=[{v:'7',l:'Last 7 Days'},{v:'14',l:'Last 14 Days'},{v:'month',l:'This Month'}];
+  const periodLabel=(PERIODS.find(function(p){return p.v===period;})||{}).l;
+  const startDay=period==='7'?Math.max(1,dayN-6):period==='14'?Math.max(1,dayN-13):1;
+  const days=[];for(var d=startDay;d<=dayN;d++)days.push(d);
+  // Repeat = recurring customers (same phone/name appears more than once in the dataset)
+  const custCount={};
+  tickets.forEach(function(t){var k=(t.phone||t.name||'').toString().trim().toLowerCase();if(k)custCount[k]=(custCount[k]||0)+1;});
+  function isRepeat(t){var k=(t.phone||t.name||'').toString().trim().toLowerCase();return k&&custCount[k]>1;}
+  const byDay=days.map(function(dd){var tx=tickets.filter(function(t){return watDayOf(t)===dd;});return{day:dd,total:tx.length,res:tx.filter(function(t){return t.status==='resolved';}).length,unr:tx.filter(function(t){return t.status==='unresolved'||t.status==='pending';}).length,rep:tx.filter(isRepeat).length};});
+  const xLabels=byDay.map(function(b){return ''+b.day;});
+  const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const fullLabels=byDay.map(function(b){return b.day+' '+MON[mo]+' '+yr;});
+  const series=[
+    {key:'total',label:'Total',color:'#6366F1',on:toggles.total,data:byDay.map(function(b){return b.total;})},
+    {key:'resolved',label:'Resolved',color:'#22C55E',on:toggles.resolved,data:byDay.map(function(b){return b.res;})},
+    {key:'unresolved',label:'Unresolved',color:'#EF4444',on:toggles.unresolved,data:byDay.map(function(b){return b.unr;})},
+    {key:'repeat',label:'Repeat',color:'#A855F7',on:toggles.repeat,data:byDay.map(function(b){return b.rep;})},
+  ];
+
+  // By category
+  const catColors=['#6366F1','#F97316','#22C55E','#EF4444','#F59E0B','#8B5CF6','#2DD4BF','#EC4899','#60A5FA','#34D399'];
+  const byCat=EK_CATS.map(function(c,i){var tx=tickets.filter(function(t){return t.category===c;});var rs=tx.filter(function(t){return t.status==='resolved';}).length;return{cat:c,total:tx.length,res:rs,pct:tx.length?Math.round(rs/tx.length*100):0,color:catColors[i%catColors.length]};}).filter(function(c){return c.total>0;}).sort(function(a,b){return b.total-a.total;});
+  const maxCat=Math.max.apply(null,byCat.map(function(c){return c.total;}).concat([1]));
+
+  // By responsible party
+  const respMap={};
+  tickets.forEach(function(t){var r=(t.responsible||t.resp||'').trim();if(!r||r.toLowerCase()==='customer experience')return;if(!respMap[r])respMap[r]={total:0,res:0};respMap[r].total++;if(t.status==='resolved')respMap[r].res++;});
+  const byParty=Object.entries(respMap).map(function(e){return{name:e[0],total:e[1].total,res:e[1].res,pct:e[1].total?Math.round(e[1].res/e[1].total*100):0};}).sort(function(a,b){return b.pct-a.pct;}).slice(0,8);
+
+  const KPIS=[
+    {label:'Total',value:all,color:'#60A5FA',sub:periodLabel},
+    {label:'Resolved',value:res,color:'#22C55E',sub:rate+'% rate'},
+    {label:'Resolution Rate',value:rate+'%',color:'#34D399',sub:'target ≥ 80%'},
+    {label:'In Progress',value:prg,color:'#F59E0B',sub:'being handled'},
+    {label:'Unresolved',value:unr,color:'#EF4444',sub:'action needed'},
+    {label:"Today",value:today,color:'#C4B5FD',sub:'Day '+dayN},
+  ];
+  const TOGGLE_META=[{k:'total',c:'#6366F1',l:'Total'},{k:'resolved',c:'#22C55E',l:'Resolved'},{k:'unresolved',c:'#EF4444',l:'Unresolved'},{k:'repeat',c:'#A855F7',l:'Repeat'}];
+
+  return(
+    <div>
+      {/* HERO */}
+      <div className="hero" style={{padding:'18px 28px'}}>
+        <div className="hero-row" style={{marginBottom:0}}>
+          <div>
+            <div className="hero-sub" style={{marginBottom:8}}>EKEDP Customer Experience · Marina HQ</div>
+            <div className="hero-greeting">{greet}, {signedInName||'CX Team'} {greetE}</div>
+            <div style={{font:'500 12px/1.3 Sora,sans-serif',color:'var(--muted)',marginTop:8}}>📈 Operations Analytics · Days 1–{dayN} · {wat.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</div>
+          </div>
+          <div className="hero-clock-box"><span className="live-dot"/><span className="hero-clock">{watTime}</span><span className="hero-clock-label">WAT</span>{onSettings&&<button onClick={onSettings} style={{background:'none',border:'none',cursor:'pointer',color:'var(--muted)',display:'flex',marginLeft:4}}>{Ico.settings}</button>}</div>
+        </div>
+      </div>
+
+      {/* KPI ROW */}
+      <div className="kpi-row" style={{gridTemplateColumns:'repeat(6,1fr)'}}>
+        {KPIS.map(function(k){return(
+          <div key={k.label} className="kpi-card" style={{'--kc':k.color}}
+            onMouseEnter={function(e){e.currentTarget.style.borderColor=k.color;}}
+            onMouseLeave={function(e){e.currentTarget.style.borderColor='var(--bsoft)';}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:9}}>
+              <span className="kpi-label">{k.label}</span>
+              <span style={{width:8,height:8,borderRadius:'50%',background:k.color,boxShadow:'0 0 9px '+k.color,flexShrink:0}}/>
+            </div>
+            <div className="kpi-num" style={{color:k.color,fontSize:28}}>{k.value}</div>
+            <div className="kpi-sub">{k.sub}</div>
+          </div>);})}
+      </div>
+
+      {/* HERO LINE CHART */}
+      <div style={{padding:'16px 28px 0'}}>
+        <div className="card">
+          <div className="card-head" style={{flexWrap:'wrap',gap:12}}>
+            <h3 style={{display:'flex',alignItems:'center',gap:7}}><span style={{width:8,height:8,borderRadius:'50%',background:'#6366F1',display:'inline-block'}}/>Daily Volume Trend</h3>
+            <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+              {TOGGLE_META.map(function(tm){var on=toggles[tm.k];return(
+                <button key={tm.k} onClick={function(){setToggles(function(s){return Object.assign({},s,{[tm.k]:!s[tm.k]});});}}
+                  style={{display:'flex',alignItems:'center',gap:7,padding:'5px 11px',borderRadius:20,cursor:'pointer',border:'1px solid '+(on?tm.c:'var(--bsoft)'),background:on?tm.c+'22':'transparent',transition:'all .15s'}}>
+                  <span style={{width:24,height:13,borderRadius:20,background:on?tm.c:'rgba(255,255,255,.14)',position:'relative',transition:'all .15s',flexShrink:0}}>
+                    <span style={{position:'absolute',top:1.5,left:on?12.5:1.5,width:10,height:10,borderRadius:'50%',background:'#fff',transition:'all .15s'}}/>
+                  </span>
+                  <span style={{font:'700 11px/1 Sora,sans-serif',color:on?'var(--text)':'var(--muted)'}}>{tm.l}</span>
+                </button>);})}
+              <div style={{position:'relative'}}>
+                <button onClick={function(){setDdOpen(function(o){return !o;});}} className="btn btn-sm" style={{display:'flex',alignItems:'center',gap:8,padding:'6px 12px'}}>
+                  {periodLabel}<span style={{fontSize:9,opacity:.7}}>▾</span>
+                </button>
+                {ddOpen&&<div style={{position:'absolute',top:'110%',right:0,zIndex:20,background:'var(--card2)',border:'1px solid var(--border)',borderRadius:9,boxShadow:'0 10px 30px rgba(0,0,0,.5)',overflow:'hidden',minWidth:150}}>
+                  {PERIODS.map(function(p){return(
+                    <button key={p.v} onClick={function(){setPeriod(p.v);setDdOpen(false);}}
+                      style={{display:'block',width:'100%',textAlign:'left',padding:'9px 13px',background:p.v===period?'rgba(99,102,241,.16)':'transparent',border:'none',cursor:'pointer',font:'600 11px/1 Sora,sans-serif',color:p.v===period?'#fff':'var(--text2)'}}
+                      onMouseEnter={function(e){if(p.v!==period)e.currentTarget.style.background='rgba(255,255,255,.05)';}}
+                      onMouseLeave={function(e){if(p.v!==period)e.currentTarget.style.background='transparent';}}>{p.l}</button>);})}
+                </div>}
+              </div>
+            </div>
+          </div>
+          <div style={{padding:'18px 16px 10px'}}>
+            <SmoothLineChart series={series} xLabels={xLabels} fullLabels={fullLabels} height={340}/>
+            <div style={{display:'flex',justifyContent:'center',gap:22,marginTop:6}}>
+              {TOGGLE_META.map(function(tm){return(
+                <div key={tm.k} style={{display:'flex',alignItems:'center',gap:7,opacity:toggles[tm.k]?1:.4}}>
+                  <span style={{width:11,height:11,borderRadius:'50%',background:tm.c}}/>
+                  <span style={{font:'600 11px/1 Sora,sans-serif',color:'var(--muted)'}}>{tm.l}</span>
+                </div>);})}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MONTHLY ROSTER (below line chart) */}
+      <div style={{padding:'16px 28px 0'}}>
+        <div style={{font:'700 10px/1 Sora,sans-serif',color:'var(--ek-gold)',letterSpacing:'.18em',textTransform:'uppercase',margin:'4px 2px 12px'}}>📅 Team Roster</div>
+        <WeekScheduleGrid/>
+      </div>
+
+      {/* STATUS SPLIT + BY CATEGORY */}
+      <div style={{padding:'16px 28px 0',display:'grid',gridTemplateColumns:'minmax(0,360px) 1fr',gap:16}}>
+        <div className="card">
+          <div className="card-head"><h3 style={{display:'flex',alignItems:'center',gap:7}}><span style={{width:8,height:8,borderRadius:'50%',background:'#22C55E',display:'inline-block'}}/>Status Split</h3><span style={{font:'600 10px Sora,sans-serif',color:'var(--muted)'}}>{all} total</span></div>
+          <div style={{padding:'18px',display:'flex',alignItems:'center',gap:18}}>
+            <DonutChart resolved={res} progress={prg} unresolved={unr}/>
+            <div style={{flex:1}}>
+              {[{label:'Resolved',v:res,c:'#22C55E'},{label:'In Progress',v:prg,c:'#F59E0B'},{label:'Unresolved',v:unr,c:'#EF4444'}].map(function(s){var tot=res+prg+unr||1;return(
+                <div key={s.label} style={{display:'flex',alignItems:'center',gap:8,marginBottom:11}}>
+                  <div style={{width:9,height:9,borderRadius:'50%',background:s.c,flexShrink:0,boxShadow:'0 0 6px '+s.c}}/>
+                  <div style={{flex:1}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                      <span style={{font:'600 11px/1 Sora,sans-serif',color:'var(--text)'}}>{s.label}</span>
+                      <span style={{font:"700 11px/1 'JetBrains Mono',monospace",color:s.c}}>{s.v}</span>
+                    </div>
+                    <div style={{height:3,background:'rgba(255,255,255,.06)',borderRadius:3}}><div style={{height:3,width:Math.round(s.v/tot*100)+'%',background:s.c,borderRadius:3,transition:'width .6s'}}/></div>
+                  </div>
+                </div>);})}
+              <div style={{borderTop:'1px solid var(--bsoft)',paddingTop:9,display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+                <span style={{font:'600 11px Sora,sans-serif',color:'var(--muted)'}}>Resolution rate</span>
+                <span style={{font:"800 17px/1 'JetBrains Mono',monospace",color:'#4ADE80'}}>{rate}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-head"><h3 style={{display:'flex',alignItems:'center',gap:7}}><span style={{width:8,height:8,borderRadius:'50%',background:'#F97316',display:'inline-block'}}/>By Category</h3><span style={{font:'600 10px Sora,sans-serif',color:'var(--muted)'}}>{byCat.length} active</span></div>
+          <div style={{padding:'16px 18px',display:'flex',flexDirection:'column',gap:11}}>
+            {byCat.length===0&&<div style={{padding:'24px',textAlign:'center',color:'var(--muted)',font:'500 12px Sora,sans-serif'}}>No tickets in range.</div>}
+            {byCat.map(function(c){return(
+              <div key={c.cat}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+                  <span style={{font:'600 11px/1 Sora,sans-serif',color:'var(--text)'}}>{c.cat.split('/')[0].trim()}</span>
+                  <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                    <span style={{font:"600 10px/1 'JetBrains Mono',monospace",color:'var(--okb)'}}>{c.res}✓</span>
+                    <span style={{font:"700 11px/1 'JetBrains Mono',monospace",color:'var(--text)',minWidth:22,textAlign:'right'}}>{c.total}</span>
+                  </div>
+                </div>
+                <div style={{height:8,background:'rgba(255,255,255,.06)',borderRadius:4,overflow:'hidden'}}>
+                  <div style={{height:8,width:Math.round(c.total/maxCat*100)+'%',background:c.color,borderRadius:4,transition:'width .6s'}}/>
+                </div>
+              </div>);})}
+          </div>
+        </div>
+      </div>
+
+      {/* BY RESPONSIBLE PARTY */}
+      <div style={{padding:'16px 28px 24px'}}>
+        <div className="card">
+          <div className="card-head"><h3 style={{display:'flex',alignItems:'center',gap:7}}><span style={{width:8,height:8,borderRadius:'50%',background:'#818CF8',display:'inline-block'}}/>🎯 Resolution Rate by Responsible Party</h3>{onNav&&<button className="btn btn-sm" onClick={function(){onNav('cumulative');}}>Full view →</button>}</div>
+          <div style={{padding:'16px 18px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px 28px'}}>
+            {byParty.length===0&&<div style={{gridColumn:'1 / -1',padding:'24px',textAlign:'center',color:'var(--muted)',font:'500 12px Sora,sans-serif'}}>No assigned tickets yet.</div>}
+            {byParty.map(function(r,idx){var col=r.pct>=80?'#4ADE80':r.pct>=50?'#FCD34D':'#FCA5A5';return(
+              <div key={r.name} style={{display:'flex',alignItems:'center',gap:10}}>
+                <span style={{fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:10,color:'var(--sub)',width:16,flexShrink:0}}>{idx+1}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                    <span style={{font:'600 11px/1 Sora,sans-serif',color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.name.split(' ').slice(0,2).join(' ')}</span>
+                    <div style={{display:'flex',gap:9,alignItems:'center',flexShrink:0}}>
+                      <span style={{font:"600 10px/1 'JetBrains Mono',monospace",color:'var(--muted)'}}>{r.total}t</span>
+                      <span style={{font:"800 11px/1 'JetBrains Mono',monospace",color:col,minWidth:34,textAlign:'right'}}>{r.pct}%</span>
+                    </div>
+                  </div>
+                  <div style={{height:7,background:'rgba(255,255,255,.06)',borderRadius:4,overflow:'hidden'}}>
+                    <div style={{height:7,width:r.pct+'%',background:col,borderRadius:4,boxShadow:'0 0 8px '+col+'88',transition:'width .6s'}}/>
+                  </div>
+                </div>
+              </div>);})}
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
@@ -3949,45 +4240,55 @@ function DataPage({tickets,setTickets,showToast}){
   const wat=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
   const todayStr=wat.toISOString().slice(0,10);
 
-  const res=tickets.filter(function(t){return t.status==='resolved';});
-  const prg=tickets.filter(function(t){return t.status==='progress';});
-  const unr=tickets.filter(function(t){return t.status==='unresolved';});
+  // ── Export date-range filter ──
+  const[exFrom,setExFrom]=useState('');
+  const[exTo,setExTo]=useState('');
+  function ticketDay(t){return String(t.created||t.received||'').slice(0,10);}
+  function inRange(t){var d=ticketDay(t);if((exFrom||exTo)&&!d)return false;if(exFrom&&d<exFrom)return false;if(exTo&&d>exTo)return false;return true;}
+  const expSet=(exFrom||exTo)?tickets.filter(inRange):tickets;
+  const rangeTag=(exFrom&&exTo)?exFrom+'_to_'+exTo:(exFrom?'from_'+exFrom:(exTo?'to_'+exTo:todayStr));
+  function setThisMonth(){var y=wat.getFullYear(),m=wat.getMonth();var p=function(n){return String(n).padStart(2,'0');};setExFrom(y+'-'+p(m+1)+'-01');setExTo(y+'-'+p(m+1)+'-'+p(new Date(y,m+1,0).getDate()));}
+
+  const res=expSet.filter(function(t){return t.status==='resolved';});
+  const prg=expSet.filter(function(t){return t.status==='progress';});
+  const unr=expSet.filter(function(t){return t.status==='unresolved';});
 
   function dlAll(){
-    const data={exportedBy:{name:'Manager',id:'manager'},exportedAt:new Date().toISOString(),filter:{status:'all',bu:'all'},total:tickets.length,tickets:tickets};
+    const data={exportedBy:{name:'Manager',id:'manager'},exportedAt:new Date().toISOString(),dateRange:{from:exFrom||null,to:exTo||null},filter:{status:'all',bu:'all'},total:expSet.length,tickets:expSet};
     const a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(data,null,2));
-    a.download='EKEDP-All-Complaints-'+todayStr+'.json';a.click();showToast('Exported '+tickets.length+' tickets ✓');
+    a.download='EKEDP-All-Complaints-'+rangeTag+'.json';a.click();showToast('Exported '+expSet.length+' tickets ✓');
   }
   function dlFiltered(statusKey){
-    const filt=tickets.filter(function(t){return t.status===statusKey;});
+    const filt=expSet.filter(function(t){return t.status===statusKey;});
     const data={exportedBy:{name:'Manager',id:'manager'},exportedAt:new Date().toISOString(),filter:{status:statusKey},total:filt.length,tickets:filt};
     const a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(data,null,2));
-    a.download='EKEDP-'+statusKey+'-'+todayStr+'.json';a.click();showToast('Exported '+filt.length+' tickets ✓');
+    a.download='EKEDP-'+statusKey+'-'+rangeTag+'.json';a.click();showToast('Exported '+filt.length+' tickets ✓');
   }
   function exportCSV(){
     const headers=['ID','Customer Name','Customer Address','Meter No./Account No.','Meter No','Account No','Metered','Action Taken','Telephone Number','Email Address','Business Unit','Complaint Description','Assigned to','Status','Complaint Category','Complaint Sub-category','Channel of Complaint','Customer House No','Customer Street Name','Customer State of Resident','Customer Local Govt Area','Disco Code','Forum Name','Complaint House No','Complaint Street Name','Complaint Local Govt Area','Complaint Area','Resolved Date','Closed By','Disco REF No','Customer Service Name','Conversation ID','Created','Created By'];
-    const rows=[headers,...tickets.slice().map(function(t,i){return[t.num,t.name,t.addr||t.address||'',t.meter||'',t.meter||'',t.account||'',t.metered||'',t.note||'',t.phone,t.email||'',t.bu,t.issue||t.complaint||'',t.resp||t.responsible||'',t.status,t.category||'','',t.channel||'Mobile App','','','','','','','','','','',t.resolvedDate||'','','',' ',t.conversationId||'',t.created||'','PowerPlatform'];})];
+    const rows=[headers,...expSet.slice().map(function(t,i){return[t.num,t.name,t.addr||t.address||'',t.meter||'',t.meter||'',t.account||'',t.metered||'',t.note||'',t.phone,t.email||'',t.bu,t.issue||t.complaint||'',t.resp||t.responsible||'',t.status,t.category||'','',t.channel||'Mobile App','','','','','','','','','','',t.resolvedDate||'','','',' ',t.conversationId||'',t.created||'','PowerPlatform'];})];
     const csv=rows.map(function(r){return r.map(function(c){return'"'+(c||'').toString().replace(/"/g,'""')+'"';}).join(',');}).join('\n');
     const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);
-    a.download='EKEDP-All-'+todayStr+'.csv';a.click();showToast('CSV exported ✓');
+    a.download='EKEDP-All-'+rangeTag+'.csv';a.click();showToast('CSV exported ✓');
   }
   function exportExcelAll(){
     if(typeof XLSX==='undefined'){showToast('Excel library not loaded yet — try again.','error');return;}
     const watNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
     const dStr=watNow.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const rangeStr=(exFrom||exTo)?('Range: '+(exFrom||'start')+' → '+(exTo||'now')):('As of '+dStr);
     const H=['#','Ticket','Date','Time','Customer Name','Phone','Meter / Acct','Address','BU','Category','Responsible','Status','Action Taken'];
     function makeRows(list){return list.map(function(t,i){return[i+1,t.num,t.created?t.created.slice(0,10):'',t.time||'',t.name,t.phone,t.meter||'',t.addr||t.address||'',t.bu,t.category,t.resp||t.responsible||'',t.status,t.note||''];});}
     function addSheet(wb,list,name){
-      const ws=XLSX.utils.aoa_to_sheet([['EKEDP Power App — Managers Hub'],[dStr],[name+': '+list.length+' tickets'],[''],H,...makeRows(list)]);
+      const ws=XLSX.utils.aoa_to_sheet([['EKEDP Power App — Managers Hub'],[dStr],[rangeStr],[name+': '+list.length+' tickets'],[''],H,...makeRows(list)]);
       ws['!cols']=[5,10,11,8,22,14,16,30,10,28,20,12,30].map(function(w){return{wch:w};});
       XLSX.utils.book_append_sheet(wb,ws,name.slice(0,31));
     }
     const wb=XLSX.utils.book_new();
-    addSheet(wb,tickets,'All Tickets');
-    addSheet(wb,tickets.filter(function(t){return t.status==='resolved';}),'Resolved');
-    addSheet(wb,tickets.filter(function(t){return t.status==='progress';}),'In Progress');
-    addSheet(wb,tickets.filter(function(t){return t.status==='unresolved';}),'Unresolved');
-    XLSX.writeFile(wb,'EKEDP_AllComplaints_'+todayStr+'.xlsx');
+    addSheet(wb,expSet,'All Tickets');
+    addSheet(wb,res,'Resolved');
+    addSheet(wb,prg,'In Progress');
+    addSheet(wb,unr,'Unresolved');
+    XLSX.writeFile(wb,'EKEDP_AllComplaints_'+rangeTag+'.xlsx');
     showToast('Excel exported — 4 sheets ✓');
   }
   function processFile(file){
@@ -4109,11 +4410,11 @@ function DataPage({tickets,setTickets,showToast}){
             meter:getCol(row,COL_MAP.meter),
             addr:getCol(row,COL_MAP.addr),
             bu:getCol(row,COL_MAP.bu),
-            category:getCol(row,COL_MAP.category),
+            category:getCol(row,COL_MAP.category)||classifyComplaint(getCol(row,COL_MAP.issue))||'',
             issue:getCol(row,COL_MAP.issue)||getCol(row,COL_MAP.category),
-            resp:getCol(row,COL_MAP.resp),
+            resp:getCol(row,COL_MAP.resp)||respForCat(getCol(row,COL_MAP.category)||classifyComplaint(getCol(row,COL_MAP.issue)))||'',
             status:mapStatus(getCol(row,COL_MAP.status)),
-            note:getCol(row,COL_MAP.note),
+            note:(function(){var n=getCol(row,COL_MAP.note);var iss=getCol(row,COL_MAP.issue)||getCol(row,COL_MAP.category);return (n&&iss&&n.trim().toLowerCase()===iss.trim().toLowerCase())?'':n;})(),
             email:getCol(row,COL_MAP.email),
             created:createdIso,
             time:timeStr,
@@ -4194,6 +4495,24 @@ function DataPage({tickets,setTickets,showToast}){
       <div style={{padding:'20px 28px'}}>
         {tab==='export'&&(
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+            {/* Date range filter */}
+            <div className="card" style={{gridColumn:'1 / -1'}}>
+              <div className="card-head"><h3>📅 Export Date Range</h3>{(exFrom||exTo)&&<button onClick={function(){setExFrom('');setExTo('');}} style={{padding:'6px 12px',background:'transparent',color:'var(--muted)',border:'1px solid var(--bsoft)',borderRadius:8,font:'700 10px Sora,sans-serif',cursor:'pointer'}}>Clear</button>}</div>
+              <div style={{padding:'14px 16px',display:'flex',gap:14,alignItems:'flex-end',flexWrap:'wrap'}}>
+                <div style={{display:'flex',flexDirection:'column',gap:5}}>
+                  <label style={{font:'700 9px Sora,sans-serif',color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em'}}>From</label>
+                  <input type="date" className="inp" value={exFrom} max={exTo||undefined} onChange={function(e){setExFrom(e.target.value);}} style={{colorScheme:'dark'}}/>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',gap:5}}>
+                  <label style={{font:'700 9px Sora,sans-serif',color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em'}}>To</label>
+                  <input type="date" className="inp" value={exTo} min={exFrom||undefined} onChange={function(e){setExTo(e.target.value);}} style={{colorScheme:'dark'}}/>
+                </div>
+                <button onClick={setThisMonth} className="btn btn-sm" style={{padding:'8px 13px'}}>This Month</button>
+                <div style={{flex:1,minWidth:140,textAlign:'right',font:'600 11px Sora,sans-serif',color:(exFrom||exTo)?'var(--ek-gold)':'var(--muted)'}}>
+                  {(exFrom||exTo)?('Exporting '+expSet.length+' of '+tickets.length+' tickets'):('No filter · all '+tickets.length+' tickets')}
+                </div>
+              </div>
+            </div>
             {/* Summary card */}
             <div className="card">
               <div className="card-head"><h3>📊 Current Dataset</h3></div>
@@ -4207,7 +4526,7 @@ function DataPage({tickets,setTickets,showToast}){
                   );})}
                 </div>
                 <div style={{font:'500 11px/1.6 Sora,sans-serif',color:'var(--muted)',padding:'10px 12px',background:'rgba(99,102,241,.08)',border:'1px solid rgba(99,102,241,.2)',borderRadius:9}}>
-                  💡 <b style={{color:'var(--text)'}}>Export All</b> produces the same JSON format that agents upload — ready to re-import into any session.
+                  💡 <b style={{color:'var(--text)'}}>Export All</b> produces the same JSON format that agents upload — ready to re-import into any session.{(exFrom||exTo)?' Exports below respect the date range above.':''}
                 </div>
               </div>
             </div>
@@ -4216,15 +4535,15 @@ function DataPage({tickets,setTickets,showToast}){
             <div style={{display:'flex',flexDirection:'column',gap:12}}>
               <div className="card">
                 <div className="card-head"><h3>📦 Export All Tickets</h3><button onClick={dlAll} style={{padding:'7px 13px',background:'#3730A3',color:'#fff',border:'none',borderRadius:8,font:'800 11px Sora,sans-serif',cursor:'pointer'}}>⬇ JSON</button></div>
-                <div style={{padding:'10px 16px',font:'500 11px Sora,sans-serif',color:'var(--muted)'}}>All {tickets.length} tickets as a single JSON file.</div>
+                <div style={{padding:'10px 16px',font:'500 11px Sora,sans-serif',color:'var(--muted)'}}>All {expSet.length} tickets as a single JSON file.</div>
               </div>
               <div className="card">
                 <div className="card-head"><h3>📊 Export as CSV</h3><button onClick={exportCSV} style={{padding:'7px 13px',background:'#E30613',color:'#fff',border:'none',borderRadius:8,font:'800 11px Sora,sans-serif',cursor:'pointer'}}>⬆ CSV</button></div>
-                <div style={{padding:'10px 16px',font:'500 11px Sora,sans-serif',color:'var(--muted)'}}>Opens directly in Excel. All {tickets.length} rows with full fields.</div>
+                <div style={{padding:'10px 16px',font:'500 11px Sora,sans-serif',color:'var(--muted)'}}>Opens directly in Excel. All {expSet.length} rows with full fields.</div>
               </div>
               <div className="card">
                 <div className="card-head"><h3>📗 Export as Excel</h3><button onClick={exportExcelAll} style={{padding:'7px 13px',background:'#059669',color:'#fff',border:'none',borderRadius:8,font:'800 11px Sora,sans-serif',cursor:'pointer'}}>📥 .xlsx</button></div>
-                <div style={{padding:'10px 16px',font:'500 11px Sora,sans-serif',color:'var(--muted)'}}>4 sheets: All · Resolved · In Progress · Unresolved. {tickets.length} tickets total.</div>
+                <div style={{padding:'10px 16px',font:'500 11px Sora,sans-serif',color:'var(--muted)'}}>4 sheets: All · Resolved · In Progress · Unresolved. {expSet.length} tickets total.</div>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
                 {[{label:'✅ Resolved',key:'resolved',color:'#22C55E',count:res.length},{label:'⏳ In Progress',key:'progress',color:'#F59E0B',count:prg.length},{label:'🔴 Unresolved',key:'unresolved',color:'#EF4444',count:unr.length}].map(function(s){return(
@@ -4388,231 +4707,28 @@ function DataPage({tickets,setTickets,showToast}){
 function Agents({tickets,shifts,onShift,showToast}){
   const watTodayFull=watTodayStr();const today=tickets.filter(function(t){if(t.created){var d=new Date(t.created);if(!isNaN(d.getTime())){var w=new Date(d.toLocaleString('en-US',{timeZone:'Africa/Lagos'}));var ds=w.getFullYear()+'-'+String(w.getMonth()+1).padStart(2,'0')+'-'+String(w.getDate()).padStart(2,'0');return ds===watTodayFull;}}if(t.day&&t.day>0){return t.day===watDayNow()&&String(t.created||'').startsWith(watTodayFull.slice(0,7));}return false;});
   const onCount=Object.values(shifts).filter(function(s){return s==='day'||s==='night';}).length;
-  function importCSV(e){
-    const file=e.target.files[0];if(!file)return;
-    e.target.value='';
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      try{
-        const raw=ev.target.result.replace(/^﻿/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-        const lines=raw.split('\n').filter(function(l){return l.trim();});
-        if(!lines.length){showToast('CSV is empty','error');return;}
-        // Parse a CSV line (handles quoted fields)
-        function parseLine(line){
-          var result=[],cur='',inQ=false;
-          for(var i=0;i<line.length;i++){
-            var c=line[i];
-            if(c==='"'){inQ=!inQ;}
-            else if(c===','&&!inQ){result.push(cur.trim());cur='';}
-            else{cur+=c;}
-          }
-          result.push(cur.trim());
-          return result;
-        }
-        const headers=parseLine(lines[0]).map(function(h){return h.toLowerCase().replace(/[^a-z0-9]/g,'');});
-        // Flexible column detection
-        function findCol(candidates){for(var i=0;i<candidates.length;i++){var idx=headers.indexOf(candidates[i]);if(idx>=0)return idx;}return -1;}
-        const iDate=findCol(['titledate','date','shiftdate','scheduledate','day']);
-        const iName=findCol(['agentname','name','agent','staffname','employeename','fullname']);
-        const iShift=findCol(['shifttype','shift','shiftname','type','schedule','schedtype']);
-        if(iDate<0||iName<0||iShift<0){
-          showToast('CSV missing columns. Need: Date, Agent Name, Shift. Found: '+headers.join(', '),'error');
-          return;
-        }
-        // Flexible name map (first name or full name match)
-        const AGENT_MAP={
-          'matthew akhigbe':'matthew','matthew':'matthew',
-          'racheal ogunleke':'racheal','racheal':'racheal',
-          'tomina egbokwu':'tomina','tomina':'tomina',
-          'esther okafor':'esther','okafor esther ifunnaya':'esther','esther':'esther',
-          'loveth okpara':'loveth','okpara loveth ifeoma':'loveth','loveth':'loveth',
-        };
-        const SHIFT_MAP={
-          'day':'day','day shift':'day',
-          'night':'shadow','night shift':'shadow','shadow':'shadow',
-          'off':'off','rest':'off','leave':'leave','annual leave':'leave','sick':'leave',
-        };
-        function parseDate(raw){
-          // Try YYYY-MM-DD
-          if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;
-          // Try DD/MM/YYYY
-          var p=raw.split('/');
-          if(p.length===3){
-            var y=p[2].length===4?p[2]:'20'+p[2];
-            // Determine if first part is day or month (>12 = must be day)
-            if(parseInt(p[0])>12){return y+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');}
-            // Default: try DD/MM/YYYY (common in Nigeria)
-            return y+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
-          }
-          // Try MM/DD/YYYY (US)
-          var p2=raw.split('-');
-          if(p2.length===3&&p2[0].length<=2){
-            return p2[2]+'-'+p2[0].padStart(2,'0')+'-'+p2[1].padStart(2,'0');
-          }
-          return null;
-        }
-        const newShifts=Object.assign({},shifts);
-        var count=0;var skipped=[];
-        const watToday=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
-        const todayStr=watToday.getFullYear()+'-'+String(watToday.getMonth()+1).padStart(2,'0')+'-'+String(watToday.getDate()).padStart(2,'0');
-        lines.slice(1).forEach(function(line){
-          if(!line.trim())return;
-          var cols=parseLine(line);
-          var rawDate=(cols[iDate]||'').replace(/"/g,'').trim();
-          var rawName=(cols[iName]||'').replace(/"/g,'').trim();
-          var rawShift=(cols[iShift]||'').replace(/"/g,'').trim();
-          var agentId=AGENT_MAP[rawName.toLowerCase()];
-          if(!agentId){
-            // Try first-name match
-            var firstName=rawName.split(/\s+/)[0].toLowerCase();
-            agentId=AGENT_MAP[firstName];
-          }
-          var shift=SHIFT_MAP[rawShift.toLowerCase()]||'off';
-          if(!agentId){if(rawName)skipped.push(rawName);return;}
-          var dateStr=parseDate(rawDate);
-          if(!dateStr)return;
-          localStorage.setItem('ek_sched_'+agentId+'_'+dateStr,shift);
-          if(dateStr===todayStr){newShifts[agentId]=shift;}
-          count++;
-        });
-        setShifts(newShifts);
-        localStorage.setItem('ek_v2_shifts',JSON.stringify(newShifts));
-        var msg='✅ '+count+' schedule entries imported';
-        if(skipped.length){var uniq=[...new Set(skipped)];msg+=' · Skipped unknown: '+uniq.slice(0,3).join(', ')+(uniq.length>3?' +'+( uniq.length-3)+' more':'');}
-        showToast(msg);
-        if(skipped.length)console.warn('[Roster CSV] Unrecognised agents:',skipped);
-        // Build full schedule object for Gist push
-        const schedObj={};
-        EK_AGENTS.forEach(function(a){
-          schedObj[a.id]={};
-          // Collect all ek_sched_ keys for this agent
-          Object.keys(localStorage).forEach(function(k){
-            if(k.startsWith('ek_sched_'+a.id+'_')){
-              const d=k.replace('ek_sched_'+a.id+'_','');
-              schedObj[a.id][d]=localStorage.getItem(k);
-            }
-          });
-        });
-        // Push _shifts + _sched to Gist 2 if token available
-        const ghToken=localStorage.getItem('ek_gh_token');
-        if(ghToken){
-          fetch('https://api.github.com/gists/57c1197c3fae7dd5731d3aa2075d0e29',{
-            method:'PATCH',
-            headers:{'Content-Type':'application/json','Authorization':'token '+ghToken,'Accept':'application/vnd.github+json'},
-            body:JSON.stringify({files:{['gistfile1.txt']:{content:JSON.stringify(Object.assign(
-              {},
-              (function(){try{return JSON.parse(localStorage.getItem('ek_gist2_cache')||'{}')}catch(e){return{}}})(),
-              {_shifts:newShifts,_sched:schedObj}
-            ),null,2)}}})
-          }).then(function(){showToast('✅ Roster imported & pushed to Gist — agents will see updates on next pull');})
-            .catch(function(){showToast('✅ Roster imported locally. Push to Gist failed — try Cloud Sync manually.','error');});
-        } else {
-          showToast('✅ Roster imported — '+count+' entries. Set GitHub token in Cloud Sync to push to agents.');
-        }
-      }catch(err){showToast('CSV parse error: '+err.message,'error');}
-    };
-    reader.readAsText(file);
-  }
-  const[agentList,setAgentList]=useState(EK_AGENTS.slice());
-  const[editAgent,setEditAgent]=useState(null);
-  const[showAddAgent,setShowAddAgent]=useState(false);
-  const AGENT_COLORS=['#16A34A','#EC4899','#8B5CF6','#DC2626','#F59E0B','#3B82F6','#06B6D4','#F97316','#A855F7','#EF4444'];
-
-  function openEditAgent(a,idx){
-    setEditAgent({idx,id:a.id,name:a.name,email:a.email||'',role:a.role||'CX Agent',color:a.color||'#60A5FA'});
-  }
-  function saveEditAgent(){
-    if(!editAgent)return;
-    var nm=editAgent.name.trim();if(!nm){showToast('Name is required','error');return;}
-    var arr=agentList.slice();
-    var idx=editAgent.idx;
-    var id=nm.split(' ')[0].toLowerCase().replace(/[^a-z]/g,'');
-    arr[idx]=Object.assign({},arr[idx],{
-      id:editAgent.idx<0?id:arr[idx].id,
-      name:nm,email:editAgent.email.trim(),role:editAgent.role.trim()||'CX Agent',
-      color:editAgent.color,
-      tint:editAgent.color+'2e',
-      initials:(nm.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase())
-    });
-    saveAgents(arr);setAgentList(arr);setEditAgent(null);showToast('Agent updated ✅');
-  }
-  function deleteAgent(idx){
-    if(!confirm('Remove this agent from the roster? Their ticket data is not deleted.'))return;
-    var arr=agentList.filter(function(_,i){return i!==idx;});
-    saveAgents(arr);setAgentList(arr);setEditAgent(null);showToast('Agent removed');
-  }
-  function addAgent(){
-    var nm=(editAgent&&editAgent.name||'').trim();if(!nm){showToast('Name is required','error');return;}
-    var id=nm.split(' ')[0].toLowerCase().replace(/[^a-z]/g,'');
-    var taken=agentList.some(function(a){return a.id===id;});
-    if(taken)id=id+(agentList.length+1);
-    var col=editAgent.color||AGENT_COLORS[agentList.length%AGENT_COLORS.length];
-    var newA={id,name:nm,email:(editAgent.email||'').trim(),role:(editAgent.role||'CX Agent').trim(),color:col,tint:col+'2e',initials:(nm.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase())};
-    var arr=agentList.concat([newA]);
-    saveAgents(arr);setAgentList(arr);setEditAgent(null);setShowAddAgent(false);showToast('Agent added ✅');
-  }
-  function importRosterCSV(e){
-    const file=e.target.files[0];if(!file)return;e.target.value='';
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      try{
-        const raw=ev.target.result.replace(/^﻿/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-        const lines=raw.split('\n').filter(function(l){return l.trim();});
-        if(lines.length<2){showToast('CSV needs a header row + data','error');return;}
-        function parseLine(line){var r=[],c='',q=false;for(var i=0;i<line.length;i++){var ch=line[i];if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c.trim());c='';}else{c+=ch;}}r.push(c.trim());return r;}
-        const header=parseLine(lines[0]).map(function(h){return h.toLowerCase().replace(/"/g,'').trim();});
-        var iName=header.findIndex(function(h){return h.includes('name');});
-        var iEmail=header.findIndex(function(h){return h.includes('email')||h.includes('mail');});
-        var iRole=header.findIndex(function(h){return h.includes('role')||h.includes('title')||h.includes('position');});
-        if(iName<0){showToast('CSV must have a Name column','error');return;}
-        var arr=agentList.slice();var added=0,updated=0;
-        lines.slice(1).forEach(function(line){
-          var cols=parseLine(line);
-          var nm=(cols[iName]||'').replace(/"/g,'').trim();if(!nm)return;
-          var email=iEmail>=0?(cols[iEmail]||'').replace(/"/g,'').trim():'';
-          var role=iRole>=0?(cols[iRole]||'').replace(/"/g,'').trim():'CX Agent';
-          var id=nm.split(' ')[0].toLowerCase().replace(/[^a-z]/g,'');
-          var existing=arr.findIndex(function(a){return a.name.toLowerCase()===nm.toLowerCase()||a.id===id;});
-          var col=AGENT_COLORS[arr.length%AGENT_COLORS.length];
-          if(existing>=0){arr[existing]=Object.assign({},arr[existing],{name:nm,email:email||arr[existing].email,role:role||arr[existing].role});updated++;}
-          else{arr.push({id,name:nm,email,role,color:col,tint:col+'2e',initials:nm.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase()});added++;}
-        });
-        saveAgents(arr);setAgentList(arr);
-        showToast('✅ Roster imported — '+added+' added, '+updated+' updated');
-      }catch(err){showToast('CSV error: '+err.message,'error');}
-    };
-    reader.readAsText(file);
-  }
-  function clearOverrides(){agentList.forEach(function(a){onShift(a.id,'off');});showToast('Overrides cleared.');}
+  function clearOverrides(){EK_AGENTS.forEach(function(a){onShift(a.id,a.id==='matthew'?'day':a.id==='loveth'?'day':'off');});showToast('Overrides cleared.');}
   return(
     <div>
       <div className="hero" style={{padding:'18px 28px'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <div>
             <div style={{font:'800 20px/1 Sora,sans-serif',color:'#fff',marginBottom:4}}>👥 Agents</div>
-            <div style={{font:'500 12px Sora,sans-serif',color:'var(--muted)'}}>{new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'})).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · {onCount} on shift · {agentList.length-onCount} off</div>
+            <div style={{font:'500 12px Sora,sans-serif',color:'var(--muted)'}}>{new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'})).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · {onCount} on shift · {EK_AGENTS.length-onCount} off</div>
           </div>
-          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <div style={{display:'flex',gap:8}}>
             <button className="btn btn-danger btn-sm" onClick={clearOverrides}>{Ico.x}&nbsp;Clear Overrides</button>
-            <label className="btn btn-sm" style={{cursor:'pointer'}}>{Ico.upload}&nbsp;Import Roster CSV
-              <input type="file" accept=".csv" style={{display:'none'}} onChange={importRosterCSV}/>
-            </label>
-            <label className="btn btn-sm" style={{cursor:'pointer',background:'rgba(99,102,241,.15)',borderColor:'rgba(99,102,241,.4)',color:'var(--infob)'}}>{Ico.upload}&nbsp;Import Schedule CSV
-              <input type="file" accept=".csv" style={{display:'none'}} onChange={importCSV}/>
-            </label>
-            <button className="btn btn-gold btn-sm" onClick={function(){setEditAgent({idx:-1,id:'',name:'',email:'',role:'CX Agent',color:AGENT_COLORS[agentList.length%AGENT_COLORS.length]});setShowAddAgent(true);}}>+ Add Agent</button>
           </div>
         </div>
       </div>
       <div style={{padding:'18px 28px'}}>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-          {agentList.map(function(a,idx){
+          {EK_AGENTS.map(function(a){
             var myTix=today.filter(function(t){return t.agent===a.id||t.agentId===a.id||(t.agentName||'').toLowerCase()===a.name.toLowerCase();});
             var res=myTix.filter(function(t){return t.status==='resolved';}).length;
             var rate=myTix.length?Math.round(res/myTix.length*100):0;
             return(
-              <div key={a.id} className="agent-card" style={{borderColor:a.color+'44',position:'relative'}}>
-                <button onClick={function(){openEditAgent(a,idx);}} style={{position:'absolute',top:10,right:10,background:'rgba(255,255,255,.08)',border:'1px solid var(--bsoft)',borderRadius:7,color:'var(--muted)',font:'700 10px Sora,sans-serif',cursor:'pointer',padding:'4px 9px'}}>✏ Edit</button>
+              <div key={a.id} className="agent-card" style={{borderColor:a.color+'44'}}>
                 <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
                   <AgentPhoto id={a.id} name={a.name} color={a.color} size={48}/>
                   <div style={{flex:1,minWidth:0}}>
@@ -4632,47 +4748,127 @@ function Agents({tickets,shifts,onShift,showToast}){
               </div>);})}
         </div>
       </div>
-      {editAgent&&(
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.65)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={function(){setEditAgent(null);setShowAddAgent(false);}}>
-          <div style={{background:'var(--surface)',borderRadius:14,width:'min(440px,94vw)',padding:28,boxShadow:'0 24px 80px rgba(0,0,0,.6)'}} onClick={function(e){e.stopPropagation();}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
-              <span style={{font:'800 15px Sora,sans-serif',color:'var(--text)'}}>{showAddAgent?'➕ Add Agent':'✏️ Edit Agent'}</span>
-              <button onClick={function(){setEditAgent(null);setShowAddAgent(false);}} style={{background:'transparent',border:'none',color:'var(--muted)',fontSize:18,cursor:'pointer'}}>✕</button>
-            </div>
-            <div style={{marginBottom:12}}>
-              <label className="lbl">Full Name *</label>
-              <input className="inp" value={editAgent.name} onChange={function(e){setEditAgent(function(p){return Object.assign({},p,{name:e.target.value});});}} placeholder="e.g. John Doe"/>
-            </div>
-            <div style={{marginBottom:12}}>
-              <label className="lbl">Email</label>
-              <input className="inp" type="email" value={editAgent.email} onChange={function(e){setEditAgent(function(p){return Object.assign({},p,{email:e.target.value});});}} placeholder="john.doe@ekedp.com"/>
-            </div>
-            <div style={{marginBottom:12}}>
-              <label className="lbl">Role</label>
-              <select className="sel" value={editAgent.role} onChange={function(e){setEditAgent(function(p){return Object.assign({},p,{role:e.target.value});});}}>
-                <option>Team Lead</option><option>CX Agent</option><option>Supervisor</option><option>Manager</option>
-              </select>
-            </div>
-            <div style={{marginBottom:20}}>
-              <label className="lbl">Colour</label>
-              <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:6}}>
-                {AGENT_COLORS.map(function(c){return(
-                  <button key={c} onClick={function(){setEditAgent(function(p){return Object.assign({},p,{color:c});});}} style={{width:28,height:28,borderRadius:'50%',background:c,border:editAgent.color===c?'3px solid #fff':'2px solid transparent',cursor:'pointer',outline:'none'}}/>
-                );})}
-                <input type="color" value={editAgent.color} onChange={function(e){setEditAgent(function(p){return Object.assign({},p,{color:e.target.value});});}} style={{width:28,height:28,borderRadius:'50%',border:'2px solid var(--bsoft)',cursor:'pointer',padding:0}} title="Custom colour"/>
-              </div>
-            </div>
-            <div style={{display:'flex',gap:8}}>
-              <button onClick={showAddAgent?addAgent:saveEditAgent} style={{flex:1,padding:'12px',background:'var(--ek-gold)',color:'#0A1A4F',border:'none',borderRadius:9,font:'800 13px Sora,sans-serif',cursor:'pointer'}}>{showAddAgent?'Add Agent':'Save Changes'}</button>
-              {!showAddAgent&&<button onClick={function(){deleteAgent(editAgent.idx);}} style={{padding:'12px 16px',background:'rgba(239,68,68,.15)',color:'#F87171',border:'1px solid rgba(239,68,68,.35)',borderRadius:9,font:'800 12px Sora,sans-serif',cursor:'pointer'}}>Remove</button>}
-              <button onClick={function(){setEditAgent(null);setShowAddAgent(false);}} style={{padding:'12px 16px',background:'transparent',color:'var(--muted)',border:'1px solid var(--bsoft)',borderRadius:9,font:'700 12px Sora,sans-serif',cursor:'pointer'}}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+// ── WEEK SCHEDULE GRID ────────────────────────────────────────────
+function WeekScheduleGrid(){
+  var DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  // Re-render when CSV import fires ek_sched_updated (same-tab event)
+  var[tick,setTick]=useState(0);
+  useEffect(function(){
+    function onUpdate(){setTick(function(n){return n+1;});}
+    window.addEventListener('ek_sched_updated',onUpdate);
+    return function(){window.removeEventListener('ek_sched_updated',onUpdate);};
+  },[]);
+  var SHIFT_META={
+    day:    {emoji:'🌞',label:'Day',   color:'#FCD34D'},
+    shadow: {emoji:'🌙',label:'Night', color:'#818CF8'},
+    off:    {emoji:'',  label:'Off',   color:'rgba(148,163,184,.5)'},
+    leave:  {emoji:'⛱️',label:'Leave', color:'#34D399'},
+  };
+  var CYCLE=['off','day','shadow','leave'];
+  function cycleShift(agentId,dateStr,cur){
+    var idx=CYCLE.indexOf(cur);var next=CYCLE[(idx+1)%CYCLE.length];
+    try{localStorage.setItem('ek_sched_'+agentId+'_'+dateStr,next);}catch(e){}
+    window.dispatchEvent(new Event('ek_sched_updated'));
+  }
+
+  // Week offset state (0 = this week)
+  var[weekOffset,setWeekOffset]=useState(0);
+
+  // Derive the Monday of the selected week in WAT
+  var watNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
+  var dow=watNow.getDay()||7; // 1=Mon … 7=Sun
+  var monday=new Date(watNow);
+  monday.setDate(watNow.getDate()-dow+1+weekOffset*7);
+  monday.setHours(0,0,0,0);
+
+  // Build date strings for the 7 days
+  var weekDates=DAYS.map(function(_,i){
+    var d=new Date(monday);d.setDate(monday.getDate()+i);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  });
+  var todayStr=watNow.getFullYear()+'-'+String(watNow.getMonth()+1).padStart(2,'0')+'-'+String(watNow.getDate()).padStart(2,'0');
+
+  function getShift(agentId,dateStr){
+    // Prefer per-date CSV key, fall back to ek_v2_shifts for today
+    var v=localStorage.getItem('ek_sched_'+agentId+'_'+dateStr);
+    if(v)return v;
+    if(dateStr===todayStr){
+      try{var s=JSON.parse(localStorage.getItem('ek_v2_shifts')||'{}');if(s[agentId])return s[agentId];}catch(e){}
+    }
+    if(typeof EK_ROSTER_SEED!=='undefined'&&EK_ROSTER_SEED[agentId]&&EK_ROSTER_SEED[agentId][dateStr])return EK_ROSTER_SEED[agentId][dateStr];
+    return 'off';
+  }
+
+  // Label: "WEEK OF 1 JUN" using Monday's date
+  var weekLabel='WEEK OF '+monday.getDate()+' '+monday.toLocaleString('en-GB',{month:'short'}).toUpperCase();
+
+  return(
+    <div className="card" style={{padding:0,marginBottom:0}}>
+      <div className="card-head" style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <h3 style={{display:'flex',alignItems:'center',gap:7}}>
+          <span style={{fontSize:14}}>📅</span> {weekLabel}
+          <span style={{font:'500 9px/1 Sora,sans-serif',color:'var(--muted)',marginLeft:6,letterSpacing:'.02em'}}>· tap a cell to edit</span>
+        </h3>
+        <div style={{display:'flex',gap:6}}>
+          <button className="btn btn-sm" onClick={function(){setWeekOffset(function(o){return o-1;})}} style={{padding:'4px 10px',fontSize:11}}>← Prev</button>
+          <button className="btn btn-sm" onClick={function(){setWeekOffset(0);}} style={{padding:'4px 10px',fontSize:11,background:weekOffset===0?'var(--ek-gold)':'',color:weekOffset===0?'#000':''}}>This Week</button>
+          <button className="btn btn-sm" onClick={function(){setWeekOffset(function(o){return o+1;})}} style={{padding:'4px 10px',fontSize:11}}>Next →</button>
+        </div>
+      </div>
+      <div style={{overflowX:'auto',padding:'12px 14px'}}>
+        <table className="week-grid">
+          <thead>
+            <tr>
+              <th className="wg-head" style={{textAlign:'left',minWidth:120}}>AGENT</th>
+              {DAYS.map(function(day,i){
+                var isToday=weekDates[i]===todayStr;
+                return(
+                  <th key={day} className={'wg-head'+(isToday?' today':'')}>
+                    {day}<br/>
+                    <span style={{fontSize:13,fontWeight:800,fontFamily:'JetBrains Mono,monospace',letterSpacing:0}}>
+                      {new Date(weekDates[i]+'T12:00:00').getDate()}
+                    </span>
+                  </th>);
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {EK_AGENTS.map(function(a){
+              return(
+                <tr key={a.id}>
+                  <td className="wg-agent">
+                    <div style={{display:'flex',alignItems:'center',gap:7}}>
+                      <AgentPhoto id={a.id} name={a.name} color={a.color} size={26}/>
+                      <div>
+                        <div style={{font:'700 11px/1 Sora,sans-serif',color:'var(--text)'}}>{a.name.split(' ')[0]}</div>
+                        <div style={{font:'500 9px/1 Sora,sans-serif',color:'var(--muted)',marginTop:2}}>{a.name.split(' ').slice(1).join(' ')}</div>
+                      </div>
+                    </div>
+                  </td>
+                  {weekDates.map(function(dateStr,i){
+                    var shift=getShift(a.id,dateStr);
+                    var meta=SHIFT_META[shift]||SHIFT_META.off;
+                    var isToday=dateStr===todayStr;
+                    return(
+                      <td key={dateStr} className={'wg-cell'+(isToday?' today':'')} title={a.name.split(' ')[0]+' · '+new Date(dateStr+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' — '+meta.label+' (click to change)'} onClick={function(){cycleShift(a.id,dateStr,shift);}} style={{cursor:'pointer'}}
+                        onMouseEnter={function(e){e.currentTarget.style.background='rgba(99,102,241,.16)';}}
+                        onMouseLeave={function(e){e.currentTarget.style.background='';}}>
+                        <div style={{height:16,display:'flex',alignItems:'center',justifyContent:'center',fontSize:shift==='leave'?13:16,lineHeight:1,textShadow:shift==='shadow'?'0 0 11px rgba(129,140,248,.95),0 0 5px rgba(129,140,248,.75)':shift==='day'?'0 0 16px rgba(253,224,71,1),0 0 8px rgba(251,191,36,.95),0 0 3px rgba(255,237,160,1)':shift==='leave'?'0 0 14px rgba(52,211,153,1),0 0 7px rgba(16,185,129,.9),0 0 3px rgba(167,243,208,1)':'none'}}>{shift==='off'?<span style={{width:8,height:8,borderRadius:'50%',background:'rgba(148,163,184,.7)',boxShadow:'0 0 9px rgba(148,163,184,.9),0 0 4px rgba(203,213,225,.8)'}}/>:meta.emoji}</div>
+                        <div style={{marginTop:3,color:meta.color,fontWeight:700,fontSize:9}}>{meta.label}</div>
+                      </td>);
+                  })}
+                </tr>);
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ── CLOUD SYNC — SharePoint via Power Automate ───────────────────
 function CloudSync({tickets,setTickets,showToast}){
   const PA_PULL_KEY='ek_pa_pull_url';
@@ -4723,8 +4919,27 @@ function CloudSync({tickets,setTickets,showToast}){
     setSaving(true);setStatus({msg:'Pulling from SharePoint via Power Automate…',ok:true});
     addLog('Fetching from SharePoint…',null);
     try{
-      const res=await fetch(pullUrl,{method:'POST'});
-      if(!res.ok)throw new Error('HTTP '+res.status+' — check your Pull URL');
+      let res,lastErr;
+      for(let attempt=1;attempt<=3;attempt++){
+        try{
+          if(attempt>1){
+            const wait=(attempt-1)*4000;
+            addLog('Retry '+attempt+'/3 in '+(wait/1000)+'s…',null);
+            await new Promise(function(r){setTimeout(r,wait);});
+          }
+          const ctrl=new AbortController();
+          const tid=setTimeout(function(){ctrl.abort();},30000);
+          res=await fetch(pullUrl,{method:'POST',signal:ctrl.signal});
+          clearTimeout(tid);
+          if(res.ok||res.status===404)break;
+          lastErr=new Error('HTTP '+res.status+(res.status===502?' (gateway timeout)':res.status===503?' (service unavailable)':''));
+          if(res.status<500)break;
+        }catch(err){
+          lastErr=err.name==='AbortError'?new Error('Request timed out after 30 s'):err;
+          if(attempt===3)throw lastErr;
+        }
+      }
+      if(!res||!res.ok)throw lastErr||new Error('HTTP '+(res?res.status:'no response'));
       const cloud1=await res.json();
       const STATUS_MAP_N={'pending':'unresolved','assigned':'progress','closed':'resolved','in progress':'progress','resolved':'resolved','unresolved':'unresolved'};
       let norm1=cloud1;
@@ -4786,29 +5001,65 @@ function CloudSync({tickets,setTickets,showToast}){
 
   async function pushNow(){
     if(!pushUrl){showToast('Set your Push URL first','error');return;}
-    setSaving(true);setStatus({msg:'Pushing to SharePoint via Power Automate…',ok:true});addLog('Preparing data…',null);
+    setSaving(true);addLog('Preparing tickets…',null);
     try{
       const watNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
       const todayStr=watNow.getFullYear()+'-'+String(watNow.getMonth()+1).padStart(2,'0')+'-'+String(watNow.getDate()).padStart(2,'0');
-      const byAgent={};
-      tickets.forEach(function(t){
-        if(t._baseline)return;
-        const tDate=(t.created||t.day||'').toString().slice(0,10);
-        if(tDate!==todayStr)return;
-        const key=t.agent||'manager';
-        if(!byAgent[key])byAgent[key]=[];
-        byAgent[key].push(t);
+      const todayTix=tickets.filter(function(t){
+        if(t._baseline)return false;
+        return (t.created||t.day||'').toString().slice(0,10)===todayStr;
       });
-      const incrementalCount=Object.values(byAgent).reduce(function(a,arr){return a+arr.length;},0);
-      try{byAgent._shifts=JSON.parse(localStorage.getItem('ek_v2_shifts')||'{}');}catch(e){}
-      try{var g=localStorage.getItem('ek_guide');if(g){byAgent._guide=JSON.parse(g);}}catch(e){}
-      const payload=Object.assign({},byAgent,{pushedAt:new Date().toISOString(),date:todayStr});
-      const res=await fetch(pushUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      if(!res.ok)throw new Error('HTTP '+res.status+' — check your Push URL');
+      if(!todayTix.length){showToast('No tickets for today to push.','error');setSaving(false);return;}
+
+      function toSpStatus(s){return s==='resolved'?'Closed':s==='progress'?'Assigned':'Pending';}
+
+      let pushed=0,failed=0;
+      for(let i=0;i<todayTix.length;i++){
+        const t=todayTix[i];
+        setStatus({msg:'Pushing ticket '+(i+1)+'/'+todayTix.length+' (#'+t.num+')…',ok:true});
+
+        // Matches the flow's single-ticket trigger schema exactly
+        const payload={
+          num:         t.num||'',
+          status:      toSpStatus(t.status),
+          responsible: t.resp||t.responsible||'',
+          actionTaken: t.note||'',
+          resolvedBy:  t.status==='resolved'?(t.resp||'Manager'):'',
+          resolvedDate:t.status==='resolved'?todayStr:'',
+          agentName:   t.agent||'manager',
+          updatedBy:   'Manager',
+        };
+
+        let res,lastErr;
+        for(let attempt=1;attempt<=3;attempt++){
+          try{
+            if(attempt>1){
+              const wait=(attempt-1)*4000;
+              addLog('Ticket '+(i+1)+' retry '+attempt+'/3 in '+(wait/1000)+'s…',null);
+              await new Promise(function(r){setTimeout(r,wait);});
+            }
+            const ctrl=new AbortController();
+            const tid=setTimeout(function(){ctrl.abort();},30000);
+            res=await fetch(pushUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
+            clearTimeout(tid);
+            if(res.ok||res.status===404)break;
+            lastErr=new Error('HTTP '+res.status+(res.status===502?' (gateway timeout)':res.status===503?' (unavailable)':''));
+            if(res.status<500)break;
+          }catch(err){
+            lastErr=err.name==='AbortError'?new Error('Timed out after 30 s'):err;
+            if(attempt===3)break;
+          }
+        }
+        if(res&&res.ok){pushed++;}
+        else{failed++;addLog('Ticket #'+t.num+' failed: '+(lastErr?.message||res?.status),false);console.warn('[Push] #'+t.num,lastErr?.message||res?.status);}
+      }
+
       const now=new Date().toLocaleString('en-GB',{timeZone:'Africa/Lagos'});
-      setLastSync(now);localStorage.setItem('ek_last_sync',now);setConnected(true);
-      const msg='✅ Pushed '+incrementalCount+' tickets to SharePoint.';
-      setStatus({msg,ok:true});addLog(msg,true);showToast(msg);
+      setLastSync(now);localStorage.setItem('ek_last_sync',now);setConnected(pushed>0);
+      const msg=failed===0
+        ?'✅ Pushed '+pushed+' ticket'+(pushed!==1?'s':'')+' to SharePoint.'
+        :'⚠️ '+pushed+' pushed, '+failed+' failed — check flow logs.';
+      setStatus({msg,ok:failed===0});addLog(msg,failed===0);showToast(msg,failed>0?'error':undefined);
     }catch(e){
       const msg='Push failed: '+e.message;
       setStatus({msg,ok:false});addLog(msg,false);showToast(msg,'error');
@@ -5147,7 +5398,7 @@ function App(){
     showToast('✓ Ticket #'+updated.num+' updated');
   }
 
-  function onSignIn(){setSignedIn(true);localStorage.setItem('ek_v2_auth','1');showToast('Welcome back ⚡');}
+  function onSignIn(email,name){setSignedIn(true);if(name){setSignedInName(name);localStorage.setItem('ek_v2_name',name);}localStorage.setItem('ek_v2_auth','1');showToast('Welcome back ⚡');}
   function onSignOut(){setSignedIn(false);localStorage.removeItem('ek_v2_auth');}
   function onPurge(){if(!confirm('Delete ALL tickets received before May 1 2026 (test data)? This cannot be undone.'))return;const kept=tickets.filter(function(t){var d=shiftWatDate(t);return d?d>='2026-05-01':true;});const removed=tickets.length-kept.length;persistTickets(kept);setTickets(kept);setShowSettings(false);showToast('🗑 Purged '+removed+' pre-May test ticket'+(removed!==1?'s':'')+' ✅');}
   function onDedup(){
@@ -5181,12 +5432,11 @@ function App(){
   if(!signedIn)return <Signin onSignIn={onSignIn}/>;
   const W=collapsed?64:220;
   const screens={
-    dashboard: <Dashboard tickets={viewTickets} carryTix={carryTix} shifts={shifts} onShift={onShift} onSettings={()=>setShowSettings(true)} onNav={setScreen}/>,
+    dashboard: <AnalyticsDash tickets={viewTickets} onNav={setScreen} signedInName={signedInName} onSettings={()=>setShowSettings(true)}/>,
     daily:     <DailyReport tickets={tickets} onUpdate={onUpdate} onSettings={()=>setShowSettings(true)}/>,
     all:       <AllComplaints tickets={viewTickets} onUpdate={onUpdate} onBulkUpdate={function(ids,patch){setTickets(function(prev){const next=prev.map(function(t){return ids.includes(t.id)?Object.assign({},t,patch):t;});persistTickets(next);return next;});showToast('Updated '+ids.length+' ticket'+(ids.length>1?'s':'')+' ✅');}} onBatchUpdate={function(updates){setTickets(function(prev){const next=prev.map(function(t){const u=updates.find(function(x){return x.id===t.id;});return u?Object.assign({},t,u):t;});persistTickets(next);return next;});showToast('✅ Batch-updated '+updates.length+' tickets');}} onDelete={function(ids){setTickets(function(prev){const next=prev.filter(function(t){return !ids.includes(t.id);});persistTickets(next);return next;});showToast('🗑 Deleted '+ids.length+' ticket'+(ids.length>1?'s':'')+' permanently.');}} showToast={showToast} onSettings={()=>setShowSettings(true)}/>,
     log:       <LogTicket tickets={tickets} onAdd={onAdd} showToast={showToast} onSettings={()=>setShowSettings(true)}/>,
     cumulative:<Cumulative tickets={viewTickets} showToast={showToast}/>,
-    analytics: <Analytics tickets={viewTickets}/>,
     slot:      <SlotReport tickets={viewTickets} showToast={showToast}/>,
     agents:    <Agents tickets={viewTickets} shifts={shifts} onShift={onShift} showToast={showToast}/>,
     sync:      <CloudSync tickets={tickets} setTickets={setTickets} showToast={showToast}/>,
@@ -5198,8 +5448,22 @@ function App(){
     rpt_monthly:   <ReportMonthly tickets={tickets} onBulkUpdate={function(ids,patch){setTickets(function(prev){const next=prev.map(function(t){return ids.includes(t.id)?Object.assign({},t,patch):t;});persistTickets(next);return next;});}} showToast={showToast}/>,
   };
 
+  const SCREEN_ORDER=['dashboard','daily','all','log','cumulative','slot','agents','sync','data','rpt_verify','rpt_anomaly','rpt_executive','rpt_weekly','rpt_monthly'];
+
+  // Swipe left/right to navigate between screens
+  const swipeRef=useRef({});
+  function onTouchStart(e){swipeRef.current.x=e.touches[0].clientX;swipeRef.current.y=e.touches[0].clientY;}
+  function onTouchEnd(e){
+    const dx=e.changedTouches[0].clientX-swipeRef.current.x;
+    const dy=e.changedTouches[0].clientY-swipeRef.current.y;
+    if(Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return; // too short or too vertical
+    const idx=SCREEN_ORDER.indexOf(screen);
+    if(dx<0&&idx<SCREEN_ORDER.length-1)setScreen(SCREEN_ORDER[idx+1]); // swipe left → next
+    if(dx>0&&idx>0)setScreen(SCREEN_ORDER[idx-1]);                      // swipe right → prev
+  }
+
   return(
-    <div>
+    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <Nav active={screen} onChange={setScreen} collapsed={collapsed} onToggle={()=>setCollapsed(c=>!c)} onSettings={()=>setShowSettings(true)} onSignOut={onSignOut} onReset={onReset} user="Love Offei" activeMonth={activeMonth} setActiveMonth={setActiveMonth} availMonths={availMonths} currentYM={currentYM} tickets={tickets} readOnly={readOnly}/>
       <main className={'main'+(collapsed?' nc':'')} style={{paddingLeft:W}}>
         {screens[screen]||screens.dashboard}
