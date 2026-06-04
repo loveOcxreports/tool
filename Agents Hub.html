@@ -2966,7 +2966,7 @@ function App(){
   const agentShift=shifts[agent.id]||'day';
   const screens={
     dashboard:<Dashboard agent={agent} allTix={viewTix} shifts={shifts}/>,
-    all:      <AllComplaints agent={agent} allTix={allTix} onUpdate={onUpdateAllTix} onDelete={onDeleteAllTix} onDeleteBulk={onDeleteBulkAllTix} showToast={showToast}/>,
+    all:      <AllComplaints agent={agent} allTix={viewTix} onUpdate={onUpdateAllTix} onDelete={onDeleteAllTix} onDeleteBulk={onDeleteBulkAllTix} showToast={showToast}/>,
     tickets:  <TicketsScreen agent={agent} tickets={tickets} allTix={viewTix} onEdit={onEdit} onUpdate={onUpdateAllTix} onDelete={onDeleteAllTix} showToast={showToast} agentShift={agentShift} onCreate={onCreate}/>,
     slot:     <SlotReport agent={agent} tickets={tickets} showToast={showToast} agentShift={agentShift}/>,
     guide:    <SupportGuide agent={agent} showToast={showToast}/>,
