@@ -2212,84 +2212,8 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
                             :<>{t.note||<span style={{opacity:.35,fontStyle:'italic'}}>—</span>}{!readOnly&&<span className="xls-hint">dbl-click</span>}</>
                           }
                         </td>
-                        <td><span style={{font:'700 10px Sora,sans-serif',color:'var(--ek-gold)'}}>{isExp?'▲ close':'▼ details'}</span></td>
+                        <td onClick={function(){setExpanded(isExp?null:t.id);}}><span style={{font:'700 10px Sora,sans-serif',color:'var(--ek-gold)'}}>{isExp?'▲ close':'▼ details'}</span></td>
                       </tr>
-                      {isExp&&(
-                        <tr><td colSpan={13} style={{padding:0}}>
-                          <div style={{background:'var(--surface)',border:'2px solid var(--ek-gold)',borderRadius:10,margin:'4px 6px 8px',overflow:'hidden',boxShadow:'0 4px 24px rgba(0,0,0,.25)'}}>
-                            {/* Header */}
-                            <div style={{background:'linear-gradient(135deg,#1E3A8A,#0F2461)',padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
-                              <div style={{display:'flex',alignItems:'center',gap:12}}>
-                                <div style={{background:'rgba(255,255,255,.12)',borderRadius:8,padding:'5px 9px',font:'800 11px Sora,sans-serif',color:'#FFC72C',letterSpacing:'.05em'}}>EKEDP ⚡</div>
-                                <div>
-                                  <span style={{font:"800 14px/1 'JetBrains Mono',monospace",color:'#60A5FA'}}>#{t.num}</span>
-                                  <span style={{font:'500 11px Sora,sans-serif',color:'rgba(255,255,255,.6)',marginLeft:10}}>{t.name}</span>
-                                </div>
-                                <span style={{marginLeft:4}}>{t.status==='resolved'?<span style={{background:'#16A34A22',color:'#4ADE80',border:'1px solid #16A34A55',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>RESOLVED</span>:t.status==='progress'?<span style={{background:'#D9770622',color:'#FCD34D',border:'1px solid #D9770655',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>IN PROGRESS</span>:<span style={{background:'#DC262622',color:'#F87171',border:'1px solid #DC262655',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>UNRESOLVED</span>}</span>
-                              </div>
-                              <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                                <button onClick={function(e){e.stopPropagation();if(window.confirm('Delete ticket #'+t.num+'?')){onDelete&&onDelete([t.id]);setExpanded(null);}}} style={{padding:'6px 12px',background:'rgba(239,68,68,.2)',color:'#F87171',border:'1px solid rgba(239,68,68,.4)',borderRadius:7,font:'800 11px Sora,sans-serif',cursor:'pointer'}}>🗑 Delete</button>
-                                <button onClick={function(e){e.stopPropagation();setExpanded(null);}} style={{background:'none',border:'none',color:'rgba(255,255,255,.5)',cursor:'pointer',font:'700 11px Sora,sans-serif'}}>✕ Close</button>
-                              </div>
-                            </div>
-                            {/* Info grid */}
-                            <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:0,borderBottom:'1px solid rgba(255,255,255,.06)'}}>
-                              {[
-                                ['📍 CUSTOMER ADDRESS',t.addr||t.address||'—'],
-                                ['⚡ METER / ACCOUNT NO.',t.meter||'—'],
-                                ['📞 TELEPHONE',t.phone],
-                                ['📧 EMAIL',t.email||'—'],
-                                ['🔗 CHANNEL',t.channel||'Mobile App'],
-                                ['📅 DATE/TIME RECEIVED',t.created?t.created.replace('T',' ').slice(0,19):'—'],
-                                ['✅ RESOLVED DATE',t.resolvedDate||'—'],
-                                ['📊 STATUS (RAW)',t.status?.toUpperCase()||'—'],
-                              ].map(function(f){return(
-                                <div key={f[0]} style={{padding:'10px 14px',borderRight:'1px solid rgba(255,255,255,.05)',borderBottom:'1px solid rgba(255,255,255,.05)'}}>
-                                  <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:4}}>{f[0]}</div>
-                                  <div style={{font:'600 11px Sora,sans-serif',color:'var(--text)',wordBreak:'break-word'}}>{f[1]}</div>
-                                </div>);})}
-                            </div>
-                            {/* Complaint description — editable */}
-                            <div style={{padding:'10px 14px',borderBottom:'1px solid rgba(255,255,255,.06)'}}>
-                              <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:6}}>📝 COMPLAINT DESCRIPTION ✏</div>
-                              <textarea className="inp" rows={3} value={getF(t,'issue')||''} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'issue',e.target.value);}} placeholder="Describe the complaint…" style={{resize:'vertical',fontSize:11,marginBottom:0}}/>
-                            </div>
-                            {/* Editable section */}
-                            <div style={{padding:'14px 16px',background:'rgba(0,0,0,.15)'}}>
-                              <div style={{font:'700 9px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.12em',marginBottom:12}}>✏️ UPDATE THIS TICKET</div>
-                              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
-                                <div>
-                                  <label className="lbl">Category</label>
-                                  <select className="sel" value={getF(t,'category')||EK_CATS[0]} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();const val=e.target.value;setF(t.id,'category',val);const ar=EK_RESP.find(function(r){return r.cat===val;});if(ar)setF(t.id,'resp',ar.name);}}>
-                                    {EK_CATS.map(function(c){return <option key={c} value={c}>{c}</option>;})}
-                                  </select>
-                                </div>
-                                <div>
-                                  <label className="lbl">Responsible Party</label>
-                                  <select className="sel" value={getF(t,'resp')||EK_RESP[0].name} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'resp',e.target.value);}}>
-                                    {EK_RESP.map(function(r){return <option key={r.name} value={r.name}>{r.name}</option>;})}
-                                  </select>
-                                </div>
-                              </div>
-                              <div style={{marginBottom:10}}>
-                                <label className="lbl">Status</label>
-                                <div style={{display:'flex',gap:8}}>
-                                  {[{v:'progress',l:'⏳ In Progress',c:'#F59E0B'},{v:'resolved',l:'✅ Resolved',c:'#22C55E'},{v:'unresolved',l:'🔴 Unresolved',c:'#EF4444'}].map(function(s){const on=getF(t,'status')===s.v;return(
-                                    <button key={s.v} onClick={function(e){e.stopPropagation();setF(t.id,'status',s.v);}} style={{flex:1,padding:'7px',border:'1px solid '+(on?s.c:'var(--bsoft)'),borderRadius:7,background:on?s.c+'22':'transparent',color:on?s.c:'var(--muted)',font:'700 11px Sora,sans-serif',cursor:'pointer'}}>{s.l}</button>
-                                  );})}
-                                </div>
-                              </div>
-                              <div style={{marginBottom:12}}>
-                                <label className="lbl">Action Taken / Resolution Note</label>
-                                <textarea className="inp" rows={2} value={getF(t,'note')||''} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'note',e.target.value);}} placeholder="Add action taken or resolution note…" style={{resize:'vertical',fontSize:11}}/>
-                              </div>
-                              <div style={{display:'flex',gap:8}}>
-                                <button onClick={function(e){e.stopPropagation();saveEdit(t);setExpanded(null);}} style={{flex:1,padding:'10px',background:'var(--ek-gold)',color:'#0A1A4F',border:'none',borderRadius:8,font:'800 13px Sora,sans-serif',cursor:'pointer'}}>💾 Save Update</button>
-                                <button onClick={function(e){e.stopPropagation();if(window.confirm('Delete ticket #'+t.num+'?')){onDelete&&onDelete([t.id]);setExpanded(null);}}} style={{padding:'10px 18px',background:'rgba(239,68,68,.15)',color:'#F87171',border:'1px solid rgba(239,68,68,.35)',borderRadius:8,font:'800 12px Sora,sans-serif',cursor:'pointer'}}>🗑 Delete</button>
-                              </div>
-                            </div>
-                          </div>
-                        </td></tr>)}
                     </React.Fragment>);
                 })}
                 {!paged.length&&<tr><td colSpan={13} style={{padding:'32px',textAlign:'center',color:'var(--muted)'}}>No tickets match your filters.</td></tr>}
@@ -2339,6 +2263,73 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
           </div>
         </div>
       )}
+      {(function(){
+        const mt=expanded?filtered.find(function(x){return x.id===expanded;}):null;
+        if(!mt)return null;
+        function handleKey(ev){if(ev.key==='Enter'&&!ev.shiftKey&&ev.target.tagName!=='TEXTAREA'){ev.preventDefault();saveEdit(mt);setExpanded(null);}}
+        return(
+          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.65)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={function(){setExpanded(null);}} onKeyDown={handleKey}>
+            <div style={{background:'var(--surface)',borderRadius:14,width:'min(820px,96vw)',maxHeight:'92vh',overflowY:'auto',boxShadow:'0 24px 80px rgba(0,0,0,.6)'}} onClick={function(e){e.stopPropagation();}}>
+              <div style={{background:'linear-gradient(135deg,#1E3A8A,#0F2461)',padding:'14px 18px',display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'1px solid rgba(255,255,255,.08)',borderRadius:'14px 14px 0 0'}}>
+                <div style={{display:'flex',alignItems:'center',gap:12}}>
+                  <div style={{background:'rgba(255,255,255,.12)',borderRadius:8,padding:'5px 9px',font:'800 11px Sora,sans-serif',color:'#FFC72C'}}>EKEDP ⚡</div>
+                  <span style={{font:"800 15px/1 'JetBrains Mono',monospace",color:'#60A5FA'}}>#{mt.num}</span>
+                  <span style={{font:'500 12px Sora,sans-serif',color:'rgba(255,255,255,.7)'}}>{mt.name}</span>
+                  {mt.status==='resolved'?<span style={{background:'#16A34A22',color:'#4ADE80',border:'1px solid #16A34A55',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>RESOLVED</span>:mt.status==='progress'?<span style={{background:'#D9770622',color:'#FCD34D',border:'1px solid #D9770655',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>IN PROGRESS</span>:<span style={{background:'#DC262622',color:'#F87171',border:'1px solid #DC262655',borderRadius:5,padding:'3px 8px',font:'700 10px Sora,sans-serif'}}>UNRESOLVED</span>}
+                </div>
+                <div style={{display:'flex',gap:8}}>
+                  <button onClick={function(){if(window.confirm('Delete ticket #'+mt.num+'?')){onDelete&&onDelete([mt.id]);setExpanded(null);}}} style={{padding:'6px 12px',background:'rgba(239,68,68,.2)',color:'#F87171',border:'1px solid rgba(239,68,68,.4)',borderRadius:7,font:'800 11px Sora,sans-serif',cursor:'pointer'}}>🗑 Delete</button>
+                  <button onClick={function(){setExpanded(null);}} style={{background:'none',border:'none',color:'rgba(255,255,255,.5)',cursor:'pointer',font:'700 11px Sora,sans-serif'}}>✕ Close</button>
+                </div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:0,borderBottom:'1px solid rgba(255,255,255,.06)'}}>
+                {[['📍 ADDRESS',mt.addr||mt.address||'—'],['⚡ METER/ACCOUNT',mt.meter||'—'],['📞 PHONE',mt.phone],['📧 EMAIL',mt.email||'—'],['🔗 CHANNEL',mt.channel||'Mobile App'],['📅 RECEIVED',mt.created?mt.created.replace('T',' ').slice(0,19):'—'],['✅ RESOLVED DATE',mt.resolvedDate||'—'],['📊 STATUS',mt.status?.toUpperCase()||'—']].map(function(f){return(
+                  <div key={f[0]} style={{padding:'10px 14px',borderRight:'1px solid rgba(255,255,255,.05)',borderBottom:'1px solid rgba(255,255,255,.05)'}}>
+                    <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:4}}>{f[0]}</div>
+                    <div style={{font:'600 11px Sora,sans-serif',color:'var(--text)',wordBreak:'break-word'}}>{f[1]}</div>
+                  </div>);})}
+              </div>
+              <div style={{padding:'12px 16px',borderBottom:'1px solid rgba(255,255,255,.06)'}}>
+                <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:6}}>📝 COMPLAINT DESCRIPTION</div>
+                <textarea className="inp" rows={3} value={getF(mt,'issue')||''} onChange={function(e){setF(mt.id,'issue',e.target.value);}} placeholder="Describe the complaint…" style={{resize:'vertical',fontSize:11,marginBottom:0}}/>
+              </div>
+              <div style={{padding:'14px 16px',background:'rgba(0,0,0,.15)'}}>
+                <div style={{font:'700 9px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.12em',marginBottom:12}}>✏️ UPDATE THIS TICKET <span style={{color:'var(--muted)',fontWeight:500,fontSize:9}}>(Enter to save)</span></div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
+                  <div>
+                    <label className="lbl">Category</label>
+                    <select className="sel" value={getF(mt,'category')||EK_CATS[0]} onChange={function(e){const val=e.target.value;setF(mt.id,'category',val);const ar=EK_RESP.find(function(r){return r.cat===val;});if(ar)setF(mt.id,'resp',ar.name);}}>
+                      {EK_CATS.map(function(c){return <option key={c} value={c}>{c}</option>;})}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="lbl">Responsible Party</label>
+                    <select className="sel" value={getF(mt,'resp')||EK_RESP[0].name} onChange={function(e){setF(mt.id,'resp',e.target.value);}}>
+                      {EK_RESP.map(function(r){return <option key={r.name} value={r.name}>{r.name}</option>;})}
+                    </select>
+                  </div>
+                </div>
+                <div style={{marginBottom:10}}>
+                  <label className="lbl">Status</label>
+                  <div style={{display:'flex',gap:8}}>
+                    {[{v:'progress',l:'⏳ In Progress',c:'#F59E0B'},{v:'resolved',l:'✅ Resolved',c:'#22C55E'},{v:'unresolved',l:'🔴 Unresolved',c:'#EF4444'}].map(function(s){const on=getF(mt,'status')===s.v;return(
+                      <button key={s.v} onClick={function(){setF(mt.id,'status',s.v);}} style={{flex:1,padding:'8px',border:'1px solid '+(on?s.c:'var(--bsoft)'),borderRadius:7,background:on?s.c+'22':'transparent',color:on?s.c:'var(--muted)',font:'700 11px Sora,sans-serif',cursor:'pointer'}}>{s.l}</button>
+                    );})}
+                  </div>
+                </div>
+                <div style={{marginBottom:14}}>
+                  <label className="lbl">Action Taken / Resolution Note</label>
+                  <textarea className="inp" rows={2} value={getF(mt,'note')||''} onChange={function(e){setF(mt.id,'note',e.target.value);}} placeholder="Add action taken or resolution note…" style={{resize:'vertical',fontSize:11}}/>
+                </div>
+                <div style={{display:'flex',gap:8}}>
+                  <button onClick={function(){saveEdit(mt);setExpanded(null);}} style={{flex:1,padding:'11px',background:'var(--ek-gold)',color:'#0A1A4F',border:'none',borderRadius:8,font:'800 13px Sora,sans-serif',cursor:'pointer'}}>💾 Save Update</button>
+                  <button onClick={function(){setExpanded(null);}} style={{padding:'11px 18px',background:'transparent',color:'var(--muted)',border:'1px solid var(--bsoft)',borderRadius:8,font:'700 12px Sora,sans-serif',cursor:'pointer'}}>Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
