@@ -85,12 +85,12 @@ body[data-theme="bright"] .inp:focus{border-color:#F97316!important;}
 body[data-theme="bright"] .sel{background:#F5F7FF!important;border-color:#D8DFFF!important;color:#080F2E!important;}
 body[data-theme="bright"] .btn{border-color:#D8DFFF!important;color:#1A2560!important;background:rgba(68,85,168,.05)!important;}
 body[data-theme="bright"] .btn:hover{background:rgba(68,85,168,.12)!important;border-color:#7082D0!important;}
-body[data-theme="bright"] .btn-gold,body[data-theme="bright"] .btn-agent{background:linear-gradient(135deg,#F97316,#EA6C0A)!important;color:#fff!important;border-color:#F97316!important;}
+body[data-theme="bright"] .btn-gold,.btn-agent{background:linear-gradient(135deg,#F97316,#EA6C0A)!important;color:#fff!important;border-color:#F97316!important;}
 body[data-theme="bright"] .badge-res{background:rgba(22,163,74,.1)!important;color:#15803D!important;border-color:rgba(22,163,74,.2)!important;}
 body[data-theme="bright"] .badge-prg{background:rgba(217,119,6,.1)!important;color:#B45309!important;border-color:rgba(217,119,6,.2)!important;}
 body[data-theme="bright"] .badge-unr{background:rgba(220,38,38,.1)!important;color:#B91C1C!important;border-color:rgba(220,38,38,.2)!important;}
-body[data-theme="bright"] .bu-tag,body[data-theme="bright"] .bu-pill{background:rgba(26,37,96,.1)!important;color:#1A2560!important;border-color:rgba(26,37,96,.2)!important;}
-body[data-theme="bright"] .agent-card,body[data-theme="bright"] .roster-card{background:#fff!important;border-color:#D8DFFF!important;box-shadow:0 2px 10px rgba(68,85,168,.08)!important;}
+body[data-theme="bright"] .bu-tag,.bu-pill{background:rgba(26,37,96,.1)!important;color:#1A2560!important;border-color:rgba(26,37,96,.2)!important;}
+body[data-theme="bright"] .agent-card,.roster-card{background:#fff!important;border-color:#D8DFFF!important;box-shadow:0 2px 10px rgba(68,85,168,.08)!important;}
 body[data-theme="bright"] .agent-pick{border-color:#D8DFFF!important;background:#F5F7FF!important;}
 body[data-theme="bright"] .agent-pick:hover{border-color:#F97316!important;}
 body[data-theme="bright"] .agent-pick.on{border-color:#F97316!important;background:rgba(249,115,22,.08)!important;}
@@ -125,7 +125,7 @@ body[data-theme="bright"] .wg-cell{border-color:#D8DFFF!important;color:#1A2560!
 body[data-theme="bright"] .stat-bar{border-color:#D8DFFF!important;}
 body[data-theme="bright"] .sbar-item{border-color:#D8DFFF!important;background:#F5F7FF!important;}
 body[data-theme="bright"] .sbar-lbl{color:#5060A0!important;}
-body[data-theme="bright"] .xls-inp,body[data-theme="bright"] .xls-sel{background:rgba(26,37,96,.9)!important;color:#fff!important;}
+body[data-theme="bright"] .xls-inp,.xls-sel{background:rgba(26,37,96,.9)!important;color:#fff!important;}
 .xls-hint{display:none;font-size:9px;color:var(--muted);opacity:.5;margin-left:4px;font-style:italic;}
 .xls-cell:hover .xls-hint{display:inline;}
 /* Bright theme: report screens readable text */
@@ -381,9 +381,9 @@ body[data-theme="lavender"] .bu-pill,
 body[data-theme="lavender"] .bu-pill * { color:#3730A3 !important; }
 
 /* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:linear-gradient(135deg,var(--card2),var(--card));
-border:1px solid var(--ek-gold);border-radius:12px;padding:12px 18px;font:700 12px 'Sora',sans-serif;
-color:#fff;display:flex;align-items:center;gap:10px;box-shadow:0 12px 32px rgba(0,0,0,.5);animation:slideIn .25s ease;}
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:#0A1232;
+border:1px solid rgba(255,199,44,.35);border-radius:12px;padding:12px 18px;font:700 12px 'Sora',sans-serif;
+color:#F0F4FF;display:flex;align-items:center;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,.75),0 0 0 1px rgba(255,199,44,.15);animation:slideIn .25s ease;}
 .toast.err{border-color:var(--bdb);}
 @keyframes slideIn{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 /* Lavender toast fix */
@@ -843,7 +843,11 @@ function Signin({onSignIn}){
           {err&&<div style={{color:'var(--bdb)',font:'600 12px Sora,sans-serif',marginBottom:8}}>{err}</div>}
           <button type="submit" className="btn btn-gold" style={{width:'100%',padding:'12px'}}>Sign in →</button>
         </form>
-        <a href="index.html" style={{marginTop:12,display:'flex',alignItems:'center',justifyContent:'center',padding:'9px',border:'1px solid var(--border)',borderRadius:10,font:'600 11px Sora,sans-serif',color:'var(--muted)',textDecoration:'none',transition:'all .15s'}}
+        <a href="Agents Hub.html" style={{marginTop:12,display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px',background:'rgba(255,199,44,.07)',border:'1px solid rgba(255,199,44,.25)',borderRadius:10,font:'700 12px Sora,sans-serif',color:'var(--ek-gold)',textDecoration:'none',transition:'all .15s'}}
+          onMouseEnter={function(e){e.currentTarget.style.background='rgba(255,199,44,.14)';}}
+          onMouseLeave={function(e){e.currentTarget.style.background='rgba(255,199,44,.07)';}}>👥 Go to Agents Hub →
+        </a>
+        <a href="index.html" style={{marginTop:8,display:'flex',alignItems:'center',justifyContent:'center',padding:'9px',border:'1px solid var(--border)',borderRadius:10,font:'600 11px Sora,sans-serif',color:'var(--muted)',textDecoration:'none',transition:'all .15s'}}
           onMouseEnter={function(e){e.currentTarget.style.borderColor='var(--ek-gold)';}}
           onMouseLeave={function(e){e.currentTarget.style.borderColor='var(--border)';}}>
           ← Return to Home
@@ -858,7 +862,7 @@ const NAV_GROUPS=[
   {label:'Operations',items:[{id:'dashboard',icon:'dash',label:'Dashboard'},{id:'all',icon:'all',label:'All Complaints'}]},
   {label:'Reports',items:[{id:'daily',icon:'daily',label:'Monthly Report'},{id:'rpt_verify',icon:'all',label:'Verify'},{id:'rpt_anomaly',icon:'analy',label:'Anomaly'},{id:'rpt_executive',icon:'cum',label:'Executive'},{id:'rpt_weekly',icon:'daily',label:'Weekly'},{id:'rpt_monthly',icon:'report',label:'Monthly'}]},
   {label:'Insights',items:[{id:'cumulative',icon:'cum',label:'Cumulative'},{id:'slot',icon:'report',label:'Slot Report',badge:'NEW'}]},
-  {label:'Team',items:[{id:'agents',icon:'agents',label:'Agents'},{id:'sync',icon:'sync',label:'Cloud Sync'},{id:'data',icon:'report',label:'Import / Export'}]},
+  {label:'Team',items:[{id:'sync',icon:'sync',label:'Cloud Sync'},{id:'data',icon:'report',label:'Import / Export'}]},
 ];
 
 function Nav({active,onChange,collapsed,onToggle,onSettings,onSignOut,onReset,user,activeMonth,setActiveMonth,availMonths,currentYM,tickets,readOnly}){
@@ -922,7 +926,6 @@ function Nav({active,onChange,collapsed,onToggle,onSettings,onSignOut,onReset,us
         })}
       </div>
       <div className="nav-foot">
-        <a href="Agents_Hub.html" className="nav-foot-btn" title="Agent Hub" style={{textDecoration:'none',display:'flex',alignItems:'center',gap:8,width:'100%',boxSizing:'border-box'}}><span style={{display:'flex'}}><svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/><path d="M2 21c0-4 3.134-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="17" cy="15" r="4" stroke="currentColor" strokeWidth="2"/><path d="M17 12v3l2 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span>{!collapsed&&<span>Agent Hub</span>}</a>
         <button className="nav-foot-btn" onClick={onSignOut} title="Sign out"><span style={{display:'flex'}}>{Ico.logout}</span>{!collapsed&&<span>Sign out</span>}</button>
       </div>
     </nav>
@@ -1706,7 +1709,6 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   const[fFrom,setFFrom]=useState('');
   const[fTo,setFTo]=useState('');
   const[sort,setSort]=useState('newest');
-  const[fRepeat,setFRepeat]=useState('all');
   const[expanded,setExpanded]=useState(null);
   const[edits,setEdits]=useState({});
   const[selected,setSelected]=useState([]); // checked ticket ids
@@ -1781,13 +1783,51 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
     window.addEventListener('keydown',onKey);
     return function(){window.removeEventListener('keydown',onKey);};
   },[lastChecked,paged]);
+
+  const[fRepeat,setFRepeat]=useState('all');
+  // ── Excel-style per-column filter popover ──
+  const[openCol,setOpenCol]=useState(null);
+  const[popPos,setPopPos]=useState({top:0,left:0,right:0,align:'left'});
+  React.useEffect(function(){
+    if(!openCol)return;
+    function close(){setOpenCol(null);}
+    document.addEventListener('click',close);
+    window.addEventListener('resize',close);
+    return function(){document.removeEventListener('click',close);window.removeEventListener('resize',close);};
+  },[openCol]);
+  function HeadFilter({label,colKey,value,setValue,options,align,extra,activeOverride}){
+    var active=activeOverride!=null?activeOverride:(value&&value!=='all'&&value!=='newest');
+    var open=openCol===colKey;
+    function toggle(e){
+      e.stopPropagation();
+      if(open){setOpenCol(null);return;}
+      var r=e.currentTarget.getBoundingClientRect();
+      setPopPos({top:r.bottom+4,left:r.left,right:window.innerWidth-r.right,align:align==='right'?'right':'left'});
+      setOpenCol(colKey);
+    }
+    return(
+      <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:align==='right'?'flex-end':'flex-start'}}>
+        <span>{label}</span>
+        <span onClick={toggle} title="Filter column"
+          style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:16,height:16,borderRadius:4,cursor:'pointer',flexShrink:0,background:active?'var(--ek-gold)':'rgba(255,255,255,.12)',color:active?'#0A1628':'rgba(255,255,255,.75)',font:'700 9px Sora,sans-serif',lineHeight:1}}>▾</span>
+        {open&&(
+          <div onClick={function(e){e.stopPropagation();}}
+            style={{position:'fixed',top:popPos.top,left:popPos.align==='right'?'auto':popPos.left,right:popPos.align==='right'?popPos.right:'auto',zIndex:9000,background:'var(--surface)',border:'1.5px solid var(--bsoft)',borderRadius:8,boxShadow:'0 10px 30px rgba(0,0,0,.5)',minWidth:170,maxHeight:340,overflowY:'auto',padding:4,textTransform:'none',letterSpacing:0}}>
+            {extra&&<div style={{padding:'4px 6px 8px',borderBottom:options&&options.length?'1px solid var(--bsoft)':'none',marginBottom:options&&options.length?4:0}}>{extra}</div>}
+            {(options||[]).map(function(o){
+              var on=value===o.v;
+              return <div key={o.v} onClick={function(){setValue(o.v);setOpenCol(null);}}
+                style={{padding:'7px 10px',borderRadius:5,cursor:'pointer',font:on?'700 12px Sora,sans-serif':'500 12px Sora,sans-serif',color:on?'#0A1628':'var(--fg)',background:on?'var(--ek-gold)':'transparent',whiteSpace:'nowrap'}}
+                onMouseEnter={function(e){if(!on)e.currentTarget.style.background='rgba(255,255,255,.08)';}}
+                onMouseLeave={function(e){if(!on)e.currentTarget.style.background='transparent';}}>{o.l}</div>;
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
   const cats=[...new Set(tickets.map(function(t){return t.category;}))].filter(Boolean).sort();
   const respOpts=[...new Set(tickets.map(function(t){return t.resp;}).filter(Boolean))].sort();
-  // ── Repeat complainant detection (full set, used by filter + badge) ──
-  const phoneFreqAC={};const meterFreqAC={};
-  tickets.forEach(function(t){const p=String(t.phone||'').trim();const m=String(t.meter||'').trim();if(p)phoneFreqAC[p]=(phoneFreqAC[p]||0)+1;if(m&&m!=='0')meterFreqAC[m]=(meterFreqAC[m]||0)+1;});
-  function repeatCountAC(t){const p=String(t.phone||'').trim();const m=String(t.meter||'').trim();const pc=phoneFreqAC[p]||0;const mc=(meterFreqAC[m]&&m!=='0')?meterFreqAC[m]:0;return Math.max(pc,mc);}
-  function isRepeatAC(t){return repeatCountAC(t)>1;}
   const filtered=tickets.filter(function(t){
     if(fSt!=='all'&&t.status!==fSt)return false;
     if(fRepeat==='repeat'&&!isRepeatAC(t))return false;
@@ -1816,6 +1856,11 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   const prg=filtered.filter(function(t){return t.status==='progress';}).length;
   const unr=filtered.filter(function(t){return t.status==='unresolved'||t.status==='pending';}).length;
 
+  // ── Repeat complainant detection ──
+  const phoneFreqAC={};const meterFreqAC={};
+  tickets.forEach(function(t){const p=String(t.phone||'').trim();const m=String(t.meter||'').trim();if(p)phoneFreqAC[p]=(phoneFreqAC[p]||0)+1;if(m&&m!=='0')meterFreqAC[m]=(meterFreqAC[m]||0)+1;});
+  function repeatCountAC(t){const p=String(t.phone||'').trim();const m=String(t.meter||'').trim();const pc=phoneFreqAC[p]||0;const mc=(meterFreqAC[m]&&m!=='0')?meterFreqAC[m]:0;return Math.max(pc,mc);}
+  function isRepeatAC(t){return repeatCountAC(t)>1;}
   const repeatTotalAC=filtered.filter(isRepeatAC).length;
 
   const watNowAC=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
@@ -1850,7 +1895,9 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   }
   function applyBulkStatus(){
     if(!selected.length)return;
-    onBulkUpdate&&onBulkUpdate(selected,{status:bulkStatus});
+    var patch={status:bulkStatus};
+    if(bulkStatus==='resolved')patch.resolvedDate=new Date().toISOString().slice(0,10);
+    onBulkUpdate&&onBulkUpdate(selected,patch);
     setSelected([]);
   }
   function applyBulkCat(){
@@ -1965,48 +2012,6 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
   const pageIds=paged.map(function(t){return t.id;});
   const allPageSel=pageIds.length&&pageIds.every(function(id){return selected.includes(id);});
 
-  // ── Excel-style per-column filter popover ──
-  const[openCol,setOpenCol]=useState(null);
-  const[popPos,setPopPos]=useState({top:0,left:0,right:0,align:'left'});
-  React.useEffect(function(){
-    if(!openCol)return;
-    function close(){setOpenCol(null);}
-    document.addEventListener('click',close);
-    window.addEventListener('resize',close);
-    return function(){document.removeEventListener('click',close);window.removeEventListener('resize',close);};
-  },[openCol]);
-  function HeadFilter({label,colKey,value,setValue,options,align,extra,activeOverride}){
-    var active=activeOverride!=null?activeOverride:(value&&value!=='all'&&value!=='newest');
-    var open=openCol===colKey;
-    function toggle(e){
-      e.stopPropagation();
-      if(open){setOpenCol(null);return;}
-      var r=e.currentTarget.getBoundingClientRect();
-      setPopPos({top:r.bottom+4,left:r.left,right:window.innerWidth-r.right,align:align==='right'?'right':'left'});
-      setOpenCol(colKey);
-    }
-    return(
-      <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:align==='right'?'flex-end':'flex-start'}}>
-        <span>{label}</span>
-        <span onClick={toggle} title="Filter column"
-          style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:16,height:16,borderRadius:4,cursor:'pointer',flexShrink:0,background:active?'var(--ek-gold)':'rgba(255,255,255,.12)',color:active?'#0A1628':'rgba(255,255,255,.75)',font:'700 9px Sora,sans-serif',lineHeight:1}}>▾</span>
-        {open&&(
-          <div onClick={function(e){e.stopPropagation();}}
-            style={{position:'fixed',top:popPos.top,left:popPos.align==='right'?'auto':popPos.left,right:popPos.align==='right'?popPos.right:'auto',zIndex:9000,background:'var(--surface)',border:'1.5px solid var(--bsoft)',borderRadius:8,boxShadow:'0 10px 30px rgba(0,0,0,.5)',minWidth:170,maxHeight:340,overflowY:'auto',padding:4,textTransform:'none',letterSpacing:0}}>
-            {extra&&<div style={{padding:'4px 6px 8px',borderBottom:options&&options.length?'1px solid var(--bsoft)':'none',marginBottom:options&&options.length?4:0}}>{extra}</div>}
-            {(options||[]).map(function(o){
-              var on=value===o.v;
-              return <div key={o.v} onClick={function(){setValue(o.v);setOpenCol(null);}}
-                style={{padding:'7px 10px',borderRadius:5,cursor:'pointer',font:on?'700 12px Sora,sans-serif':'500 12px Sora,sans-serif',color:on?'#0A1628':'var(--fg)',background:on?'var(--ek-gold)':'transparent',whiteSpace:'nowrap'}}
-                onMouseEnter={function(e){if(!on)e.currentTarget.style.background='rgba(255,255,255,.08)';}}
-                onMouseLeave={function(e){if(!on)e.currentTarget.style.background='transparent';}}>{o.l}</div>;
-            })}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return(
     <div>
       {/* Hero / filters */}
@@ -2025,7 +2030,30 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
             <span style={{position:'absolute',left:11,top:'50%',transform:'translateY(-50%)',color:'rgba(255,255,255,.5)',display:'flex'}}>{Ico.search}</span>
             <input className="inp" style={{paddingLeft:34,height:36}} value={search} onChange={function(e){setSearch(e.target.value);}} placeholder="Search ticket #, customer, phone, address…"/>
           </div>
-          <span style={{font:'600 11px Sora,sans-serif',color:'rgba(255,255,255,.5)',display:'flex',alignItems:'center',gap:5,flexShrink:0,whiteSpace:'nowrap'}}>▾ Filters are on the column headers</span>
+          <select className="sel" style={{flex:'0 0 130px',height:36}} value={fSt} onChange={function(e){setFSt(e.target.value);}}>
+            <option value="all">All statuses</option>
+            <option value="resolved">Resolved</option>
+            <option value="progress">In Progress</option>
+            <option value="unresolved">Unresolved</option>
+          </select>
+          <select className="sel" style={{flex:'0 0 110px',height:36}} value={fBu} onChange={function(e){setFBu(e.target.value);}}>
+            <option value="all">All BUs</option>
+            {EK_BUS.map(function(b){return <option key={b} value={b}>{b}</option>;})}
+          </select>
+          <select className="sel" style={{flex:'0 0 150px',height:36}} value={fCat} onChange={function(e){setFCat(e.target.value);}}>
+            <option value="all">All categories</option>
+            {cats.map(function(c){return <option key={c} value={c}>{c.split('/')[0].trim()}</option>;})}
+          </select>
+          <select className="sel" style={{flex:'0 0 140px',height:36}} value={sort} onChange={function(e){setSort(e.target.value);}}>
+            <option value="newest">↓ Newest first</option>
+            <option value="oldest">↑ Oldest first</option>
+            <option value="num_desc">Ticket # high → low</option>
+            <option value="num_asc">Ticket # low → high</option>
+          </select>
+          <select className="sel" style={{flex:'0 0 170px',height:36}} value={fResp} onChange={function(e){setFResp(e.target.value);}}>
+            <option value="all">All resp. parties</option>
+            {respOpts.map(function(r){return <option key={r} value={r}>{r}</option>;})}
+          </select>
           {(function(){
             function todayStr(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
             var PRESETS=[
@@ -2074,7 +2102,7 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
               </>)}
             </>);
           })()}
-          {(search||fSt!=='all'||fBu!=='all'||fCat!=='all'||fResp!=='all'||fRepeat!=='all'||fFrom||fTo||sort!=='newest')&&<button className="btn btn-sm btn-danger" onClick={function(){setSearch('');setFSt('all');setFBu('all');setFCat('all');setFResp('all');setFRepeat('all');setFFrom('');setFTo('');setSort('newest');}} style={{height:36}}>Clear</button>}
+          {(search||fSt!=='all'||fBu!=='all'||fCat!=='all'||fResp!=='all'||fFrom||fTo||sort!=='newest')&&<button className="btn btn-sm btn-danger" onClick={function(){setSearch('');setFSt('all');setFBu('all');setFCat('all');setFResp('all');setFFrom('');setFTo('');setSort('newest');}} style={{height:36}}>Clear</button>}
           <button onClick={function(){var now=new Date();var y=now.getFullYear();var m=String(now.getMonth()+1).padStart(2,'0');setExpFrom(y+'-'+m+'-01');var last=new Date(y,now.getMonth()+1,0);setExpTo(y+'-'+m+'-'+String(last.getDate()).padStart(2,'0'));setShowExportDlg(true);}} style={{height:36,padding:'0 14px',background:'#059669',color:'#fff',border:'none',borderRadius:8,font:'700 11px Sora,sans-serif',cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>⬇ Excel</button>
         </div>
       </div>
@@ -2218,7 +2246,7 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
                         <td style={{color:'var(--muted)',fontSize:11}}>{t.time}</td>
                         <td style={{fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:160}}>
                           {t.name}
-                          {isRepeatAC(t)&&<span title={'Repeat complainant — '+repeatCountAC(t)+' tickets'} style={{marginLeft:5,background:'rgba(167,139,250,.2)',color:'#A78BFA',border:'1px solid rgba(167,139,250,.4)',borderRadius:4,fontSize:9,fontWeight:700,padding:'1px 4px',verticalAlign:'middle'}}>🔁 x{repeatCountAC(t)}</span>}
+                          {isRepeatAC(t)&&<span title={'Repeat complainant — '+repeatCountAC(t)+' tickets'} style={{marginLeft:7,background:'linear-gradient(135deg,#A855F7,#7C3AED)',color:'#fff',border:'1px solid #C4B5FD',borderRadius:6,fontSize:11,fontWeight:800,padding:'2px 7px',verticalAlign:'middle',boxShadow:'0 0 10px rgba(168,85,247,.6)',letterSpacing:'.02em',display:'inline-flex',alignItems:'center',gap:3,whiteSpace:'nowrap'}}>🔁 ×{repeatCountAC(t)}</span>}
                         </td>
                         <td><Mono style={{color:'var(--muted)',fontSize:11}}>{t.phone}</Mono></td>
                         <td><BuPill bu={t.bu}/></td>
@@ -2294,10 +2322,16 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
                                     onFocus={function(e){e.target.style.borderColor='var(--ek-gold)';}} onBlur={function(e){e.target.style.borderColor='var(--bsoft)';}}/>
                                 </div>);})}
                             </div>
-                            {/* Complaint description — editable */}
+                            {/* Complaint description — editable, with status right here */}
                             <div style={{padding:'10px 14px',borderBottom:'1px solid rgba(255,255,255,.06)'}}>
                               <div style={{font:'700 8.5px Sora,sans-serif',color:'var(--ek-gold)',textTransform:'uppercase',letterSpacing:'.10em',marginBottom:6}}>📝 COMPLAINT DESCRIPTION ✏ <span style={{color:'var(--muted)',fontWeight:600,textTransform:'none',letterSpacing:0}}>· the customer's complaint</span></div>
-                              <textarea className="inp" rows={3} value={getF(t,'issue')||''} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'issue',e.target.value);}} placeholder="Describe the complaint…" style={{resize:'vertical',fontSize:11,marginBottom:0}}/>
+                              <textarea className="inp" rows={3} value={getF(t,'issue')||''} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'issue',e.target.value);}} placeholder="Describe the complaint…" style={{resize:'vertical',fontSize:11,marginBottom:10}}/>
+                              <label className="lbl">Status of this complaint</label>
+                              <div style={{display:'flex',gap:8}}>
+                                {[{v:'progress',l:'⏳ In Progress',c:'#F59E0B'},{v:'resolved',l:'✅ Resolved',c:'#22C55E'},{v:'unresolved',l:'🔴 Unresolved',c:'#EF4444'}].map(function(s){const on=getF(t,'status')===s.v;return(
+                                  <button key={s.v} onClick={function(e){e.stopPropagation();setF(t.id,'status',s.v);if(s.v==='resolved'){if(!getF(t,'resolvedDate'))setF(t.id,'resolvedDate',watTodayStr());}else{setF(t.id,'resolvedDate','');}}} style={{flex:1,padding:'7px',border:'1px solid '+(on?s.c:'var(--bsoft)'),borderRadius:7,background:on?s.c+'22':'transparent',color:on?s.c:'var(--muted)',font:'700 11px Sora,sans-serif',cursor:'pointer'}}>{s.l}</button>
+                                );})}
+                              </div>
                             </div>
                             {/* Editable section */}
                             <div style={{padding:'14px 16px',background:'rgba(0,0,0,.15)'}}>
@@ -2314,14 +2348,6 @@ function AllComplaints({tickets,onUpdate,onBulkUpdate,onBatchUpdate,onDelete,sho
                                   <select className="sel" value={getF(t,'resp')||EK_RESP[0].name} onClick={function(e){e.stopPropagation();}} onChange={function(e){e.stopPropagation();setF(t.id,'resp',e.target.value);}}>
                                     {EK_RESP.map(function(r){return <option key={r.name} value={r.name}>{r.name}</option>;})}
                                   </select>
-                                </div>
-                              </div>
-                              <div style={{marginBottom:10}}>
-                                <label className="lbl">Status</label>
-                                <div style={{display:'flex',gap:8}}>
-                                  {[{v:'progress',l:'⏳ In Progress',c:'#F59E0B'},{v:'resolved',l:'✅ Resolved',c:'#22C55E'},{v:'unresolved',l:'🔴 Unresolved',c:'#EF4444'}].map(function(s){const on=getF(t,'status')===s.v;return(
-                                    <button key={s.v} onClick={function(e){e.stopPropagation();setF(t.id,'status',s.v);if(s.v==='resolved'){if(!getF(t,'resolvedDate'))setF(t.id,'resolvedDate',watTodayStr());}else{setF(t.id,'resolvedDate','');}}} style={{flex:1,padding:'7px',border:'1px solid '+(on?s.c:'var(--bsoft)'),borderRadius:7,background:on?s.c+'22':'transparent',color:on?s.c:'var(--muted)',font:'700 11px Sora,sans-serif',cursor:'pointer'}}>{s.l}</button>
-                                  );})}
                                 </div>
                               </div>
                               <div style={{marginBottom:12}}>
@@ -2395,6 +2421,8 @@ function LogTicket({tickets,onAdd,showToast,onSettings}){
   const[bulk,setBulk]=useState([]);
   const[sel,setSel]=useState([]);
   const[form,setForm]=useState(EMPTY);
+  const[catManual,setCatManual]=useState(false);
+  const[autoCat,setAutoCat]=useState(null);
   const watNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
 
   function stamp(){return{time:watNow.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),created:new Date().toISOString(),id:'tk_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),day:watNow.getDate()};}
@@ -2404,8 +2432,9 @@ function LogTicket({tickets,onAdd,showToast,onSettings}){
     if(!txt.trim()){setBulk([]);setSel([]);return;}
     const parsed=parseMultiple(txt);
     const cards=parsed.map(function(p){
-      const resp=p.resp||EK_RESP.find(function(r){return(p.category||p.issue||'').includes(r.cat.split('/')[0]);});
-      return Object.assign({},EMPTY,p,{resp:resp?resp.name:EK_RESP[0].name,status:'progress'});
+      var cat=p.category||classifyComplaint(p.issue)||EK_CATS[0];
+      var resp=p.resp||respForCat(cat)||(EK_RESP.find(function(r){return(p.category||p.issue||'').includes(r.cat.split('/')[0]);})||{}).name;
+      return Object.assign({},EMPTY,p,{category:cat,resp:resp||EK_RESP[0].name,status:'progress'});
     });
     setBulk(cards);setSel(cards.map(function(_,i){return i;}));
     if(cards.length===1)setForm(Object.assign({},EMPTY,cards[0]));
@@ -2423,6 +2452,14 @@ function LogTicket({tickets,onAdd,showToast,onSettings}){
     clearAll();
   }
   function setF(k,v){setForm(function(f){return Object.assign({},f,{[k]:v});});}
+  function onIssueChange(text){
+    setForm(function(f){
+      var nf=Object.assign({},f,{issue:text});
+      if(!catManual){var c=classifyComplaint(text);if(c){nf.category=c;var r=respForCat(c);if(r)nf.resp=r;}}
+      return nf;
+    });
+    setAutoCat(catManual?null:classifyComplaint(text));
+  }
   function submitForm(e){
     e.preventDefault();
     if(!form.num&&!form.name){showToast('Ticket # or Customer Name required.','error');return;}
@@ -2507,8 +2544,8 @@ function LogTicket({tickets,onAdd,showToast,onSettings}){
               <div><label className="lbl">Responsible Party</label><select className="sel" value={form.resp} onChange={function(e){setF('resp',e.target.value);}}>{EK_RESP.map(function(r){return <option key={r.name} value={r.name}>{r.name}</option>;})}</select></div>
             </div>
             <div style={{marginBottom:12}}><label className="lbl">Address</label><input className="inp" value={form.addr} onChange={function(e){setF('addr',e.target.value);}} placeholder="Street address"/></div>
-            <div style={{marginBottom:12}}><label className="lbl">Category</label><select className="sel" value={form.category} onChange={function(e){setF('category',e.target.value);}}>{EK_CATS.map(function(c){return <option key={c} value={c}>{c}</option>;})}</select></div>
-            <div style={{marginBottom:12}}><label className="lbl">Complaint / Issue</label><textarea className="inp" rows={3} value={form.issue} onChange={function(e){setF('issue',e.target.value);}} placeholder="Describe the complaint…" style={{resize:'vertical'}}/></div>
+            <div style={{marginBottom:12}}><label className="lbl">Category</label><select className="sel" value={form.category} onChange={function(e){setCatManual(true);setAutoCat(null);setF('category',e.target.value);var r=respForCat(e.target.value);if(r)setF('resp',r);}}>{EK_CATS.map(function(c){return <option key={c} value={c}>{c}</option>;})}</select>{autoCat&&!catManual&&form.issue&&<div style={{display:'flex',alignItems:'center',gap:6,marginTop:6,font:'600 10px Sora,sans-serif',color:'var(--ek-gold)'}}><span>✨</span><span>Auto-detected from complaint · pick the dropdown to override</span></div>}</div>
+            <div style={{marginBottom:12}}><label className="lbl">📝 Complaint Description <span style={{color:'var(--muted)',fontWeight:500}}>— the customer's complaint</span></label><textarea className="inp" rows={3} value={form.issue} onChange={function(e){onIssueChange(e.target.value);}} placeholder="Describe the complaint… (category &amp; responsible party auto-fill as you type)" style={{resize:'vertical'}}/></div>
             <div style={{marginBottom:14}}>
               <label className="lbl">Status</label>
               <div style={{display:'flex',gap:8}}>
@@ -5333,7 +5370,7 @@ function Settings({theme,onTheme,onClose,onReset,onResetMonth,onDedup,onPurge,ac
 // ── APP ────────────────────────────────────────────────────────────
 // ── LOADING SPLASH ───────────────────────────────────────────────
 function App(){
-  const[signedIn,setSignedIn]=useState(false);
+  const[signedIn,setSignedIn]=useState(()=>localStorage.getItem('ek_v2_auth')==='1');
   const[signedInName,setSignedInName]=useState(()=>localStorage.getItem('ek_v2_name')||'');
   const[readOnly,setReadOnly]=useState(()=>localStorage.getItem('ek_v2_readonly')==='1');
   const[screen,setScreen]=useState('dashboard');
@@ -5388,6 +5425,7 @@ function App(){
   const[showSettings,setShowSettings]=useState(false);
   const[toast,setToast]=useState(null);
   const toastTimer=useRef(null);
+  const swipeRef=useRef({});
 
   useEffect(()=>{document.body.setAttribute('data-theme',theme);localStorage.setItem('ek_global_theme',theme);},[theme]);
   // Cross-tab sync: refresh when Agents Hub writes to ek_v2_tickets
@@ -5470,7 +5508,6 @@ function App(){
     showToast('🔄 Entire app reset to zero.');
   }
 
-  const swipeRef=useRef({});
   if(!signedIn)return <Signin onSignIn={onSignIn}/>;
   const W=collapsed?64:220;
   const screens={

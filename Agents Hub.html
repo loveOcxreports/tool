@@ -193,7 +193,7 @@ border-right:1px solid rgba(42,64,153,.5);display:flex;flex-direction:column;ove
 .stat-lbl{font:700 8px/1 Sora,sans-serif;color:rgba(255,255,255,.4);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;}
 
 /* ── WEEK CALENDAR ─────────────────────────────────────────── */
-.week-grid{display:grid;grid-template-columns:140px repeat(7,1fr);border-radius:12px;overflow:hidden;border:1px solid var(--bsoft);}
+.week-grid{width:100%;border-collapse:collapse;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;}
 .wg-head{background:rgba(0,0,0,.3);padding:8px 6px;text-align:center;font:700 9px/1 Sora,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--bsoft);border-right:1px solid var(--bsoft);}
 .wg-head.today{background:rgba(99,102,241,.18);color:var(--text);}
 .wg-agent{display:flex;align-items:center;gap:7px;padding:9px 10px;border-bottom:1px solid var(--bsoft);border-right:1px solid var(--bsoft);background:rgba(0,0,0,.2);}
@@ -224,7 +224,10 @@ border-right:1px solid rgba(42,64,153,.5);display:flex;flex-direction:column;ove
 /* Make table header sticky */
 .ctbl thead tr,.tbl thead tr{position:sticky;top:0;z-index:10;}
 /* Constrain the scroll container */
-.xls-scroll{max-height:65vh;overflow-y:auto;overflow-x:auto;}
+.xls-scroll{max-height:65vh;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+.xls-scroll .ctbl{min-width:1180px;}
+.xls-scroll::-webkit-scrollbar{height:8px;width:6px;}
+.xls-scroll::-webkit-scrollbar-thumb{background:var(--sub);border-radius:4px;}
 .ctbl tbody tr.expanded td{background:rgba(99,102,241,.06);}
 .ctbl .exp-row td{background:rgba(0,0,0,.2);padding:12px 14px;}
 .st-res{color:#22C55E;font:800 11px/1 Sora,sans-serif;}
@@ -562,7 +565,7 @@ function Signin({onSignIn}){
           <div style={{font:'600 9px/1 Sora,sans-serif',color:'var(--muted)',letterSpacing:'.15em',textTransform:'uppercase',marginTop:5}}>Agents Hub · Marina HQ</div>
         </div>
         <div style={{font:'800 16px/1.2 Sora,sans-serif',color:'var(--text)',marginBottom:4}}>Welcome 👋</div>
-        <div style={{font:'500 12px Sora,sans-serif',color:'var(--muted)',marginBottom:14}}>For Matthew, Racheal, Tomina, Esther, Loveth.<br/>Pick your name then enter your password.</div>
+        <div style={{font:'500 12px Sora,sans-serif',color:'var(--muted)',marginBottom:14}}></div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
           {AGENTS.map(function(a){return(
             <div key={a.id} className={'agent-pick'+(sel?.id===a.id?' on':'')} onClick={function(){setSel(a);setErr('');}}
@@ -573,7 +576,7 @@ function Signin({onSignIn}){
           <a href="Managers Hub.html" style={{gridColumn:'span 2',display:'flex',alignItems:'center',justifyContent:'center',padding:'9px',border:'1px dashed var(--border)',borderRadius:10,font:'600 11px Sora,sans-serif',color:'var(--muted)',textDecoration:'none',transition:'all .15s'}}
             onMouseEnter={function(e){e.currentTarget.style.borderColor='var(--ek-gold)';e.currentTarget.style.color='var(--ek-gold)';}}
             onMouseLeave={function(e){e.currentTarget.style.borderColor='var(--border)';e.currentTarget.style.color='var(--muted)';}}>
-            Manager → Managers Hub
+            Manager → Loves Hub
           </a>
         </div>
         <form onSubmit={submit}>
@@ -590,6 +593,12 @@ function Signin({onSignIn}){
     </div>
   );
 }
+
+
+// ── MINI LINE CHART ───────────────────────────────────────
+function smoothD(pts){if(!pts.length)return'';if(pts.length<3)return pts.map(function(p,i){return(i?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');var d='M'+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1),t=0.16;for(var i=0;i<pts.length-1;i++){var p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;var c1x=p1.x+(p2.x-p0.x)*t,c1y=p1.y+(p2.y-p0.y)*t;var c2x=p2.x-(p3.x-p1.x)*t,c2y=p2.y-(p3.y-p1.y)*t;d+=' C'+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);}return d;}
+function MiniLineChart({data,color,height}){const H=height||120,W=480,PL=36,PR=16,PT=12,PB=24;const n=data.length;if(n<2)return null;const maxV=Math.max.apply(null,data.concat([1]));const xOf=function(i){return PL+i*(W-PL-PR)/(n-1);};const yOf=function(v){return PT+(1-v/maxV)*(H-PT-PB);};const pts=data.map(function(v,i){return{x:xOf(i),y:yOf(v)};});const d=smoothD(pts);const area=d+' L'+xOf(n-1).toFixed(1)+','+(H-PB)+' L'+PL+','+(H-PB)+' Z';return(<svg width="100%" viewBox={"0 0 "+W+" "+H} style={{display:'block',height:H}}><defs><linearGradient id="mlg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity=".22"/><stop offset="100%" stopColor={color} stopOpacity="0"/></linearGradient></defs>{[0,.5,1].map(function(f,i){return <line key={i} x1={PL} y1={PT+f*(H-PT-PB)} x2={W-PR} y2={PT+f*(H-PT-PB)} stroke="rgba(255,255,255,.05)" strokeWidth="1"/>;})}<path d={area} fill="url(#mlg)"/><path d={d} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>{pts.map(function(p,i){return <circle key={i} cx={p.x} cy={p.y} r="3" fill={color} stroke="var(--card)" strokeWidth="1.5"/>;})}</svg>);}
+function classifyComplaintA(text){var s=' '+String(text||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ')+' ';if(!s.trim())return null;var RULES=[{cat:'MYCRON',kw:['mycron']},{cat:'AMISA',kw:['amisa']},{cat:'Band Reclassification',kw:['band reclass','reclassif','hours of supply','migrate band']},{cat:'Onboarding',kw:['new connection','onboard','new customer','fresh connection']},{cat:'Billing',kw:['bill','overbill','estimated bill','tariff','arrears','wrong bill','high bill','refund','payment']},{cat:'PPM Maintenance',kw:['replace meter','meter replacement','swap meter','burnt meter']},{cat:'Metering',kw:['meter','token','recharge','prepaid','unit','vend','unable to load','cannot load','no token','faulty meter']},{cat:'PPM Support',kw:['ppm','prepaid meter program']},{cat:'Interruption / Voltage / Safety',kw:['no light','no power','power outage','outage','interruption','no supply','blackout','voltage','low voltage','cable','burning','spark','fire','shock','fallen wire','transformer','tripped']},];var best=null,bestScore=0;RULES.forEach(function(r){var score=0;r.kw.forEach(function(k){if(s.indexOf(k)>=0)score+=(k.indexOf(' ')>=0?2:1);});if(score>bestScore){bestScore=score;best=r.cat;}});return best;}
 
 // ── DASHBOARD ──────────────────────────────────────────────
 
@@ -798,8 +807,32 @@ function Dashboard({agent,allTix,shifts}){
         </div>
         <CarryForwardBanner agent={agent} allTix={allTix}/>
 
+        {(function(){
+          var watN=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Lagos'}));
+          var dayN=watN.getDate(),mo=watN.getMonth(),yr=watN.getFullYear();
+          var startDay=Math.max(1,dayN-13);
+          var days=[];for(var d=startDay;d<=dayN;d++)days.push(d);
+          function watDayA(t){var raw=t.created||t.receivedAt||'';if(!raw)return 0;try{var w=new Date(new Date(raw).toLocaleString('en-US',{timeZone:'Africa/Lagos'}));return w.getDate();}catch(e){return 0;}}
+          var byDay=days.map(function(dd){var tx=allTix.filter(function(t){return watDayA(t)===dd;});return{day:dd,total:tx.length,res:tx.filter(function(t){return t.status==='resolved';}).length};});
+          var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          return(
+          <div className="card" style={{marginBottom:18,padding:0}}>
+            <div className="card-head" style={{padding:'12px 18px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8}}><span style={{width:7,height:7,borderRadius:'50%',background:'#6366F1',boxShadow:'0 0 7px #6366F1'}}/><h3 style={{font:'700 13px/1 Sora,sans-serif',color:'var(--text)'}}>📈 Daily Volume Trend <span style={{font:'500 11px/1 Sora,sans-serif',color:'var(--muted)',fontStyle:'italic'}}>Last 14 days · all team</span></h3></div>
+              <div style={{display:'flex',gap:18}}>{[{l:'Total',c:'#6366F1'},{l:'Resolved',c:'#22C55E'}].map(function(s){return <div key={s.l} style={{display:'flex',alignItems:'center',gap:5}}><span style={{width:18,height:3,borderRadius:2,background:s.c,display:'inline-block'}}/><span style={{font:'600 10px Sora,sans-serif',color:'var(--muted)'}}>{s.l}</span></div>;})}</div>
+            </div>
+            <div style={{padding:'4px 18px 14px'}}>
+              <MiniLineChart data={byDay.map(function(b){return b.total;})} color="#6366F1" height={110}/>
+              <div style={{marginTop:-8}}><MiniLineChart data={byDay.map(function(b){return b.res;})} color="#22C55E" height={60}/></div>
+              <div style={{display:'flex',gap:2,marginTop:4}}>{byDay.map(function(b){var pct=b.total?Math.round(b.res/b.total*100):0;var col=pct>=80?'#22C55E':pct>=50?'#F59E0B':b.total?'#EF4444':'rgba(255,255,255,.06)';return <div key={b.day} title={'Day '+b.day+' · '+b.total+' total'} style={{flex:1,height:5,borderRadius:2,background:col}}/>;})}</div>
+              <div style={{display:'flex',justifyContent:'space-between',marginTop:4}}><span style={{font:'600 9px Sora,sans-serif',color:'var(--sub)'}}>Day {startDay}</span><span style={{font:'600 9px Sora,sans-serif',color:'var(--sub)'}}>Day {dayN} · {MON[mo]} {yr}</span></div>
+            </div>
+          </div>);
+        })()}
+
         {/* KPI Table Card */}
-        <div className="card" style={{marginBottom:18}}>
+        <div className="card" style={{marginBottom:18,position:'relative',overflow:'hidden'}}>
+          <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:'linear-gradient(90deg,var(--ek-gold),#F97316)',zIndex:1}}/>
           <div className="card-head" style={{padding:'12px 18px'}}>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
               <span style={{width:7,height:7,borderRadius:'50%',background:'#60A5FA',boxShadow:'0 0 7px #60A5FA'}}/>
@@ -915,36 +948,28 @@ function Dashboard({agent,allTix,shifts}){
           </div>
         </div>
 
-        {/* Week Calendar */}
-        <div style={{marginBottom:8,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-          <div style={{font:'700 10px/1 Sora,sans-serif',color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.14em'}}>📅 {weekLabel}</div>
-          <div style={{display:'flex',gap:6}}>
-            <button onClick={function(){setWeekOffset(function(w){return w-1;});}} className="btn btn-sm">← Prev</button>
-            <button onClick={function(){setWeekOffset(0);}} className="btn btn-sm" style={{background:isThisWeek?'var(--ek-gold)':'rgba(255,255,255,.05)',color:isThisWeek?'#0A1A4F':'var(--muted)',fontWeight:isThisWeek?800:600}}>This Week</button>
-            <button onClick={function(){setWeekOffset(function(w){return w+1;});}} className="btn btn-sm">Next →</button>
+        <div className="card" style={{padding:0,marginBottom:18}}>
+          <div className="card-head">
+            <h3 style={{display:'flex',alignItems:'center',gap:7}}><span style={{fontSize:14}}>📅</span> {weekLabel} <span style={{font:'500 9px/1 Sora,sans-serif',color:'var(--muted)',marginLeft:4}}>· view only</span></h3>
+            <div style={{display:'flex',gap:6}}>
+              <button onClick={function(){setWeekOffset(function(w){return w-1;});}} className="btn btn-sm" style={{padding:'4px 10px',fontSize:11}}>← Prev</button>
+              <button onClick={function(){setWeekOffset(0);}} className="btn btn-sm" style={{padding:'4px 10px',fontSize:11,background:isThisWeek?'var(--ek-gold)':'',color:isThisWeek?'#000':'',fontWeight:isThisWeek?800:600}}>This Week</button>
+              <button onClick={function(){setWeekOffset(function(w){return w+1;});}} className="btn btn-sm" style={{padding:'4px 10px',fontSize:11}}>Next →</button>
+            </div>
           </div>
-        </div>
-        <div className="week-grid">
-          <div className="wg-head" style={{textAlign:'left',paddingLeft:12}}>AGENT</div>
-          {weekDays.map(function(d,i){const isTod=d.toDateString()===today.toDateString();return(
-            <div key={i} className={'wg-head'+(isTod?' today':'')}>{DAY_NAMES[i]}<br/><span style={{font:"800 14px/1 'JetBrains Mono',monospace",color:isTod?'var(--ek-gold)':'var(--text)'}}>{d.getDate()}</span></div>);})}
-          {AGENTS.map(function(a){return(
-            <React.Fragment key={a.id}>
-              <div className="wg-agent">
-                <Av agent={a} size={22}/>
-                <div><div style={{font:'600 10px/1 Sora,sans-serif',color:'var(--text)'}}>{a.name.split(' ')[0]}</div><div style={{font:'500 9px/1 Sora,sans-serif',color:'var(--muted)'}}>{a.name.split(' ')[1]}</div></div>
-              </div>
-              {weekDays.map(function(d,i){
-                const isTod=d.toDateString()===today.toDateString();
-                const shift=getShiftForDay(a.id,d);
-                const sl=SHIFT_LABELS[shift]||SHIFT_LABELS.off;
-                return(
-                  <div key={i} className={'wg-cell'+(isTod?' today-col':'')} style={{background:isTod?'rgba(99,102,241,.08)':'transparent'}}>
-                    <div style={{fontSize:14,marginBottom:1}}>{sl.emoji}</div>
-                    <div style={{font:'600 9px/1 Sora,sans-serif',color:sl.color}}>{shift==='day'?'Day':shift==='night'?'Night':shift==='leave'?'Leave':'Off'}</div>
-                  </div>);
-              })}
-            </React.Fragment>);})}
+          <div style={{overflowX:'auto',padding:'12px 14px'}}>
+            <table className="week-grid">
+              <thead><tr>
+                <th className="wg-head" style={{textAlign:'left',minWidth:130}}>AGENT</th>
+                {weekDays.map(function(d,i){var isTod=d.toDateString()===today.toDateString();return(<th key={i} className={'wg-head'+(isTod?' today':'')}>{DAY_NAMES[i]}<br/><span style={{fontSize:13,fontWeight:800,fontFamily:"JetBrains Mono,monospace",color:isTod?'var(--ek-gold)':'var(--text)',letterSpacing:0}}>{d.getDate()}</span></th>);})}
+              </tr></thead>
+              <tbody>
+                {AGENTS.map(function(a){return(
+                  <tr key={a.id}>
+                    <td className="wg-agent"><div style={{display:'flex',alignItems:'center',gap:7}}><Av agent={a} size={26}/><div><div style={{font:'700 11px/1 Sora,sans-serif',color:'var(--text)'}}>{a.name.split(' ')[0]}</div><div style={{font:'500 9px/1 Sora,sans-serif',color:'var(--muted)',marginTop:2}}>{a.name.split(' ').slice(1).join(' ')}</div></div></div></td>
+                    {weekDays.map(function(d,i){var isTod=d.toDateString()===today.toDateString();var shift=getShiftForDay(a.id,d);var sl=SHIFT_LABELS[shift]||SHIFT_LABELS.off;var glow=shift==='day'?'0 0 14px rgba(253,224,71,1)':shift==='night'||shift==='shadow'?'0 0 10px rgba(129,140,248,.9)':shift==='leave'?'0 0 12px rgba(52,211,153,1)':'none';return(<td key={i} className={'wg-cell'+(isTod?' today':'')}><div style={{height:18,display:'flex',alignItems:'center',justifyContent:'center',fontSize:shift==='off'?0:15,textShadow:glow}}>{shift==='off'?<span style={{width:8,height:8,borderRadius:'50%',background:'rgba(148,163,184,.55)',display:'inline-block'}}/>:sl.emoji}</div><div style={{marginTop:2,color:sl.color,fontWeight:700,fontSize:9}}>{shift==='day'?'DAY':shift==='night'?'NIGHT':shift==='leave'?'LEAVE':shift==='shadow'?'NIGHT':'OFF'}</div></td>);})}</tr>);})}</tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1129,7 +1154,7 @@ function MyTickets({agent,tickets,allTix,onEdit,onUpdate,onDelete,showToast,agen
                         <td style={{color:'var(--text2)',fontSize:12,whiteSpace:'nowrap'}}>{fmtDay(t)}</td>
                         <td style={{fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:160}}>
                           {t.name}
-                          {isRepeat(t)&&<span title={'Repeat complainant — '+repeatCount(t)+' tickets'} style={{marginLeft:5,background:'rgba(167,139,250,.2)',color:'#A78BFA',border:'1px solid rgba(167,139,250,.4)',borderRadius:4,fontSize:9,fontWeight:700,padding:'1px 4px',verticalAlign:'middle'}}>🔁 x{repeatCount(t)}</span>}
+                          {isRepeat(t)&&<span title={'Repeat complainant — '+repeatCount(t)+' tickets'} style={{marginLeft:7,background:'linear-gradient(135deg,#A855F7,#7C3AED)',color:'#fff',border:'1px solid #C4B5FD',borderRadius:6,fontSize:11,fontWeight:800,padding:'2px 7px',verticalAlign:'middle',boxShadow:'0 0 10px rgba(168,85,247,.6)',whiteSpace:'nowrap'}}>🔁 ×{repeatCount(t)}</span>}
                         </td>
                         <td><span className="mono" style={{fontSize:12,color:'var(--text2)'}}>{t.phone}</span></td>
                         <td><span className="bu-tag">{t.bu}</span></td>
@@ -1258,6 +1283,8 @@ function AllComplaints({agent,allTix,onUpdate,onDelete,onDeleteBulk,showToast}){
   const[expFrom,setExpFrom]=useState('');
   const[expTo,setExpTo]=useState('');
   const[cellEdit,setCellEdit]=useState(null); // {id,field,val}
+  const[bulkCat,setBulkCat]=useState('');
+  function applyBulkCat(){if(!selected.size||!bulkCat)return;var auto=getResp(bulkCat);var patch={category:bulkCat};if(auto)patch.resp=auto;Array.from(selected).forEach(function(id){var t=safeTix.find(function(x){return x.id===id;});if(t)onUpdate&&onUpdate(Object.assign({},t,patch));});showToast&&showToast('🏷 Set on '+selected.size+' ticket'+(selected.size>1?'s':'')+(auto?' · '+auto.split(' ')[0]:'')+' ✅');setSelected(new Set());setBulkCat('');}
   const XLS_COLS_A=['category','status','note']; // editable columns in order
   function commitCellA(t,noClose){
     if(!cellEdit||cellEdit.id!==t.id)return;
@@ -1472,7 +1499,7 @@ function AllComplaints({agent,allTix,onUpdate,onDelete,onDeleteBulk,showToast}){
               <span style={{font:'700 12px Sora,sans-serif',color:'#F87171'}}>{selected.size} selected</span>
               <button onClick={deleteSelected} style={{padding:'5px 13px',background:'#EF4444',color:'#fff',border:'none',borderRadius:7,font:'800 11px Sora,sans-serif',cursor:'pointer'}}>🗑 Delete Selected</button>
               <button onClick={function(){setSelected(new Set());}} style={{padding:'5px 11px',background:'transparent',color:'var(--muted)',border:'1px solid var(--bsoft)',borderRadius:7,font:'700 11px Sora,sans-serif',cursor:'pointer'}}>✕ Clear</button>
-              <span style={{font:'500 10px Sora,sans-serif',color:'var(--muted)',marginLeft:4}}>Shift+click to select range</span>
+              <div style={{width:1,height:20,background:'rgba(255,255,255,.15)',flexShrink:0}}/><span style={{font:'600 10px Sora,sans-serif',color:'var(--muted)'}}>Set category:</span><select style={{height:28,padding:'0 8px',background:'var(--surface)',border:'1px solid var(--bsoft)',borderRadius:6,font:'600 11px Sora,sans-serif',color:'var(--text)',outline:'none'}} value={bulkCat} onChange={function(e){setBulkCat(e.target.value);}}><option value="">— pick —</option>{CATS.map(function(c){return <option key={c} value={c}>{c.split('/')[0].trim()}</option>;})}</select><button onClick={applyBulkCat} style={{padding:'4px 12px',background:bulkCat?'var(--ek-gold)':'rgba(255,255,255,.08)',color:bulkCat?'#0A1A4F':'var(--muted)',border:'none',borderRadius:6,font:'800 11px Sora,sans-serif',cursor:bulkCat?'pointer':'not-allowed',opacity:bulkCat?1:.5}}>Apply</button><span style={{font:'500 10px Sora,sans-serif',color:'var(--muted)',marginLeft:4}}>Shift+click = range</span>
             </div>)}
           <div style={{padding:'8px 14px',background:'rgba(0,0,0,.3)',font:'600 11px Sora,sans-serif',color:'var(--muted)',display:'flex',justifyContent:'space-between'}}>
             <span>Tickets · {filt.length}</span>
@@ -1659,7 +1686,7 @@ function AddTicket({agent,onCreate}){
   function handlePaste(txt){
     setPasted(txt);if(!txt.trim()){setBulk([]);setSel([]);return;}
     const parsed=parseMultiple(txt);
-    const cards=parsed.map(function(p){return Object.assign({},EMPTY,p,{resp:p.resp||getResp(p.category||p.issue||''),status:'progress'});});
+    const cards=parsed.map(function(p){var cat=p.category||classifyComplaintA(p.issue)||CATS[0];var resp=p.resp||getResp(cat);return Object.assign({},EMPTY,p,{category:cat,resp:resp||'',status:'progress'});});
     setBulk(cards);setSel(cards.map(function(_,i){return i;}));
     if(cards.length===1)setForm(Object.assign({},EMPTY,cards[0]));
   }
