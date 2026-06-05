@@ -26,7 +26,7 @@ header{
 .logo-wrap{display:flex;align-items:center;gap:12px;}
 .logo-img{width:52px;height:52px;border-radius:13px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 20px rgba(255,199,44,.3);}
 .logo-img img{width:100%;height:100%;object-fit:contain;}
-.logo-title{font:900 16px/1.1 'Sora';color:#fff;letter-spacing:.2px;}
+.logo-title{font:900 16px/1.1 'Sora';color:#0A1B3F;letter-spacing:.2px;}
 .logo-title span{color:#FFC72C;}
 .logo-sub{font:600 9px/1 'Sora';color:rgba(255,255,255,.4);letter-spacing:.18em;text-transform:uppercase;margin-top:5px;}
 
@@ -34,20 +34,20 @@ header{
 .eyebrow{font:700 10px/1 'Sora';color:#FFC72C;letter-spacing:.2em;text-transform:uppercase;}
 
 .header-right{display:flex;align-items:center;gap:10px;}
-.clock-pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:7px 14px;}
+.clock-pill{display:flex;align-items:center;gap:7px;background:rgba(10,27,63,.06);border:1px solid rgba(10,27,63,.12);border-radius:999px;padding:7px 14px;}
 .live-dot{width:6px;height:6px;border-radius:50%;background:#22C55E;animation:pulse 2.2s infinite;}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.7);}70%{box-shadow:0 0 0 6px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
-.clock{font:800 15px/1 'JetBrains Mono';color:#fff;letter-spacing:.06em;}
-.clock-lbl{font:600 9px/1 'JetBrains Mono';color:rgba(255,255,255,.4);}
+.clock{font:800 15px/1 'JetBrains Mono';color:#0A1B3F;letter-spacing:.06em;}
+.clock-lbl{font:600 9px/1 'JetBrains Mono';color:rgba(10,27,63,.45);}
 
 /* HERO */
 .hero{padding:28px 40px 16px;text-align:center;}
-.greeting{font:900 36px/1.1 'Sora';color:#fff;margin-bottom:10px;}
+.greeting{font:900 36px/1.1 'Sora';color:#0A1B3F;margin-bottom:10px;}
 .greeting span{color:#FFC72C;}
-.hero-sub{font:500 14px/1.6 'Sora';color:rgba(240,244,255,.5);max-width:420px;margin:0 auto;}
+.hero-sub{font:500 14px/1.6 'Sora';color:rgba(10,27,63,.55);max-width:420px;margin:0 auto;}
 
 /* HUB LABEL */
-.hub-label-strip{padding:22px 40px 12px;font:700 11px/1 'Sora';color:#FFC72C;letter-spacing:.18em;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
+.hub-label-strip{padding:22px 40px 12px;font:700 11px/1 'Sora';color:#C47A00;letter-spacing:.18em;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
 .hub-label-strip::before{content:'🚀';}
 
 /* HUB CARDS GRID */
@@ -113,8 +113,57 @@ footer{margin-top:auto;padding:4px 0;text-align:center;}
 .scripture{font:500 italic 13px/1.7 'Sora';color:rgba(255,255,255,.25);max-width:460px;margin:0 auto 5px;}
 .scripture-ref{font:700 9px/1 'Sora';color:#FFC72C;letter-spacing:.16em;text-transform:uppercase;}
 </style>
+
+<style id="force-light">
+  html, body {
+    background: #F7F8FC !important;
+    color: #0A1B3F !important;
+  }
+  body {
+    background-image: none !important;
+    background-color: #F7F8FC !important;
+  }
+  header { background: #fff !important; border-bottom: 1px solid rgba(10,27,63,.08) !important; }
+  .logo-title { color: #0A1B3F !important; }
+  .logo-sub { color: rgba(10,27,63,.5) !important; }
+  .eyebrow { color: #C47A00 !important; }
+  .clock-pill { background: rgba(10,27,63,.06) !important; border-color: rgba(10,27,63,.14) !important; }
+  .clock { color: #0A1B3F !important; }
+  .clock-lbl { color: rgba(10,27,63,.5) !important; }
+  .greeting { color: #0A1B3F !important; }
+  .greeting span { color: #C47A00 !important; }
+  .hero-sub { color: rgba(10,27,63,.55) !important; }
+  .hub-label-strip { color: #C47A00 !important; }
+  .hub-card { background: #fff !important; border: 1px solid rgba(10,27,63,.10) !important; box-shadow: 0 2px 16px rgba(10,27,63,.08) !important; }
+  .hub-card h2, .hub-card p, .hub-card span { color: #0A1B3F !important; }
+  .hub-card .hub-tag { background: rgba(10,27,63,.07) !important; color: #0A1B3F !important; border: 1px solid rgba(10,27,63,.12) !important; }
+  .hub-footer, footer { background: rgba(10,27,63,.04) !important; border-top: 1px solid rgba(10,27,63,.08) !important; color: rgba(10,27,63,.5) !important; }
+  a { color: inherit !important; }
+</style>
+
+<style id="force-light-2">
+  /* Hub card text */
+  .hub-card * { color: #0A1B3F !important; }
+  .hub-card h2, .hub-card h3 { color: #0A1B3F !important; font-weight: 800 !important; }
+  .hub-card p, .hub-card div, .hub-card span { color: rgba(10,27,63,.7) !important; }
+  .hub-card strong, .hub-card b { color: #0A1B3F !important; }
+  /* Card action buttons/tags */
+  .hub-tag { background: rgba(10,27,63,.07) !important; color: #0A1B3F !important; border: 1px solid rgba(10,27,63,.14) !important; }
+  /* Pill badges */
+  [style*="background:#E30613"], [style*="background: #E30613"] { color: #fff !important; }
+  [style*="background:#22C55E"] { color: #fff !important; }
+  /* Section labels */
+  .hub-section-lbl, .hub-label-strip, [class*="label"] { color: #C47A00 !important; }
+  /* Quote / inspiration text */
+  .quote, .quote * { color: rgba(10,27,63,.5) !important; font-style: italic !important; }
+  /* Divider line */
+  hr { border-color: rgba(10,27,63,.1) !important; }
+  /* Footer */
+  footer, .footer, [class*="foot"] { background: rgba(10,27,63,.04) !important; }
+  footer *, .footer * { color: rgba(10,27,63,.5) !important; }
+</style>
 </head>
-<body>
+<body style="background:#F7F8FC;color:#0A1B3F;">
 
 <header>
   <div class="logo-wrap">
@@ -137,12 +186,12 @@ footer{margin-top:auto;padding:4px 0;text-align:center;}
 </header>
 
 <div class="hero">
-  <h1 class="greeting" id="greeting">Good morning, <span>Best CX Team! ✨</span></h1>
+  <h1 class="greeting" id="greeting">Good morning, <span>Team! ✨</span></h1>
   <div id="quote-wrap" style="transition:opacity .6s ease;margin-top:10px;">
-    <p class="scripture" id="quote-text">"Strength and honour are her clothing, and she rejoices in time to come."</p>
+    <p class="scripture" id="quote-text" style="color: rgba(40, 20, 20, 0.973)">"Strength and honour are her clothing, and she rejoices in time to come."</p>
     <p class="scripture-ref" id="quote-ref">— Proverbs 31:25</p>
   </div>
-  <p class="hero-sub">Agents Hub · Marina HQ</p>
+  <p class="hero-sub"> </p>
 </div>
 
 <div class="hub-label-strip">YOUR HUB</div>
@@ -219,8 +268,8 @@ footer{margin-top:auto;padding:4px 0;text-align:center;}
 <div class="sync-strip">
   <div class="sync-card">
     <div class="sync-dot"></div>
-    <div class="sync-text"><b>All hubs are in sync</b> — Managers Hub, Agents Hub &amp; Daily Email Report share the same live data via Power Automate &amp; SharePoint.</div>
-    <div class="sync-meta" id="last-sync">Checking…</div>
+    <div class="sync-text" style="color: rgb(31, 14, 14)"><b style="color: rgb(18, 17, 17)">All hubs are in sync</b> — Managers Hub, Agents Hub &amp; Daily Email Report share the same live data via Power Automate &amp; SharePoint.</div>
+    <div class="sync-meta" id="last-sync" style="color: rgba(4, 27, 12, 0.5)">Checking…</div>
   </div>
 </div>
 
@@ -257,7 +306,7 @@ function updateClock(){
     String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
   const greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   const emoji=h<12?'☀️':h<17?'🌤️':'🌙';
-  document.getElementById('greeting').innerHTML=greet+', <span style="color:#FFC72C">Best CX Team! '+emoji+'</span>';
+  document.getElementById('greeting').innerHTML=greet+', <span style="color:#FFC72C">Team! '+emoji+'</span>';
   applyAutoTheme(h);
 }
 setInterval(updateClock,1000);
@@ -334,3 +383,9 @@ setInterval(rotateQuote,6000);
 </script>
 </body>
 </html>
+<style id="__om-edit-overrides">
+span { color: rgb(24, 22, 18) !important }
+span { color: rgb(24, 19, 11) !important }
+span { color: rgb(18, 12, 3) !important }
+span { color: rgb(29, 25, 19) !important }
+</style>
