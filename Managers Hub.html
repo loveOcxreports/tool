@@ -27,7 +27,7 @@ window.Msal = {
 --border:#1E3557;--bsoft:#162844;--bdark:#0C1830;--text:#E8F0FF;--text2:#A8BCDE;--fg:#E8F0FF;--muted:#6080AC;--sub:#3D5F8C;
 --ok:#22C55E;--okb:#86EFAC;--okt:rgba(34,197,94,.18);
 --wn:#F59E0B;--wnb:#FCD34D;--wnt:rgba(245,158,11,.18);
---bd:#EF4444;--bdb:#FCA5A5;--bdt:rgba(239,68,68,.18);
+--bd:#C2410C;--bdb:#FCA5A5;--bdt:rgba(239,68,68,.18);
 --info:#38BDF8;--infob:#7DD3FC;--violet:#818CF8;
 --agent:#FFC72C;--agent-tint:rgba(255,199,44,.12);}
 
@@ -88,7 +88,7 @@ body[data-theme="bright"] .btn:hover{background:rgba(68,85,168,.12)!important;bo
 body[data-theme="bright"] .btn-gold,body[data-theme="bright"] .btn-agent{background:linear-gradient(135deg,#F97316,#EA6C0A)!important;color:#fff!important;border-color:#F97316!important;}
 body[data-theme="bright"] .badge-res{background:rgba(22,163,74,.1)!important;color:#15803D!important;border-color:rgba(22,163,74,.2)!important;}
 body[data-theme="bright"] .badge-prg{background:rgba(217,119,6,.1)!important;color:#B45309!important;border-color:rgba(217,119,6,.2)!important;}
-body[data-theme="bright"] .badge-unr{background:rgba(220,38,38,.1)!important;color:#B91C1C!important;border-color:rgba(220,38,38,.2)!important;}
+body[data-theme="bright"] .badge-unr{background:rgba(194,65,12,.1)!important;color:#9A3412!important;border-color:rgba(194,65,12,.25)!important;}
 body[data-theme="bright"] .bu-tag,body[data-theme="bright"] .bu-pill{background:rgba(26,37,96,.1)!important;color:#1A2560!important;border-color:rgba(26,37,96,.2)!important;}
 body[data-theme="bright"] .agent-card,body[data-theme="bright"] .roster-card{background:#fff!important;border-color:#D8DFFF!important;box-shadow:0 2px 10px rgba(68,85,168,.08)!important;}
 body[data-theme="bright"] .agent-pick{border-color:#D8DFFF!important;background:#F5F7FF!important;}
@@ -101,7 +101,7 @@ body[data-theme="bright"] .wa-box{background:#F5F7FF!important;border-color:#D8D
 body[data-theme="bright"] .cat-main{color:#080F2E!important;}
 body[data-theme="bright"] .st-res{color:#15803D!important;}
 body[data-theme="bright"] .st-prg{color:#B45309!important;}
-body[data-theme="bright"] .st-unr{color:#B91C1C!important;}
+body[data-theme="bright"] .st-unr{color:#9A3412!important;}
 body[data-theme="bright"] .tbl-num{color:#1A2560!important;}
 body[data-theme="bright"] .live-dot{background:#22C55E!important;}
 body[data-theme="bright"] [style*="var(--muted)"]{color:#4455A8!important;}
@@ -181,22 +181,85 @@ body[data-theme="bright"] .main .btn-primary{background:linear-gradient(135deg,#
 /* Status badges stay coloured */
 body[data-theme="bright"] .main .badge-res{background:rgba(22,163,74,.15)!important;color:#15803D!important;}
 body[data-theme="bright"] .main .badge-prg{background:rgba(217,119,6,.15)!important;color:#B45309!important;}
-body[data-theme="bright"] .main .badge-unr{background:rgba(220,38,38,.15)!important;color:#B91C1C!important;}
+body[data-theme="bright"] .main .badge-unr{background:rgba(194,65,12,.15)!important;color:#9A3412!important;}
 /* SVG / chart text */
 body[data-theme="bright"] .main text{fill:#111!important;}
+/* ── SOLAR cream readability (cloned from bright) ── */
+body[data-theme="solar"] .main-inner{color:#080F2E;}
+body[data-theme="solar"] .page-sub{color:#3A4A90!important;}
+body[data-theme="solar"] .main-inner table td{color:#080F2E!important;}
+body[data-theme="solar"] .main-inner table th{color:#3A4A90!important;}
+body[data-theme="solar"] .main-inner select,
+body[data-theme="solar"] .main-inner input,
+body[data-theme="solar"] .main-inner textarea{background:#FFFDF8!important;border-color:#E5CFA6!important;color:#080F2E!important;}
+body[data-theme="solar"] .main-inner select option{background:#FFFDF8;color:#080F2E;}
+body[data-theme="solar"] .main-inner .card-head{background:#FBF4E8!important;border-color:#E5CFA6!important;}
+body[data-theme="solar"] .main-inner .card-head h3{color:#080F2E!important;}
+body[data-theme="solar"] .main-inner .card-head span{color:#3A4A90!important;}
+body[data-theme="solar"] .main-inner .btn-sm{background:rgba(68,85,168,.08)!important;color:#1A2560!important;border-color:#E5CFA6!important;}
+body[data-theme="solar"] .main-inner .btn-sm:disabled{opacity:.4;}
+body[data-theme="solar"] .main-inner .btn-primary{background:linear-gradient(135deg,#F97316,#EA6C0A)!important;color:#FFFDF8!important;border-color:#F97316!important;}
+/* Bright theme: force pure black text throughout main content */
+body[data-theme="solar"] .main{color:#111!important;background:#FBF4E8!important;}
+body[data-theme="solar"] .main .card{background:#FFFDF8!important;color:#111!important;}
+body[data-theme="solar"] .main .page-header h1{color:#C44F00!important;}
+body[data-theme="solar"] .main .page-sub{color:#444!important;}
+/* Override any hardcoded white/near-white text */
+body[data-theme="solar"] .main [style*="color:#FFFDF8"]{color:#111!important;}
+body[data-theme="solar"] .main [style*="color:rgba(255,255,255"]{color:#444!important;}
+body[data-theme="solar"] .main [style*="color:#E8F0FF"]{color:#111!important;}
+body[data-theme="solar"] .main [style*="color:#CBD5E1"]{color:#222!important;}
+body[data-theme="solar"] .main [style*="color:#94A3B8"]{color:#555!important;}
+body[data-theme="solar"] .main [style*="color:#64748B"]{color:#444!important;}
+body[data-theme="solar"] .main [style*="color:#8892B0"]{color:#444!important;}
+/* Override dark card/section backgrounds */
+body[data-theme="solar"] .main [style*="background:#0C1830"]{background:#F3E8D4!important;}
+body[data-theme="solar"] .main [style*="background:#1E2A45"]{background:#F3E8D4!important;}
+body[data-theme="solar"] .main [style*="background:#162035"]{background:#F3E8D4!important;}
+body[data-theme="solar"] .main [style*="background:#0A1628"]{background:#F3E8D4!important;}
+body[data-theme="solar"] .main [style*="background:#0C1628"]{background:#F3E8D4!important;}
+body[data-theme="solar"] .main [style*="rgba(255,255,255,.03)"]{background:rgba(0,0,0,.03)!important;}
+body[data-theme="solar"] .main [style*="rgba(255,255,255,.05)"]{background:rgba(0,0,0,.04)!important;}
+body[data-theme="solar"] .main [style*="rgba(255,255,255,.08)"]{background:rgba(0,0,0,.05)!important;}
+body[data-theme="solar"] .main [style*="rgba(255,255,255,.1)"]:not(img):not(svg){background:rgba(0,0,0,.06)!important;}
+/* Inputs, selects, textareas */
+body[data-theme="solar"] .main input,
+body[data-theme="solar"] .main select,
+body[data-theme="solar"] .main textarea{background:#FFFDF8!important;border-color:#E5CFA6!important;color:#111!important;}
+body[data-theme="solar"] .main input::placeholder{color:#999!important;}
+/* Tables */
+body[data-theme="solar"] .main table td{color:#111!important;}
+body[data-theme="solar"] .main table th{color:#444!important;background:#F3E8D4!important;}
+body[data-theme="solar"] .main table tr{border-color:#EFE0C4!important;}
+/* Buttons */
+body[data-theme="solar"] .main .btn{background:#F3E8D4!important;border-color:#E5CFA6!important;color:#222!important;}
+body[data-theme="solar"] .main .btn-primary{background:linear-gradient(135deg,#E05C00,#C44F00)!important;color:#FFFDF8!important;border-color:#E05C00!important;}
+/* Status badges stay coloured */
+body[data-theme="solar"] .main .badge-res{background:rgba(22,163,74,.15)!important;color:#15803D!important;}
+body[data-theme="solar"] .main .badge-prg{background:rgba(217,119,6,.15)!important;color:#B45309!important;}
+body[data-theme="solar"] .main .badge-unr{background:rgba(194,65,12,.15)!important;color:#9A3412!important;}
+/* SVG / chart text */
+body[data-theme="solar"] .main text{fill:#111!important;}
+
 
 /* ── SOLAR: rich warm amber dark ─────────────────────────── */
 body[data-theme="solar"]{
-  --bg:#110B00;--bg2:#1E1200;--surface:#2D1B00;--card:#3A2400;--card2:#472D00;
-  --border:#7A5400;--bsoft:#5E4000;--bdark:#110B00;--text:#FFF4DE;--text2:#F0D9A5;--fg:#FFF4DE;--muted:#CCA040;--sub:#A07C25;
-  --ek-gold:#FFBE00;--ek-gold-deep:#E5A500;
-  --ok:#22C55E;--okb:#86EFAC;--okt:rgba(34,197,94,.2);
-  --wn:#F59E0B;--wnb:#FCD34D;--wnt:rgba(245,158,11,.2);
-  --bd:#EF4444;--bdb:#FCA5A5;--bdt:rgba(239,68,68,.2);
-  --info:#FCD34D;--infob:#FEF3C7;--violet:#F59E0B;
-  --agent:#FFBE00;--agent-tint:rgba(255,190,0,.12);}
-body[data-theme="solar"] .nav{background:linear-gradient(180deg,#1E1200 0%,#110B00 100%)!important;border-right:1px solid #5E4000!important;}
-body[data-theme="solar"] .hero{background:linear-gradient(135deg,#3A2400 0%,#7A5400 55%,#B37A00 100%)!important;border-bottom:3px solid #FFBE00!important;}
+  --bg:#FBF4E8;--bg2:#F3E8D4;--surface:#FFFDF8;--card:#FFFDF8;--card2:#FBF4E8;
+  --border:#E5CFA6;--bsoft:#EFE0C4;--bdark:#FBF4E8;--text:#2A1B05;--text2:#4A340F;--fg:#2A1B05;--muted:#8A6A2E;--sub:#A8853E;
+  --ek-gold:#E09A12;--ek-gold-deep:#B47209;
+  --ok:#16A34A;--okb:#15803D;--okt:rgba(22,163,74,.14);
+  --wn:#D97706;--wnb:#B45309;--wnt:rgba(217,119,6,.14);
+  --bd:#DC2626;--bdb:#B91C1C;--bdt:rgba(220,38,38,.12);
+  --info:#1D4ED8;--infob:#1E3A8A;--violet:#6D28D9;
+  --agent:#E09A12;--agent-tint:rgba(224,154,18,.12);}
+body[data-theme="solar"] .nav{background:linear-gradient(180deg,#7A4E12 0%,#52391B 100%)!important;border-right:1px solid #E5CFA6!important;}
+body[data-theme="solar"] .hero{background:linear-gradient(135deg,#F59E0B 0%,#D97706 55%,#B45309 110%)!important;border-bottom:3px solid #B45309!important;}
+/* Solar: cream table headers, readable BU pills, dash-matched toast */
+body[data-theme="solar"] .tbl thead tr{background:#F3E8D4!important;border-bottom:2px solid #E5CFA6!important;}
+body[data-theme="solar"] .tbl th{color:#4A340F!important;background:#F3E8D4!important;}
+body[data-theme="solar"] .tbl td{color:#2A1B05!important;}
+body[data-theme="solar"] .bu-pill,body[data-theme="solar"] .bu-tag{background:transparent!important;color:#2A1B05!important;border:none!important;padding:0!important;font-weight:700!important;}
+body[data-theme="solar"] .toast{background:linear-gradient(180deg,#7A4E12 0%,#52391B 100%)!important;color:#fff!important;border-color:#E30613!important;}
 
 /* ── NIGHT: deep premium dark ────────────────────────────── */
 body[data-theme="night"]{
@@ -205,7 +268,7 @@ body[data-theme="night"]{
   --ek-gold:#38BDF8;--ek-gold-deep:#0EA5E9;
   --ok:#22C55E;--okb:#86EFAC;--okt:rgba(34,197,94,.18);
   --wn:#F59E0B;--wnb:#FCD34D;--wnt:rgba(245,158,11,.18);
-  --bd:#EF4444;--bdb:#FCA5A5;--bdt:rgba(239,68,68,.18);
+  --bd:#C2410C;--bdb:#FCA5A5;--bdt:rgba(239,68,68,.18);
   --info:#38BDF8;--infob:#7DD3FC;--violet:#818CF8;
   --agent:#38BDF8;--agent-tint:rgba(56,189,248,.12);}
 body[data-theme="night"] .nav{background:linear-gradient(180deg,#0A1220 0%,#030712 100%)!important;border-right:1px solid #1E3557!important;}
@@ -218,7 +281,7 @@ body[data-theme="green"]{
   --ek-gold:#34D399;--ek-gold-deep:#10B981;
   --ok:#22C55E;--okb:#86EFAC;--okt:rgba(34,197,94,.25);
   --wn:#FBBF24;--wnb:#FCD34D;--wnt:rgba(251,191,36,.18);
-  --bd:#EF4444;--bdb:#FCA5A5;--bdt:rgba(239,68,68,.18);
+  --bd:#C2410C;--bdb:#FCA5A5;--bdt:rgba(239,68,68,.18);
   --info:#34D399;--infob:#6EE7B7;--violet:#A78BFA;
   --agent:#34D399;--agent-tint:rgba(52,211,153,.12);}
 body[data-theme="green"] .nav{background:linear-gradient(180deg,#0B2414 0%,#020E07 100%)!important;border-right:1px solid #1A5432!important;}
@@ -439,24 +502,23 @@ var EK_ROSTER_SEED={
 };
 var EK_BUS=['ISLAND','IJORA','MUSHIN','AJAH','LEKKI','APAPA','AGBARA','AJELE','OJO','FESTAC','ORILE','IBEJU-LEKKI'];
 var EK_RESP_DEFAULTS=[
-  {sn:1,name:'Holyland Umude',         cat:'Metering',                       color:'#60A5FA'},
-  {sn:2,name:'Mojibola Adefuwa',       cat:'Billing',                        color:'#34D399'},
-  {sn:3,name:'Ogheneyoreme Agbroko',   cat:'Interruption/Voltage/Safety',    color:'#F87171'},
+  {sn:1,name:'Ogheneyoreme Agbroko',   cat:'Interruption / Voltage / Safety', color:'#F87171'},
+  {sn:2,name:'Holyland Umude',         cat:'Metering',                       color:'#60A5FA'},
+  {sn:3,name:'Mojibola Adefuwa',       cat:'Billing',                        color:'#34D399'},
   {sn:4,name:'David Obisesan',         cat:'PPM Support',                    color:'#FBBF24'},
   {sn:5,name:'Owokade Olusegun',       cat:'PPM Maintenance',                color:'#F97316'},
   {sn:6,name:'Clara Olutola',          cat:'Onboarding',                     color:'#A78BFA'},
   {sn:7,name:'Glory Chinyere',         cat:'MYCRON',                         color:'#2DD4BF'},
   {sn:8,name:'Festus Moko',            cat:'AMISA',                          color:'#FB7185'},
   {sn:9,name:'Nonye Angelina Nnadozie',cat:'Band Reclassification',          color:'#818CF8'},
-  {sn:10,name:'Customer Experience',   cat:'General First Contact Resolution',color:'#94A3B8'},
 ];
-var EK_RESP_KEY='ek_v3_resp';
+var EK_RESP_KEY='ek_v4_resp';
 function loadResp(){
   try{
     var s=localStorage.getItem(EK_RESP_KEY);
     if(s){var arr=JSON.parse(s);if(Array.isArray(arr)&&arr.length)return arr;}
     // Migrate from v2 if present: replace renamed parties, drop stale ones
-    var v2=localStorage.getItem('ek_v2_resp');
+    var v2=null;
     if(v2){
       try{
         var old=JSON.parse(v2);
@@ -478,7 +540,7 @@ function loadResp(){
 }
 function saveResp(arr){try{localStorage.setItem(EK_RESP_KEY,JSON.stringify(arr));}catch(e){}EK_RESP.length=0;arr.forEach(function(r){EK_RESP.push(r);});}
 var EK_RESP=loadResp();
-var EK_CATS=['Band Reclassification','Billing','Interruption / Voltage / Safety','Metering','PPM Support','PPM Maintenance','Onboarding','MYCRON','AMISA','General'];
+var EK_CATS=['Interruption / Voltage / Safety','Metering','Billing','Band Reclassification','PPM Support','PPM Maintenance','Onboarding','MYCRON','AMISA'];
 
 // ── SMART COMPLAINT CLASSIFIER ────────────────────────────────────
 // Reads complaint text → best-matching category (keyword scoring).
@@ -544,9 +606,12 @@ if(localStorage.getItem('ek_data_version')!==EK_DATA_VERSION){
 
 var EK_EMAIL_BACKFILL = {"690355":"bojanmilicevic91@gmail.com","690360":"bojanmilicevic91@gmail.com","690571":"tobilobailori@gmail.com","690776":"bojanmilicevic91@gmail.com","690802":"bojanmilicevic91@gmail.com","690999":"bojanmilicevic91@gmail.com","691026":"bojanmilicevic91@gmail.com","691079":"bojanmilicevic91@gmail.com","691756":"bojanmilicevic91@gmail.com","691792":"tobilobailori@gmail.com","691822":"Damilolao+kay@bpsafrica.com","691858":"tobilobailori@gmail.com","692029":"tobilobailori@gmail.com","692994":"damilolao+xepp2@bpsafrica.com","693841":"tobilobailori@gmail.com","694025":"ahmedokunade@yahoo.com","694772":"evanyexceptional@gmail.com","695854":"Oyesinamojeed+xepp2@gmail.com","695928":"mycustomerbalo@gmail.com","696543":"Damilolao+goke@bpsafrica.com","696636":"Mariamadeshola86@gmail.com","696654":"bojanmilicevic91@gmail.com","698409":"Damilolagoke@bpsafrica.com","699271":"tobilobailori@gmail.com","699309":"tobilobailori@gmail.com","702504":"raekerone@gmail.com","702686":"samsondaniel939@gmail.com","703074":"luka.zecevic@sotexsolutions.com","703409":"nyarofnk@gmail.com","703635":"rgclagos@gmail.com","703724":"ahmed.adeoye86@gmail.com","703725":"rgclagos@gmail.com","705287":"Awelefaithokafor@gmail.com","705288":"Awelefaithokafor@gmail.com","707318":"alao.lizzy@gmail.com","707417":"ajibolarasheed432@gmail.com","707776":"alao.lizzy@gmail.com","708645":"love.offei22@gmail.com","708694":"tominaegbokwu@gmail.com","708808":"damilola.ilesanmi01@gmail.com","708809":"odewumibabawale@gmail.com","709708":"sharafadeen.ogunbiyi@gmail.com","709805":"love.offei22@gmail.com","709808":"love.offei22@gmail.com","709928":"slogan003@yahoo.co.uk","709960":"omardiddit@gmail.com","709977":"babatundemayowa001@gmail.com","709985":"olluwaseunzye@gmail.com","710083":"eguonojuliet98@gmail.com","710087":"ciwugoh@hotmail.com","710099":"emmykeyz@gmail.com","710131":"okechukwua72@gmail.com","710155":"itzopemipolateef@gmail.com","710159":"Olubukunolapase@yahoo.com","710182":"sojioj@yahoo.co.uk","710205":"danielprecious@yahoo.ca","710208":"ayoola.ajuwon@gmail.com","710237":"chioma.uchehara@ekedp.com","710238":"cgabriel.asiegbu@gmail.com","710260":"georgyo.1962@gmail.com","710276":"tomiwafasoyin@gmail.com","710283":"martha.rotoye@yahoo.com","710286":"lion4ever001@gmail.com","710289":"info.copdev@gmail.com","710303":"mayellahh@gmail.com","710312":"danielprecious@yahoo.ca","710366":"harrisonogbolu32@gmail.com","710389":"olabisimary98@gmail.com","710397":"kvnqjames01@gmail.com","710411":"opeyemiabdulazeez8@gmail.com","710439":"holahegx@gmail.com","710443":"chukwuemekadaniel2010@gmail.com","710469":"Hamza.ibrahim.gyaran@gmail.com","710475":"dabitemilore@gmail.com","710478":"akinwandee7@gmail.com","710480":"liziebrown.o@gmail.com","710481":"akinwandee7@gmail.com","710499":"azeez.nike53@gmail.com","710522":"love.offei22@gmail.com","710524":"babafemimichealayomide@gmail.co","710528":"babafemimichealayomide@gmail.com","710535":"olambiwonninukk@yahoo.co.uk","710551":"oparachinwendu1999@yahoo.com","710642":"saheedbg@gmail.com","710647":"jidefowosire@yahoo.com","710660":"habeebayinde2014@gmail.com","710661":"Sixtusmendez20@gmail.com","710669":"minnie21244@yahoo.com","710700":"valentineodoh007@gmail.com","710706":"hafeezoyewumi@gmail.com","710776":"Babajideayokunle96@gmail.com","710794":"azeez.nike53@gmail.com","710918":"blessingoluchukwuokeke@gmail.com","711058":"tadeyemi004@gmail.com","711222":"bojanmilicevic91@gmail.com","711294":"adedayoadegbite2019@gmail.com","711318":"bojanmilicevic91@gmail.com","711347":"rotrijeoma@yahoo.com","711483":"gantjosepholadimeji@gmail.com","711618":"hblaize77@gmail.com","711622":"Samuelmbachu9@gmail.com","711635":"k_uzoma@yahoo.com","711639":"andyhat4all@yahoo.com","711683":"beautifiedbylinda21@gmail.com","711725":"iykezuby@yahoo.co.uk","711764":"Kayceekelbert@gmail.com","711823":"father2father4eva@gmail.com","712268":"olajumokesarah@yahoo.com","712327":"elukuomoeko@gmail.com","712333":"elukuomoeko@gmail.com","712439":"kayodesteven0@gmail.com","712463":"gabatunde10@gmail.com","712496":"aydanzee@gmail.com","712521":"olawusi.olabisi@yahoo.com","712525":"ojeiayokunumi123@gmail.com","712541":"louisaoketa95@gmail.com","712549":"azeez.nike53@gmail.com","712573":"okpala231@gmail.com","712617":"ijaynk@yahoo.com","712849":"vicoradeniran@gmail.com","712989":"arowoloarowolo409@gmail.com","713313":"algaf2002@yahoo.com","713337":"joshfos82@gmail.com","713347":"thehaircentersalon@gmail.com","713395":"Ajayij54@yahoo.com","713688":"isaacanani1973@gmail.com","713891":"saheedbg@gmail.com","714217":"Obashichibuike600@gmail.com","714234":"bellodamilola6@gmail.com","714235":"sandratimothy269@gmail.com","714277":"ismailoba321@gmail.com","714312":"Lutheruzoma@ymail.com","714420":"Mariamadeshola86@gmail.com","714472":"toibkush@live.com","714476":"sandratimothy269@gmail.com","714483":"okeyakuwudike@gmail.com","714738":"tmb.queen@gmail.com","714868":"ololadejoseph@yahoo.com","714886":"gobrian2011@gmail.com","714950":"Therasmith8@gmail.com","714956":"amarasilivia@gmail.com","714971":"oluwaseyihameed00@gmail.com","714994":"obashichibuike600@gmail.com","714995":"Obashichibuike600@gmail.com","715002":"busydiva1@gmail.com","715035":"amarasilivia@gmail.com","715040":"georgyo.1962@gmail.com","715050":"odofinoluniyi@gmail.com","715110":"oadebimpe@yahoo.com","715114":"helenadedayo10@gmail.com","715129":"cycline02@gmail.com","715142":"oluwaseyihameed00@gmail.com","715204":"babto1305@gmail.com","715206":"hassanjimohjamiu@gmail.com","715210":"Kayceekelbert@gmail.com","715219":"Oliseazu6009@gmail.com","715224":"odimegwuukachi24@gmail.com","715233":"adebiyi.mabel@gmail.com","715239":"olowetemiloluwa@yahoo.com","715252":"ca.yetunde@gmail.com","715256":"andrewbenedictholmes@gmail.com","715273":"aleduibrahim@yahoo.com","715283":"samsonadenekan2006@gmail.com","715296":"mojilawal23@gmail.com","715305":"Obashichibuike600@gmail.com","715308":"kabilaw680@gmail.com","715310":"minnie21244@yahoo.com","715311":"okeyakuwudike@gmail.com","715318":"makinyemi10@yahoo.com","715341":"emikemicbraimoh@gmail.com","715386":"hassanjimohjamiu@gmail.com","715388":"hassanjimohjamiu@gmail.com","715434":"angeone01@gmail.com","715444":"solononir@gmail.com","715448":"dedamolaodukoya@gmail.com","715460":"Kayceekelbert@gmail.com","715461":"christopherekwebe@yahoo.com","715490":"Obashichibuike600@gmail.com","715492":"Obashichibuike600@gmail.com","715493":"samsonadenekan2006@gmail.com","715496":"nyaknno.esinwang@yahoo.com","715558":"chiiokafor@gmail.com","715663":"amsonumukoro@gmail.com","715715":"sanni.aabdul@gmail.com","715787":"obaedoisiuwa@gmail.com","716180":"olowetemiloluwa@yahoo.com","716337":"ayodejiajewole42@gmail.com","716405":"olowetemiloluwa@yahoo.com","716457":"udogumezie46@gmail.com","716465":"skypoint5050@gmail.com","716482":"iykeman197@gmail.com","716493":"ebohjennifer46@gmail.com","716521":"anwuliolisa@gmail.com","716563":"macaulayj69@gmail.com","716576":"macaulayj69@gmail.com","716581":"Chiomaukamaka22@gmail.com","716582":"samuel.timecode@gmail.com","716593":"agboola.abdulwasiu@gmail.com","716638":"hallimjerry@gmail.com","716673":"ajumajoy222@gmail.com","716768":"bankolek1@gmail.com","716772":"ifechiehilda@gmail.com","716792":"Vichumble16@gmail.com","716828":"gabatunde10@gmail.com","716830":"Chiomaukamaka22@gmail.com","716887":"Adisaolanrewaju84@gmail.com","716901":"ogboruprecious186@gmail.com","716992":"ayodejiajewole42@gmail.com","717016":"Obashichibuike600@gmail.com","717062":"nicholas.ikeokwu@gmail.com","717103":"obenejake@gmail.com","717361":"nixbronks@gmail.com","717399":"faggybabsjide@gmail.com","717401":"Stephanieobiyo05@gmail.com","717409":"anitinifunmi@gmail.com","717412":"Ipinjugbamayowa@gmail.com","717420":"peteibe@gmail.com","717421":"peteibe@gmail.com","717432":"favlabanja98@gmail.com","717501":"ik1260@yahoo.com","717643":"preciousakh@gmail.com","718021":"hallimjerry@gmail.com","718100":"aodigwe@gmail.com","718121":"blessingskess7@gmail.com","718122":"rachealogunlekemayowa@gmail.com","718146":"charlesonando@gmail.com","718158":"oparachinwendu1999@yahoo.com","718171":"princeerejuwa@gmail.com","718196":"Vichumble16@gmail.com","718212":"ometangoodluck@gmail.com","718215":"ibrahimjohn58@gmail.com","718222":"aliuawa4@gmail.com","718227":"azeez.nike53@gmail.com","718239":"adewumia07@gmail.com","718244":"adedayoadegbite2019@gmail.com","718249":"emmapatrick747@gmail.com","718253":"obenejake@gmail.com","718352":"onlyossai@gmail.com","718462":"nichospecie@yahoo.co.uk","718463":"nichospecie@yahoo.co.uk","718470":"nichospecie@yahoo.co.uk","718568":"adamstee@yahoo.com","718723":"chuksmorrison@gmail.com","718824":"ajibolaolayinka@gmail.com","718866":"faggybabsjide@gmail.com","718878":"emmanuel.oyase@outlook.com","718959":"abimbolaifej@gmail.com","718962":"adeutitaiwo0000@gmail.com","718970":"harrisonogbolu32@gmail.com","718973":"aribukky@gmail.com","719127":"owonsikak@gmail.com","719139":"Vibreone2809@gmail.com","719172":"deborahodofin23@gmail.com","719175":"citzenyari@gmail.com","719207":"eswabdude@gmail.com","719224":"vickywinkyventure@gmail.com","719257":"larasavagecreations@gmail.com","719265":"emekajackson20@gmail.com","719360":"onyewuchiikechukwu1@gmail.com","719396":"soletizzle@gmail.com","719426":"Oshioshioanthonia@gmail.com","719447":"dtobi292@gmail.com","719493":"uchenduikedichi@gmail.com","719509":"info.copdev@gmail.com","719581":"Abubakarmuhdinuwa888@gmail.com","719596":"oladehinboolamide21@gmail.com","719605":"Obashichibuike600@gmail.com","719680":"funmikoya@yahoo.com","719690":"Ipinjugbamayowa@gmail.com","719717":"samsonadenekan2006@gmail.com","719732":"tobeosuno@gmail.com","719762":"akinloyeolaide11@gmail.com","719768":"ekendav@gmail.com","719780":"fanyaoha@yahoo.com","719789":"anuobinali@gmail.com","719790":"otegbadedotun@yahoo.com","719792":"symbygurl@gmail.com","719828":"iykeman197@gmail.com","719840":"georgyo.1962@gmail.com","719851":"onigbanjokhadija@gmail.com","719852":"omoomorodion@gmail.com","719887":"faggybabsjide@gmail.com","719931":"infocharlesanyim@gmail.com","719934":"ogidiVictor1983@gmail.com","719956":"isabelladuke21@gmail.com","719967":"shobayofatahi@gmail.com","720076":"uchemorrisodih@gmail.com","720083":"sanniaisha@gmail.com","720135":"aodigwe@gmail.com","720207":"chisomngaikedi@gmail.com","720349":"bojanmilicevic91@gmail.com","720356":"bojanmilicevic91@gmail.com","720390":"raphealbenjamin247@gmail.com","720452":"oladipoemmanuel17@gmail.com","720456":"ogaplumber1@gmail.com","720557":"richardsrackel@gmail.com","720642":"minnie21244@yahoo.com","720651":"horlarmhi4luv@gmail.com","720660":"tijhalmak@gmail.com","720687":"mojiboboye@gmail.com","720693":"abhope@yahoo.com","720705":"nichospecie@yahoo.co.uk","720734":"tejuoshomicheal25@gmail.com","720821":"Nwawuru.precious25@gmail.com","720971":"citzenyari@gmail.com","721114":"oladipoemmanuel17@gmail.com","721421":"sharonadesola@gmail.com","721598":"algaf2002@yahoo.com","721634":"shuaibuumargoronyo@gmail.com","721661":"premiumattorney@gmail.com","721700":"akoredeeniola@gmail.com","721708":"nathanbanji@gmail.com","721967":"georgyo.1962@gmail.com","722204":"mojiboboye@gmail.com","722218":"uchenduikedichi@gmail.com","722221":"medinatutu56@gmail.com","722386":"arogundadeoluwolemartins@gmail.com","722392":"edehchinasa@gmail.com","722394":"nnekaodigbo@gmail.com","722406":"drbusuyi@yahoo.com","722408":"uu7697521@gmail.com","722410":"edehchinasa@gmail.com","722435":"sinawale20@gmail.com","722468":"hallimjerry@gmail.com","722526":"imeldaifode@gmail.com","722564":"sulaimonfatai1978@gmail.com","722597":"sulaimonfatai1978@gmail.com","722623":"princeerejuwa@gmail.com","722699":"edehchinasa@gmail.com","722752":"georgyo.1962@gmail.com","722761":"sannidinho@hotmail.com","722777":"Damilolao+referal@bpsafrica.com","722787":"only4real88@yahoo.com","722834":"ayubaismaila11@gmail.com","722999":"princeerejuwa@gmail.com","723056":"jeremiapeter494@gmail.com","723103":"ovobrodoh@gmail.com","723106":"georgyo.1962@gmail.com","723113":"titiloperegina@gmail.com","723117":"titiloperegina@gmail.com","723120":"memunaidris05@gmail.com","723147":"odusholaritaolabisi@gmail.com","723185":"makanjuolaazeez25@gmail.com","723229":"wendugabriel31@gmail.com","723340":"ekpoto.liberty@gmail.com","723464":"confidencechinwendu067@gmail.com","723527":"makanjuolaazeez25@gmail.com","723628":"georgyo.1962@gmail.com","723640":"fanyaoha@yahoo.com","723676":"kpietrades@gmail.com","723700":"com2sulaiman@gmail.com","723701":"titiloperegina@gmail.com","723702":"titiloperegina@gmail.com","723714":"tintotipsy21@gmail.com","723758":"georgyo.1962@gmail.com","723770":"celinakile7@gmail.com","723775":"akanjiolugbenga4@gmail.com","723782":"sulaimonfatai1978@gmail.com","723784":"obenejake@gmail.com","723786":"sulaimonfatai1978@gmail.com","723806":"timm_ayegba@yahoo.com","723809":"yinoluwa@gmail.com","723812":"tosinlawrence1130@gmail.com","723816":"makanjuolaazeez25@gmail.com","723819":"ekeneekette@gmail.com","723824":"fdjones4u@gmail.com","723842":"dangbenzy@gmail.com","723856":"afexonline4@gmail.com","723868":"awahuemeka3@gmail.com","723888":"georgyo.1962@gmail.com","723924":"emmanuelgideon7@gmail.com","723927":"eddyezeagu31@gmail.com","723941":"preciousekere@gmail.com","723975":"Olaiwolamustaqim17@outlook.com","724004":"tunde2bunmi@gmail.com","724006":"stanikechukwu@gmail.com","724015":"cgizim@yahoo.com","724024":"mastergab4love@gmail.com","724041":"georgyo.1962@gmail.com","724048":"peacezeja@gmail.com","724053":"eswabdude@gmail.com","724101":"nelsonemmanuel1.ee@gmail.com","724123":"morondiyadavid@yahoo.co.uk","724126":"morondiyadavd@yahoo.co.uk","724134":"areaops@yahoo.com","724152":"rayfage@yahoo.com","724155":"ijaynk@yahoo.com","724188":"nagbeyei38@gmail.com","724291":"makanjuolaazeez25@gmail.com","724322":"ayanfeola1@gmail.com","724338":"info.copdev@gmail.com","724399":"ekehifeoma23@yahoo.com","724513":"agunstephen34@gmail.com","724541":"princeerejuwa@gmail.com","724714":"fanyaoha@yahoo.co","724813":"facilities@petralon.com","724825":"makanjuolaazeez25@gmail.com","724901":"zollnerbabatunde@aol.com","724903":"zollnerbabatunde@aol.com","724910":"Adisaolanrewaju84@gmail.com","724914":"samuelchigozie30@gmail.com","724921":"peteibe@gmail.com","724924":"obenejake@gmail.com","725011":"iroegbuathan@gmail.com","725164":"aamadasun@hotmail.com","725194":"effiok_udouwem@yahoo.com","725275":"tijhalmak@gmail.com","725295":"iykeamadyke@yahoo.com","725340":"dalu.chukwuma@yahoo.com","725360":"tagbajeuk@yahoo.com","725460":"abisco3456@gmail.com","725520":"Adedolapoajayi69@gmail.com","725540":"balozakat4life@gmail.com","725541":"aribukky@gmail.com","725546":"viyonjattu96@gmail.com","725549":"viyonjattu96@gmail.com","725552":"whizbright@gmail.com","725553":"whizbright@gmail.com","725559":"viyonjattu96@gmail.com","725564":"deborahodofin23@gmail.com","725577":"lindaifeajuna@gmail.com","725581":"francismok.data@gmail.com","725583":"francismok.data@gmail.com","725597":"fanyaoha@yahoo.com","725613":"estherbayo360@gmail.com","725617":"estherbayo360@gmail.com","725618":"austeeneugene@yahoo.com","725623":"lanrechibuzor@gmail.com","725649":"sweetbodeolufisoye@gmail.com","725652":"greatadinyeemmanuel@gmail.com","725659":"bankeyronkey@gmail.com","725674":"bankeyronkey@gmail.com","725680":"isaacon2003@yahoo.co.uk","725688":"imaku305@gmail.com","725698":"arowoloarowolo409@gmail.com","725704":"modubunmi7@gmail.com","725717":"mayowaomoajileye@gmail.com","725720":"emmanuelcharley025@gmail.com","725757":"isiomaplatinum@gmail.com","725760":"waleadenuga1974@gmail.com","725789":"greenwidecourtf6f10@gmail.com","725802":"akinyemi193@gmail.com","725817":"christopherekwebe@yahoo.com","725844":"jaiyeayeni@yahoo.co.uk","725847":"obenejake@gmail.com","725872":"saysholex@gmail.com","725875":"inyamakingsley@gmail.com","725923":"ositaokeke84@gmail.com","725946":"jprex39@gmail.com","725988":"meladis67@outlook.com","725989":"basul3074@gmail.com","725995":"allowabbey@gmail.com","725999":"Patmusa@gmail.com","726027":"afolabiomobolaji2@gmail.com","726031":"dapoaa@gmail.com","726032":"fdjones4u@gmail.com","726063":"Prazzimunachi@gmail.com","726080":"Emmanuelladivine27@gmail.com","726097":"Mariamadeshola86@gmail.com","726129":"Fawasojora5@gmail.com","726133":"Fawasojora5@gmail.com","726135":"lindseynigeria@gmail.com","726142":"ajayiabolarin@gmail.com","726173":"cgabriel.asiegbu@gmail.com","726182":"osmatekhator1@gmail.com","726183":"bknfisayo@gmail.com","726186":"samsonayinde81@gmail.com","726188":"ekwinof@gmail.com","726240":"harrisonogbolu32@gmail.com","726242":"oiseoghaedeanthony@gmail.com","726268":"georgyo1962@gmail.com","726540":"Ibktayorh@gmail.com","726609":"awosley.uduma@gmail.com","726759":"Moses.aiyevbomwan@gmail.com","726799":"dulcetayo18@gmail.com","726845":"anisiobimelanie@yahoo.com","726922":"nenyekezie3@gmail.com","726925":"dulcetayo18@gmail.com","726965":"filonwa2@gmail.com","726972":"bammieyour@gmail.com","726976":"markoviceze@gmail.com","726977":"Obiekw801@gmail.com","726984":"dulcetayo18@gmail.com","726986":"aydanzee@gmail.com","726995":"enebelirosemarye6@gmail.com","726997":"enebelirosemarye6@gmail.com","727020":"ogunkinle@gmail.com","727032":"enebelirosemarye6@gmail.com","727033":"haneefwaidi45@gmail.com","727048":"a.ayobami.d@gmail.com","727052":"okparajoachim3@gmail.com","727053":"info.copdev@gmail.com","727059":"tobibidemi@gmail.com","727060":"fdjones4u@gmail.com","727071":"gabatunde10@gmail.com","727078":"danielchidi1983@gmail.com","727112":"afclimited007@gmail.com","727113":"afclimited007@gmail.com","727127":"oladipoibukun60@gmail.com","727133":"mondayemmanuel78@yahoo.com","727141":"ademusibau84@gmail.com","727147":"Ojugo697@gmail.com","727181":"algaf2002@yahoo.com","727189":"olanrewajuyunusa43@gmail.com","727192":"amudatganiyu@gmail.com","727193":"amudatganiyu@gmail.com","727200":"ogunkinle@gmail.com","727208":"ugwufrancis94@gmail.com","727214":"larushi4luv@gmail.com","727230":"tobibidemi@gmail.com","727249":"gm0806853@gmail.com","727286":"gm0806853@gmail.com","727289":"mondayemmanuel78@yahoo.com","727320":"obenejake@gmail.com","727326":"christopherekwebe@yahoo.com","727328":"fanyaoha@yahoo.com","727357":"iaremu99@gmail.com","727362":"info.copdev@gmail.com","727430":"Virioda@yahoo.com","727515":"mercyadebanwo001@gmail.com","727606":"dimibe@hotmail.com","727608":"asttweff@gmail.com","727613":"tagbajeuk@yahoo.com","727659":"dimibe@hotmail.com","727661":"honmkt1989@gmail.com","727682":"sholasegbenu@gmail.com","727684":"makanjuolaazeez25@gmail.com","727688":"akylecfoods@gmail.com","727720":"sholasegbenu@gmail.com","727737":"iononiwu0920@gmail.com","727815":"agofurearoma@gmail.com","727830":"tagbajeuk@yahoo.com","727850":"tejuoshomicheal25@gmail.com","727898":"arowoloarowolo409@gmail.com","727970":"ajagbeolumideest2@gmail.com","727988":"jy_niyi@yahoo.co.uk","727989":"arowoloarowolo409@gmail.com","728025":"dejidurodolabrown@yahoo.com","728028":"sabinovates@gmail.com","728051":"jacime2002@gmail.com","728059":"fatihullah@hotmail.com","728093":"mercyadebanwo001@gmail.com","728098":"anisiobimelanie@yahoo.com","728101":"nathanbanji@gmail.com","728107":"willybk2015@gmail.com","728116":"larushi4luv@gmail.com","728117":"larushi4luv@gmail.com","728155":"stmikels4real@gmail.com","728303":"rufuskechi@gmail.com","728340":"hunsaoluwatosin.oh@gmail.com","728343":"hunsaoluwatosin.oh@gmail.com","728394":"paulmacjonathan@gmail.com","728407":"paulmacjonathan@gmail.com","728559":"emmanueloramen@gmail.com","728742":"isiomaplatinum@gmail.com","728777":"drbusuyi@yahoo.com","728778":"arowoloarowolo409@gmail.com","728786":"enebelirosemarye6@gmail.com","728819":"info@edenpower.ng","728826":"iononiwu0920@gmail.com","728832":"Obashichibuike600@gmail.com","728833":"michaelbasseymusic@gmail.com","728842":"omoomorodion@gmail.com","728846":"bellomobolaji1@gmail.com","728857":"study2improve@gmail.com","728867":"josepholuku@gmail.com","728874":"paulmacjonathan@gmail.com","728877":"Basseyeyire@gmail.com","728879":"t4lawtech@gmail.com","728885":"tagbajeuk@yahoo.com","729171":"komolafei894@gmail.com","729180":"shonibarekareem@gmail.com","729226":"jerryglobalchoice@gmail.com","729255":"gbolahanteemy07@gmail.com","729278":"ppmozea@gmail.com","729292":"dapomola17@yahoo.com","729323":"viyonjattu96@gmail.com","729346":"obenejake@gmail.com","729389":"onohchukwuebuka@gmail.com","729424":"princeonoyom@yahoo.com","729448":"ogunkinle@gmail.com","729488":"ojeladeenitan9@gmail.com","729516":"viyonjattu96@gmail.com","729533":"whandhos07@gmail.com","729560":"Jesseomosehin@gmail.com","729563":"drnogbomo@gmail.com","729568":"a.ayobami.d@gmail.com","729583":"fanyaoha@yahoo.com","729584":"olusholaoluwatosin10@gmail.com","729585":"amos1607@yahoo.com","729596":"allenameanthony2000@gmail.com","729598":"forbyimagination@gmail.com","729611":"sandinajohnson97@gmail.com","729616":"joeachinmadueke@gmail.com","729627":"allenameanthony2000@gmail.com","729674":"jegacomputers@gmail.com","729703":"deputydede435@gmail.com","729715":"biodunoguny@gmail.com","729767":"princetundeshado@gmail.com","729774":"mndadeoye@gmail.com","729814":"Ade.t.kehinde@gmail.com","729817":"Charles.ikegwuruka@broadview-ng.com","729839":"Anietiejohnson27@gmail.com","729843":"joeachinmadueke@gmail.com","729869":"joeachinmadueke@gmail.com","729986":"onohchukwuebuka@gmail.com","730005":"onohchukwuebuka@gmail.com","730172":"deputydede435@gmail.com","730179":"emmapatrick747@gmail.com","730305":"kal200020@yahoo.com","730342":"fanyaoha@yahoo.com","730365":"oyeniyiadenike419@gmail.com","730371":"willybk2015@gmail.com","730380":"kal200020@yahoo.com","730417":"Godwin170@gmail.com","730419":"idrisadetolamustapha@gmail.com","730422":"leke.kazeem@gmail.com","730441":"deputydede435@gmail.com","730475":"joanneadenle@gmail.com"};
 function ekBackfillEmails(tix){if(!Array.isArray(tix))return tix;var changed=false;tix.forEach(function(t){if((!t.email||!String(t.email).includes('@'))&&EK_EMAIL_BACKFILL[t.num]){t.email=EK_EMAIL_BACKFILL[t.num];changed=true;}});return changed;}
+function ekDedupeNote(tix){if(!Array.isArray(tix))return false;var changed=false;tix.forEach(function(t){var iss=(t.issue||'').trim().toLowerCase();var nt=(t.note||'').trim().toLowerCase();if(iss&&nt&&iss===nt){t.note='';changed=true;}});return changed;}
+function ekNormalizeCategory(tix){if(!Array.isArray(tix))return false;var changed=false;tix.forEach(function(t){if(!t.category)return;var c=canonCat(t.category);if(c&&c!=='Uncategorised'&&t.category!==c){t.category=c;changed=true;}});return changed;}
+function ekNormalizeStatus(tix){if(!Array.isArray(tix))return false;var changed=false;tix.forEach(function(t){var lo=String(t.status||'').toLowerCase().trim();var s;if(lo.indexOf('un')===0||lo.indexOf('unre')>=0||lo==='open'||lo==='pending'||lo==='')s='unresolved';else if(lo.indexOf('resolv')===0||lo==='closed'||lo==='done'||lo==='completed')s='resolved';else if(lo.indexOf('progress')>=0||lo.indexOf('assign')>=0||lo==='ongoing')s='progress';else s='unresolved';if(t.status!==s){t.status=s;changed=true;}});return changed;}
 (function(){
   var stored=localStorage.getItem('ek_v2_tickets');
-  if(stored){try{var _t=JSON.parse(stored);if(ekBackfillEmails(_t)){localStorage.setItem('ek_v2_tickets',JSON.stringify(_t));}window.EK_TICKETS=_t;return;}catch(e){}}
+  if(stored){try{var _t=JSON.parse(stored);var _c1=ekBackfillEmails(_t);var _c2=ekDedupeNote(_t);var _c3=ekNormalizeStatus(_t);var _c4=ekNormalizeCategory(_t);if(_c1||_c2||_c3||_c4){localStorage.setItem('ek_v2_tickets',JSON.stringify(_t));}window.EK_TICKETS=_t;return;}catch(e){}}
 
   // Seed from SharePoint baseline
   if(window.EK_BASELINE_TICKETS&&Array.isArray(window.EK_BASELINE_TICKETS)&&window.EK_BASELINE_TICKETS.length){
@@ -594,7 +659,7 @@ async function ekCloudAutoPull(){
   var norm1=cloud1;
   if(Array.isArray(cloud1.days)){
     var flat=[];
-    cloud1.days.forEach(function(day){(day.tickets||[]).forEach(function(t){flat.push({id:t.id||'tk_'+t.num,num:t.num||'',time:t.time||'',name:t.name||'',phone:(t.phone||'').replace(/^\+234/,'0'),meter:t.meter||'',addr:t.address||t.addr||'',bu:t.bu||'',category:t.category&&t.subcategory?t.category+' — '+t.subcategory:t.category||'',issue:t.note||t.title||'',resp:t.assignee||'',status:SM[(t.status||'').toLowerCase()]||'unresolved',note:t.resolutionNote||'',day:day.dayNum||new Date().getDate(),agent:t.agent||'manager',created:t.created||t.received||t.receivedAt||t.createdAt||t.date||t.Date||t.dateCreated||t.receivedDate||t.Created||t.timestamp||'',email:t.email||''});});});
+    cloud1.days.forEach(function(day){(day.tickets||[]).forEach(function(t){flat.push({id:t.id||'tk_'+t.num,num:t.num||'',time:t.time||'',name:t.name||'',phone:(t.phone||'').replace(/^\+234/,'0'),meter:t.meter||'',addr:t.address||t.addr||'',bu:t.bu||'',category:t.category&&t.subcategory?t.category+' — '+t.subcategory:t.category||'',issue:t.note||t.title||'',resp:t.assignee||'',status:SM[(t.status||'').toLowerCase()]||'unresolved',note:(function(){var iss=(t.note||t.title||'');var nt=(t.resolutionNote||'');return (nt&&iss&&nt.trim().toLowerCase()===iss.trim().toLowerCase())?'':nt;})(),day:day.dayNum||new Date().getDate(),agent:t.agent||'manager',created:t.created||t.received||t.receivedAt||t.createdAt||t.date||t.Date||t.dateCreated||t.receivedDate||t.Created||t.timestamp||'',email:t.email||''});});});
     norm1={manager:flat};
   }
   var cloudNorm=Object.assign({},norm1);
@@ -722,6 +787,10 @@ var EK_AGENT_PHOTOS = {
 
 
 
+
+
+
+
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 // ── DUTY WINDOW ─────────────────────────────────────────────
@@ -804,7 +873,7 @@ const Ico = {
 
 // ── SHARED COMPONENTS ──────────────────────────────────────────────
 function StatusBadge({ s }) {const m = { resolved: 'badge-res', progress: 'badge-prg', unresolved: 'badge-unr' };const l = { resolved: 'Resolved', progress: 'In Progress', unresolved: 'Unresolved' };return <span className={'badge ' + (m[s] || 'badge-unr')}>{l[s] || s}</span>;}
-function BuPill({ bu }) {return <span className="bu-pill">{bu || '—'}</span>;}
+function BuPill({ bu }) {return <span className="bu-pill" style={{ color: "rgb(39, 21, 228)" }}>{bu || '—'}</span>;}
 function Mono({ children, style }) {return <span style={{ fontFamily: "'JetBrains Mono',monospace", ...style }}>{children}</span>;}
 function Toast({ toast }) {if (!toast) return null;return <div className={'toast' + (toast.type === 'error' ? ' err' : '')}><span style={{ color: toast.type === 'error' ? '#F87171' : 'var(--ek-gold)' }}>⚡</span>{toast.msg}</div>;}
 
@@ -833,7 +902,7 @@ function DonutChart({ resolved, progress, unresolved }) {
         strokeDasharray={rDash + " " + (circ - rDash)} strokeDashoffset="0" />
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="#F59E0B" strokeWidth="14" strokeLinecap="butt"
         strokeDasharray={pDash + " " + (circ - pDash)} strokeDashoffset={-rDash} />
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#EF4444" strokeWidth="14" strokeLinecap="butt"
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#C2410C" strokeWidth="14" strokeLinecap="butt"
         strokeDasharray={uDash + " " + (circ - uDash)} strokeDashoffset={-(rDash + pDash)} />
       </g>
       {/* Text — upright, centered */}
@@ -937,7 +1006,7 @@ function Nav({ active, onChange, collapsed, onToggle, onSettings, onSignOut, onR
         </div>
         {!collapsed && <div className="nav-brand-text">
           <div className="nav-brand-title">EKEDP <span>Power App</span></div>
-          <div className="nav-brand-sub">Reporting Tool</div>
+          <div className="nav-brand-sub" style={{ color: "rgb(40, 28, 5)" }}>Reporting Tool</div>
         </div>}
         {!collapsed && <div style={{ marginLeft: 'auto', color: 'var(--muted)', display: 'flex' }}>{Ico.chev}</div>}
       </div>
@@ -952,7 +1021,7 @@ function Nav({ active, onChange, collapsed, onToggle, onSettings, onSignOut, onR
         <div style={{ font: '700 8px/1 Sora,sans-serif', color: 'var(--sub)', textTransform: 'uppercase', letterSpacing: '.14em', marginBottom: 6 }}>MONTH</div>
         <div style={{ position: 'relative' }}>
           <select value={activeMonth || currentYM} onChange={function (e) {setActiveMonth(e.target.value);localStorage.setItem('ek_active_month', e.target.value);}}
-          style={{ width: '100%', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', padding: '9px 30px 9px 11px', borderRadius: 8, border: '1px solid ' + (activeMonth === currentYM ? 'rgba(34,197,94,.55)' : 'var(--bsoft)'), background: activeMonth === currentYM ? 'rgba(34,197,94,.09)' : 'rgba(255,255,255,.03)', font: '700 12px/1 Sora,sans-serif', cursor: 'pointer', outline: 'none', color: "rgb(222, 40, 40)" }}>
+          style={{ width: '100%', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', padding: '9px 30px 9px 11px', borderRadius: 8, border: '1px solid ' + (activeMonth === currentYM ? 'rgba(34,197,94,.55)' : 'var(--bsoft)'), background: activeMonth === currentYM ? 'rgba(34,197,94,.09)' : 'rgba(255,255,255,.03)', font: '700 12px/1 Sora,sans-serif', cursor: 'pointer', outline: 'none', color: "rgb(222, 124, 40)" }}>
             {(availMonths || []).map(function (ym) {
               var parts = ym.split('-');
               var label = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
@@ -1060,7 +1129,7 @@ function Dashboard({ tickets, carryTix, shifts, onShift, onSettings, onNav, sign
   { label: 'Total', value: all, color: '#60A5FA', sub: 'All time' },
   { label: 'Resolved', value: res, color: '#22C55E', sub: rate + '% rate' },
   { label: 'In Progress', value: prg, color: '#F59E0B', sub: 'Being handled' },
-  { label: 'Unresolved', value: unr, color: '#EF4444', sub: 'Action needed' },
+  { label: 'Unresolved', value: unr, color: '#C2410C', sub: 'Action needed' },
   { label: "Today's", value: today.length, color: '#C4B5FD', sub: 'Day ' + new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getDate() }];
 
 
@@ -1142,7 +1211,7 @@ function Dashboard({ tickets, carryTix, shifts, onShift, onSettings, onNav, sign
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
                 {SCORE.map(function (s) {
-                  const dot = s.ok ? '#22C55E' : s.warn ? '#EF4444' : '#94A3B8';
+                  const dot = s.ok ? '#22C55E' : s.warn ? '#C2410C' : '#94A3B8';
                   const mark = s.ok ? '✓' : s.warn ? '✕' : '·';
                   return (
                     <div key={s.l} style={{ background: 'var(--bg2)', border: '1px solid var(--bsoft)', borderRadius: 10, padding: '10px 12px', borderLeft: '3px solid ' + dot }}>
@@ -1237,7 +1306,7 @@ function Dashboard({ tickets, carryTix, shifts, onShift, onSettings, onNav, sign
 
                 })}
                 <div style={{ display: 'flex', gap: 12, marginTop: 10, borderTop: '1px solid var(--bsoft)', paddingTop: 8 }}>
-                  {[{ c: '#22C55E', l: 'Resolved' }, { c: '#F59E0B', l: 'In Progress' }, { c: '#EF4444', l: 'Unresolved' }].map(function (s) {return (
+                  {[{ c: '#22C55E', l: 'Resolved' }, { c: '#F59E0B', l: 'In Progress' }, { c: '#C2410C', l: 'Unresolved' }].map(function (s) {return (
                       <div key={s.l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <div style={{ width: 7, height: 7, borderRadius: 2, background: s.c }} />
                       <span style={{ font: '500 9px Sora,sans-serif', color: 'var(--muted)' }}>{s.l}</span>
@@ -1281,7 +1350,7 @@ function Dashboard({ tickets, carryTix, shifts, onShift, onSettings, onNav, sign
                       {byDay.map(function (d, i) {if (dayN > 8 && i % 2 !== 0 && i !== dayN - 1) return null;var p = pts[i];return <text key={d.day} x={p.x} y={H - 5} textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="9" fontFamily="JetBrains Mono,monospace">D{d.day}</text>;})}
                     </svg>
                     <div style={{ display: 'flex', gap: 3, marginTop: 8 }}>
-                      {byDay.map(function (d) {var col = d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? '#F59E0B' : d.total ? '#EF4444' : 'rgba(255,255,255,.06)';return <div key={d.day} title={'Day ' + d.day + ' · ' + d.pct + '% resolved'} style={{ flex: 1, height: 6, borderRadius: 2, background: col, opacity: .85 }} />;})}
+                      {byDay.map(function (d) {var col = d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? '#F59E0B' : d.total ? '#C2410C' : 'rgba(255,255,255,.06)';return <div key={d.day} title={'Day ' + d.day + ' · ' + d.pct + '% resolved'} style={{ flex: 1, height: 6, borderRadius: 2, background: col, opacity: .85 }} />;})}
                     </div>
                     <div style={{ font: '600 10px Sora,sans-serif', color: 'var(--sub)', marginTop: 5 }}>Resolution rate per day · green ≥80% · amber ≥50% · red &lt;50%</div>
                   </div>);
@@ -1661,7 +1730,7 @@ function DailyReport({ tickets, onUpdate, onSettings }) {
                   </div>);
               })}
                 <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
-                  {[{ c: '#22C55E', l: 'Resolved' }, { c: '#F59E0B', l: 'In Progress' }, { c: '#EF4444', l: 'Unresolved' }].map(function (s) {return (
+                  {[{ c: '#22C55E', l: 'Resolved' }, { c: '#F59E0B', l: 'In Progress' }, { c: '#C2410C', l: 'Unresolved' }].map(function (s) {return (
                     <div key={s.l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <div style={{ width: 7, height: 7, borderRadius: 2, background: s.c }} />
                       <span style={{ font: '500 9px Sora,sans-serif', color: 'var(--muted)' }}>{s.l}</span>
@@ -1793,7 +1862,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
     const ci = XLS_COLS_M.indexOf(field);
     const ri = rows.findIndex(function (x) {return x.id === t.id;});
     if (ev.key === 'Escape') {ev.preventDefault();setCellEdit(null);return;}
-    if (ev.key === 'Enter' && field !== 'note') {ev.preventDefault();commitCellM(t, true);if (ri < rows.length - 1) setCellEdit({ id: rows[ri + 1].id, field, val: rows[ri + 1][field] || '' });else setCellEdit(null);return;}
+    if (ev.key === 'Enter' && !ev.shiftKey) {ev.preventDefault();commitCellM(t, true);if (ri < rows.length - 1) setCellEdit({ id: rows[ri + 1].id, field, val: rows[ri + 1][field] || '' });else setCellEdit(null);return;}
     if (ev.key === 'ArrowDown' && !ev.shiftKey && field !== 'note') {ev.preventDefault();commitCellM(t, true);if (ri < rows.length - 1) setCellEdit({ id: rows[ri + 1].id, field, val: rows[ri + 1][field] || '' });return;}
     if (ev.key === 'ArrowUp' && field !== 'note') {ev.preventDefault();commitCellM(t, true);if (ri > 0) setCellEdit({ id: rows[ri - 1].id, field, val: rows[ri - 1][field] || '' });return;}
     if (ev.key === 'Tab') {ev.preventDefault();commitCellM(t, true);
@@ -2173,7 +2242,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
                 {SCORE.map(function (s) {
-                  var dot = s.ok ? '#22C55E' : s.warn ? '#EF4444' : '#94A3B8';
+                  var dot = s.ok ? '#22C55E' : s.warn ? '#C2410C' : '#94A3B8';
                   var mark = s.ok ? '✓' : s.warn ? '✕' : '·';
                   return (
                     <div key={s.l} style={{ background: 'var(--bg2)', border: '1px solid var(--bsoft)', borderRadius: 10, padding: '10px 12px', borderLeft: '3px solid ' + dot }}>
@@ -2192,7 +2261,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
         }()}
         {/* Stat bar — matches Agents Hub */}
         <div className="stat-bar" style={{ marginBottom: 14 }}>
-          {[{ l: 'Total', v: filtered.length, c: 'var(--text)' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#EF4444' }, { l: 'Repeat 🔁', v: repeatTotalAC, c: '#A78BFA' }].map(function (k) {return (
+          {[{ l: 'Total', v: filtered.length, c: 'var(--text)' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#C2410C' }, { l: 'Repeat 🔁', v: repeatTotalAC, c: '#A78BFA' }].map(function (k) {return (
               <div key={k.l} className="sbar-item">
               <span className="sbar-lbl">{k.l}</span>
               <span className="sbar-val" style={{ color: k.c }}>{k.v}</span>
@@ -2214,14 +2283,14 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
             <span style={{ font: '600 11px Sora,sans-serif', color: 'var(--muted)' }}>Set category:</span>
             <select className="sel" style={{ height: 32, flex: '0 0 170px' }} value={bulkCat} onChange={function (e) {setBulkCat(e.target.value);}}>
               <option value="">— pick category —</option>
-              {EK_CATS.map(function (c) {return <option key={c} value={c}>{c.split('/')[0].trim()}</option>;})}
+              {EK_CATS.map(function (c) {return <option key={c} value={c}>{c.split('/')[0].trim().toUpperCase()}</option>;})}
             </select>
             <button onClick={applyBulkCat} className="btn btn-gold btn-sm" style={{ height: 32, padding: '0 14px', opacity: bulkCat ? 1 : .45, cursor: bulkCat ? 'pointer' : 'not-allowed' }}>Apply</button>
             <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,.15)', margin: '0 4px' }} />
             <button onClick={function () {autoAssignResp(selected);}} style={{ height: 32, padding: '0 14px', background: 'rgba(99,102,241,.25)', color: 'var(--infob)', border: '1px solid rgba(99,102,241,.4)', borderRadius: 7, font: '800 10px Sora,sans-serif', cursor: 'pointer' }}>
               🧠 Auto-assign Resp.
             </button>
-            <button onClick={function () {if (window.confirm('Delete ' + selected.length + ' ticket' + (selected.length > 1 ? 's' : '') + ' permanently? This cannot be undone.')) {onDelete && onDelete(selected);setSelected([]);}}} style={{ height: 32, padding: '0 14px', background: 'rgba(239,68,68,.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,.4)', borderRadius: 7, font: '800 10px Sora,sans-serif', cursor: 'pointer' }}>
+            <button onClick={function () {if (window.confirm('Delete ' + selected.length + ' ticket' + (selected.length > 1 ? 's' : '') + ' permanently? This cannot be undone.')) {onDelete && onDelete(selected);setSelected([]);}}} style={{ height: 32, padding: '0 14px', background: 'rgba(239,68,68,.15)', color: '#C2410C', border: '1px solid rgba(239,68,68,.4)', borderRadius: 7, font: '800 10px Sora,sans-serif', cursor: 'pointer' }}>
               🗑 Delete selected
             </button>
             <button onClick={clearSelection} className="btn btn-sm btn-danger" style={{ height: 32, marginLeft: 'auto' }}>Clear</button>
@@ -2293,13 +2362,13 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
                         <td className={'xls-cell' + (cellEdit && cellEdit.id === t.id && cellEdit.field === 'category' ? ' xls-editing' : '')} style={{ fontSize: 11, maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', position: 'relative' }} onDoubleClick={function (ev) {ev.stopPropagation();setCellEdit({ id: t.id, field: 'category', val: t.category || '' });}} onClick={function (ev) {if (cellEdit && cellEdit.id === t.id) ev.stopPropagation();else setExpanded(isExp ? null : t.id);}}>
                           {cellEdit && cellEdit.id === t.id && cellEdit.field === 'category' ?
                           <div style={{ position: 'absolute', top: 0, left: 0, zIndex: 200, background: 'var(--surface)', border: '1.5px solid var(--ek-gold)', borderRadius: 6, boxShadow: '0 4px 16px rgba(0,0,0,.4)', minWidth: 180 }}>
-                                <select className="xls-sel" autoFocus value={cellEdit.val} onChange={function (ev) {setCellEdit(Object.assign({}, cellEdit, { val: ev.target.value }));}} onBlur={function () {commitCellM(t);}} onKeyDown={function (ev) {xlsNavM(ev, t, 'category', paged);}} style={{ width: '100%', border: 'none', background: 'transparent', padding: '6px 8px', font: '600 11px Sora,sans-serif', color: 'var(--fg)', outline: 'none' }}>{EK_CATS.map(function (c) {return <option key={c} value={c}>{c}</option>;})}</select>
+                                <select className="xls-sel" autoFocus value={cellEdit.val} onChange={function (ev) {setCellEdit(Object.assign({}, cellEdit, { val: ev.target.value }));}} onBlur={function () {commitCellM(t);}} onKeyDown={function (ev) {xlsNavM(ev, t, 'category', paged);}} style={{ width: '100%', border: 'none', background: 'transparent', padding: '6px 8px', font: '600 11px Sora,sans-serif', color: 'var(--fg)', outline: 'none' }}>{EK_CATS.map(function (c) {return <option key={c} value={c}>{c.toUpperCase()}</option>;})}</select>
                               </div> :
                           <>{t.category && t.category.split('/')[0].trim().toUpperCase()}{!readOnly && <span className="xls-hint">dbl-click</span>}</>
                           }
                         </td>
                         <td style={{ padding: '4px 6px' }} onClick={function (ev) {ev.stopPropagation();cycleStatusM(t);}}>
-                          {function () {const s = t.status || 'unresolved';const cfg = { resolved: { bg: '#14532d', color: '#4ade80', label: '✓ RESOLVED' }, progress: { bg: '#78350f', color: '#FCD34D', label: '⟳ IN PROGRESS' }, unresolved: { bg: '#450a0a', color: '#f87171', label: '✕ UNRESOLVED' } }[s] || { bg: '#1e1e2e', color: '#94a3b8', label: s.toUpperCase() };return <button onClick={function (ev) {ev.stopPropagation();cycleStatusM(t);}} style={{ padding: '3px 8px', borderRadius: 5, background: cfg.bg, color: cfg.color, border: '1px solid ' + cfg.color + '55', font: '800 9px Sora,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap' }} title="Click to cycle status">{cfg.label}</button>;}()}
+                          {function () {const s = t.status || 'unresolved';const cfg = { resolved: { bg: '#14532d', color: '#4ade80', label: '✓ RESOLVED' }, progress: { bg: '#78350f', color: '#FCD34D', label: '⟳ IN PROGRESS' }, unresolved: { bg: '#7C2D12', color: '#FDBA74', label: '✕ UNRESOLVED' } }[s] || { bg: '#1e1e2e', color: '#94a3b8', label: s.toUpperCase() };return <button onClick={function (ev) {ev.stopPropagation();cycleStatusM(t);}} style={{ padding: '3px 8px', borderRadius: 5, background: cfg.bg, color: cfg.color, border: '1px solid ' + cfg.color + '55', font: '800 9px Sora,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap' }} title="Click to cycle status">{cfg.label}</button>;}()}
                         </td>
                         <td className={'xls-cell' + (cellEdit && cellEdit.id === t.id && cellEdit.field === 'resp' ? ' xls-editing' : '')} style={{ fontSize: 11, color: 'var(--muted)', maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', position: 'relative' }} onDoubleClick={function (ev) {ev.stopPropagation();setCellEdit({ id: t.id, field: 'resp', val: t.resp || '' });}} onClick={function (ev) {if (cellEdit && cellEdit.id === t.id) ev.stopPropagation();else setExpanded(isExp ? null : t.id);}}>
                           {cellEdit && cellEdit.id === t.id && cellEdit.field === 'resp' ?
@@ -2368,7 +2437,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
                               <textarea className="inp" rows={3} value={getF(t, 'issue') || ''} onClick={function (e) {e.stopPropagation();}} onChange={function (e) {e.stopPropagation();setF(t.id, 'issue', e.target.value);}} placeholder="Describe the complaint…" style={{ resize: 'vertical', fontSize: 11, marginBottom: 10 }} />
                               <label className="lbl">Status of this complaint</label>
                               <div style={{ display: 'flex', gap: 8 }}>
-                                {[{ v: 'progress', l: '⏳ In Progress', c: '#F59E0B' }, { v: 'resolved', l: '✅ Resolved', c: '#22C55E' }, { v: 'unresolved', l: '🔴 Unresolved', c: '#EF4444' }].map(function (s) {const on = getF(t, 'status') === s.v;return (
+                                {[{ v: 'progress', l: '⏳ In Progress', c: '#F59E0B' }, { v: 'resolved', l: '✅ Resolved', c: '#22C55E' }, { v: 'unresolved', l: '🔴 Unresolved', c: '#C2410C' }].map(function (s) {const on = getF(t, 'status') === s.v;return (
                                       <button key={s.v} onClick={function (e) {e.stopPropagation();setF(t.id, 'status', s.v);if (s.v === 'resolved') {if (!getF(t, 'resolvedDate')) setF(t.id, 'resolvedDate', watTodayStr());} else {setF(t.id, 'resolvedDate', '');}}} style={{ flex: 1, padding: '7px', border: '1px solid ' + (on ? s.c : 'var(--bsoft)'), borderRadius: 7, background: on ? s.c + '22' : 'transparent', color: on ? s.c : 'var(--muted)', font: '700 11px Sora,sans-serif', cursor: 'pointer' }}>{s.l}</button>);
                                   })}
                               </div>
@@ -2379,8 +2448,8 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                                 <div>
                                   <label className="lbl">Category</label>
-                                  <select className="sel" value={getF(t, 'category') || EK_CATS[0]} onClick={function (e) {e.stopPropagation();}} onChange={function (e) {e.stopPropagation();const val = e.target.value;setF(t.id, 'category', val);const ar = EK_RESP.find(function (r) {return r.cat === val;});if (ar) setF(t.id, 'resp', ar.name);}}>
-                                    {EK_CATS.map(function (c) {return <option key={c} value={c}>{c}</option>;})}
+                                  <select className="sel" value={getF(t, 'category') || EK_CATS[0]} onClick={function (e) {e.stopPropagation();}} onChange={function (e) {e.stopPropagation();const val = e.target.value;setF(t.id, 'category', val);var ar = respForCat(val);if (ar) setF(t.id, 'resp', ar);}}>
+                                    {EK_CATS.map(function (c) {return <option key={c} value={c}>{c.toUpperCase()}</option>;})}
                                   </select>
                                 </div>
                                 <div>
@@ -2584,12 +2653,12 @@ function LogTicket({ tickets, onAdd, showToast, onSettings }) {
               <div><label className="lbl">Responsible Party</label><select className="sel" value={form.resp} onChange={function (e) {setF('resp', e.target.value);}}>{EK_RESP.map(function (r) {return <option key={r.name} value={r.name}>{r.name}</option>;})}</select></div>
             </div>
             <div style={{ marginBottom: 12 }}><label className="lbl">Address</label><input className="inp" value={form.addr} onChange={function (e) {setF('addr', e.target.value);}} placeholder="Street address" /></div>
-            <div style={{ marginBottom: 12 }}><label className="lbl">Category</label><select className="sel" value={form.category} onChange={function (e) {setCatManual(true);setAutoCat(null);setF('category', e.target.value);var r = respForCat(e.target.value);if (r) setF('resp', r);}}>{EK_CATS.map(function (c) {return <option key={c} value={c}>{c}</option>;})}</select>{autoCat && !catManual && form.issue && <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, font: '600 10px Sora,sans-serif', color: 'var(--ek-gold)' }}><span>✨</span><span>Auto-detected from complaint · pick the dropdown to override</span></div>}</div>
+            <div style={{ marginBottom: 12 }}><label className="lbl">Category</label><select className="sel" value={form.category} onChange={function (e) {setCatManual(true);setAutoCat(null);setF('category', e.target.value);var r = respForCat(e.target.value);if (r) setF('resp', r);}}>{EK_CATS.map(function (c) {return <option key={c} value={c}>{c.toUpperCase()}</option>;})}</select>{autoCat && !catManual && form.issue && <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, font: '600 10px Sora,sans-serif', color: 'var(--ek-gold)' }}><span>✨</span><span>Auto-detected from complaint · pick the dropdown to override</span></div>}</div>
             <div style={{ marginBottom: 12 }}><label className="lbl">📝 Complaint Description <span style={{ color: 'var(--muted)', fontWeight: 500 }}>— the customer's complaint</span></label><textarea className="inp" rows={3} value={form.issue} onChange={function (e) {onIssueChange(e.target.value);}} placeholder="Describe the complaint… (category &amp; responsible party auto-fill as you type)" style={{ resize: 'vertical' }} /></div>
             <div style={{ marginBottom: 14 }}>
               <label className="lbl">Status</label>
               <div style={{ display: 'flex', gap: 8 }}>
-                {[{ v: 'progress', l: '⟳ In Progress', c: '#F59E0B' }, { v: 'resolved', l: '✓ Resolved', c: '#22C55E' }, { v: 'unresolved', l: '✕ Unresolved', c: '#EF4444' }].map(function (s) {return (
+                {[{ v: 'progress', l: '⟳ In Progress', c: '#F59E0B' }, { v: 'resolved', l: '✓ Resolved', c: '#22C55E' }, { v: 'unresolved', l: '✕ Unresolved', c: '#C2410C' }].map(function (s) {return (
                   <button type="button" key={s.v} onClick={function () {setF('status', s.v);}} style={{ flex: 1, padding: '8px 4px', border: '1px solid ' + (form.status === s.v ? s.c : 'var(--bsoft)'), borderRadius: 8, background: form.status === s.v ? s.c + '22' : 'transparent', color: form.status === s.v ? s.c : 'var(--muted)', font: '700 11px Sora,sans-serif', cursor: 'pointer' }}>{s.l}</button>);})}
               </div>
             </div>
@@ -2711,7 +2780,7 @@ function Cumulative({ tickets, showToast }) {
       </div>
       <div style={{ padding: '18px 28px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 16 }}>
-          {[{ l: 'Grand Total', v: totals.grand, c: '#60A5FA' }, { l: 'Resolved', v: totals.res, c: '#22C55E' }, { l: 'In Progress', v: totals.prg, c: '#F59E0B' }, { l: 'Unresolved', v: totals.unr, c: '#EF4444' }].map(function (k) {return (
+          {[{ l: 'Grand Total', v: totals.grand, c: '#60A5FA' }, { l: 'Resolved', v: totals.res, c: '#22C55E' }, { l: 'In Progress', v: totals.prg, c: '#F59E0B' }, { l: 'Unresolved', v: totals.unr, c: '#C2410C' }].map(function (k) {return (
               <div key={k.l} style={{ background: 'rgba(0,0,0,.22)', border: '1px solid var(--bsoft)', borderRadius: 12, padding: '14px 16px', textAlign: 'center' }}>
               <div style={{ font: '700 9px/1 Sora,sans-serif', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>{k.l}</div>
               <div style={{ font: "800 28px/1 'JetBrains Mono',monospace", color: k.c }}>{k.v}</div>
@@ -2738,7 +2807,7 @@ function Cumulative({ tickets, showToast }) {
                   <input className="inp" value={r.name} onChange={function (e) {updateDraft(i, 'name', e.target.value);}} placeholder="Responsible name" style={{ padding: '7px 9px', font: '600 12px Sora,sans-serif' }} />
                   <input className="inp" value={r.cat} onChange={function (e) {updateDraft(i, 'cat', e.target.value);}} placeholder="Category" style={{ padding: '7px 9px', font: '600 12px Sora,sans-serif' }} />
                   <input type="color" value={r.color || '#94A3B8'} onChange={function (e) {updateDraft(i, 'color', e.target.value);}} style={{ width: 36, height: 30, border: '1px solid var(--bsoft)', borderRadius: 6, background: 'transparent', cursor: 'pointer', padding: 2, justifySelf: 'center' }} />
-                  <button onClick={function () {delDraft(i);}} style={{ padding: '6px 10px', background: 'rgba(239,68,68,.12)', color: '#EF4444', border: '1px solid rgba(239,68,68,.3)', borderRadius: 7, font: '700 11px Sora,sans-serif', cursor: 'pointer', justifySelf: 'center' }}>✕</button>
+                  <button onClick={function () {delDraft(i);}} style={{ padding: '6px 10px', background: 'rgba(239,68,68,.12)', color: '#C2410C', border: '1px solid rgba(239,68,68,.3)', borderRadius: 7, font: '700 11px Sora,sans-serif', cursor: 'pointer', justifySelf: 'center' }}>✕</button>
                 </div>);
             })}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--bsoft)' }}>
@@ -2900,12 +2969,12 @@ function AnalyticsDash({ tickets, onNav, signedInName, onSettings }) {
   { key: 'total', label: 'Total', color: '#6366F1', on: toggles.total, data: byDay.map(function (b) {return b.total;}) },
   { key: 'resolved', label: 'Resolved', color: '#22C55E', on: toggles.resolved, data: byDay.map(function (b) {return b.res;}) },
   { key: 'progress', label: 'In Progress', color: '#F59E0B', on: toggles.progress, data: byDay.map(function (b) {return b.prg;}) },
-  { key: 'unresolved', label: 'Unresolved', color: '#EF4444', on: toggles.unresolved, data: byDay.map(function (b) {return b.unr;}) },
+  { key: 'unresolved', label: 'Unresolved', color: '#C2410C', on: toggles.unresolved, data: byDay.map(function (b) {return b.unr;}) },
   { key: 'repeat', label: 'Repeat', color: '#A855F7', on: toggles.repeat, data: byDay.map(function (b) {return b.rep;}) }];
 
 
   // By category
-  const catColors = ['#6366F1', '#F97316', '#22C55E', '#EF4444', '#F59E0B', '#8B5CF6', '#2DD4BF', '#EC4899', '#60A5FA', '#34D399'];
+  const catColors = ['#6366F1', '#F97316', '#22C55E', '#C2410C', '#F59E0B', '#8B5CF6', '#2DD4BF', '#EC4899', '#60A5FA', '#34D399'];
   const byCat = EK_CATS.map(function (c, i) {var tx = tickets.filter(function (t) {return t.category === c;});var rs = tx.filter(function (t) {return t.status === 'resolved';}).length;return { cat: c, total: tx.length, res: rs, pct: tx.length ? Math.round(rs / tx.length * 100) : 0, color: catColors[i % catColors.length] };}).filter(function (c) {return c.total > 0;}).sort(function (a, b) {return b.total - a.total;});
   const maxCat = Math.max.apply(null, byCat.map(function (c) {return c.total;}).concat([1]));
 
@@ -2919,10 +2988,10 @@ function AnalyticsDash({ tickets, onNav, signedInName, onSettings }) {
   { label: 'Resolved', value: res, color: '#22C55E', sub: rate + '% rate' },
   { label: 'Resolution Rate', value: rate + '%', color: '#34D399', sub: 'target ≥ 80%' },
   { label: 'In Progress', value: prg, color: '#F59E0B', sub: 'being handled' },
-  { label: 'Unresolved', value: unr, color: '#EF4444', sub: 'action needed' },
+  { label: 'Unresolved', value: unr, color: '#C2410C', sub: 'action needed' },
   { label: "Today", value: today, color: '#C4B5FD', sub: 'Day ' + dayN }];
 
-  const TOGGLE_META = [{ k: 'total', c: '#6366F1', l: 'Total' }, { k: 'resolved', c: '#22C55E', l: 'Resolved' }, { k: 'progress', c: '#F59E0B', l: 'In Progress' }, { k: 'unresolved', c: '#EF4444', l: 'Unresolved' }, { k: 'repeat', c: '#A855F7', l: 'Repeat' }];
+  const TOGGLE_META = [{ k: 'total', c: '#6366F1', l: 'Total' }, { k: 'resolved', c: '#22C55E', l: 'Resolved' }, { k: 'progress', c: '#F59E0B', l: 'In Progress' }, { k: 'unresolved', c: '#C2410C', l: 'Unresolved' }, { k: 'repeat', c: '#A855F7', l: 'Repeat' }];
 
   return (
     <div>
@@ -2930,7 +2999,7 @@ function AnalyticsDash({ tickets, onNav, signedInName, onSettings }) {
       <div className="hero" style={{ padding: '18px 28px' }}>
         <div className="hero-row" style={{ marginBottom: 0 }}>
           <div>
-            <div className="hero-sub" style={{ marginBottom: 8 }}>EKEDP Customer Experience · Marina HQ</div>
+            <div className="hero-sub" style={{ marginBottom: 8, color: "rgb(111, 77, 11)" }}>EKEDP Customer Experience · Marina HQ</div>
             <div className="hero-greeting">{greet}, {signedInName || 'CX Team'} {greetE}</div>
             <div style={{ font: '500 12px/1.3 Sora,sans-serif', marginTop: 8, color: "rgba(18, 6, 1, 0.54)" }}>📈 Operations Analytics · Days 1–{dayN} · {wat.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</div>
           </div>
@@ -3007,7 +3076,7 @@ function AnalyticsDash({ tickets, onNav, signedInName, onSettings }) {
           <div style={{ padding: '18px', display: 'flex', alignItems: 'center', gap: 18 }}>
             <DonutChart resolved={res} progress={prg} unresolved={unr} />
             <div style={{ flex: 1 }}>
-              {[{ label: 'Resolved', v: res, c: '#22C55E' }, { label: 'In Progress', v: prg, c: '#F59E0B' }, { label: 'Unresolved', v: unr, c: '#EF4444' }].map(function (s) {var tot = res + prg + unr || 1;return (
+              {[{ label: 'Resolved', v: res, c: '#22C55E' }, { label: 'In Progress', v: prg, c: '#F59E0B' }, { label: 'Unresolved', v: unr, c: '#C2410C' }].map(function (s) {var tot = res + prg + unr || 1;return (
                   <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 11 }}>
                   <div style={{ width: 9, height: 9, borderRadius: '50%', background: s.c, flexShrink: 0, boxShadow: '0 0 6px ' + s.c }} />
                   <div style={{ flex: 1 }}>
@@ -3080,7 +3149,7 @@ function AnalyticsDash({ tickets, onNav, signedInName, onSettings }) {
 // ── ANALYTICS ─────────────────────────────────────────────────────
 function Analytics({ tickets }) {
   const byBu = EK_BUS.map(function (b) {var tix = tickets.filter(function (t) {return t.bu === b;});var res = tix.filter(function (t) {return t.status === 'resolved';}).length;var prg = tix.filter(function (t) {return t.status === 'progress';}).length;return { bu: b, total: tix.length, res: res, prg: prg, unr: tix.length - res - prg, pct: tix.length ? Math.round(res / tix.length * 100) : 0 };}).filter(function (b) {return b.total > 0;}).sort(function (a, b) {return b.total - a.total;});
-  const byCat = EK_CATS.map(function (c, i) {var tix = tickets.filter(function (t) {return t.category === c;});var res = tix.filter(function (t) {return t.status === 'resolved';}).length;const colors = ['#6366F1', '#F97316', '#22C55E', '#EF4444', '#F59E0B', '#8B5CF6', '#2DD4BF', '#EC4899', '#60A5FA', '#34D399'];return { cat: c, total: tix.length, res: res, pct: tix.length ? Math.round(res / tix.length * 100) : 0, color: colors[i % colors.length] };}).filter(function (c) {return c.total > 0;}).sort(function (a, b) {return b.total - a.total;});
+  const byCat = EK_CATS.map(function (c, i) {var tix = tickets.filter(function (t) {return t.category === c;});var res = tix.filter(function (t) {return t.status === 'resolved';}).length;const colors = ['#6366F1', '#F97316', '#22C55E', '#C2410C', '#F59E0B', '#8B5CF6', '#2DD4BF', '#EC4899', '#60A5FA', '#34D399'];return { cat: c, total: tix.length, res: res, pct: tix.length ? Math.round(res / tix.length * 100) : 0, color: colors[i % colors.length] };}).filter(function (c) {return c.total > 0;}).sort(function (a, b) {return b.total - a.total;});
   const byDay = Array.from({ length: new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getDate() }, function (_, i) {var d = i + 1;var tix = tickets.filter(function (t) {return watDayOf(t) === d;});var res = tix.filter(function (t) {return t.status === 'resolved';}).length;return { day: d, total: tix.length, res: res, pct: tix.length ? Math.round(res / tix.length * 100) : 0 };});
   const maxBu = Math.max(...byBu.map(function (b) {return b.total;}), 1);
   const maxDay = Math.max(...byDay.map(function (d) {return d.total;}), 1);
@@ -3107,7 +3176,7 @@ function Analytics({ tickets }) {
           </div>
           {/* Quick stats */}
           <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            {[{ l: 'Total', v: totalAll, c: '#60A5FA' }, { l: 'Resolved', v: totalRes, c: '#22C55E' }, { l: 'Unresolved', v: totalUnr, c: '#EF4444' }, { l: 'Avg Rate', v: avgRate + '%', c: avgRate >= 80 ? '#22C55E' : avgRate >= 50 ? '#F59E0B' : '#EF4444' }].map(function (k) {return (
+            {[{ l: 'Total', v: totalAll, c: '#60A5FA' }, { l: 'Resolved', v: totalRes, c: '#22C55E' }, { l: 'Unresolved', v: totalUnr, c: '#C2410C' }, { l: 'Avg Rate', v: avgRate + '%', c: avgRate >= 80 ? '#22C55E' : avgRate >= 50 ? '#F59E0B' : '#C2410C' }].map(function (k) {return (
                 <div key={k.l} style={{ textAlign: 'center', background: 'rgba(255,255,255,.06)', borderRadius: 10, padding: '10px 16px', border: '1px solid var(--bsoft)' }}>
                 <div style={{ font: '700 9px/1 Sora,sans-serif', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 5 }}>{k.l}</div>
                 <div style={{ font: "800 20px/1 'JetBrains Mono',monospace", color: k.c }}>{k.v}</div>
@@ -3143,7 +3212,7 @@ function Analytics({ tickets }) {
             </svg>
             {/* Sparkline rate row */}
             <div style={{ display: 'flex', gap: 2, marginTop: 8 }}>
-              {byDay.map(function (d) {const col = d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? '#F59E0B' : d.total ? '#EF4444' : 'rgba(255,255,255,.06)';return (
+              {byDay.map(function (d) {const col = d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? '#F59E0B' : d.total ? '#C2410C' : 'rgba(255,255,255,.06)';return (
                   <div key={d.day} title={'Day ' + d.day + ' · ' + d.pct + '% resolved'} style={{ flex: 1, height: 6, borderRadius: 2, background: col, opacity: .85, transition: 'opacity .15s', cursor: 'default' }} />);})}
             </div>
             <div style={{ font: '600 10px Sora,sans-serif', color: 'var(--sub)', marginTop: 4 }}>Resolution rate per day (green = ≥80%, amber = ≥50%, red = &lt;50%)</div>
@@ -3168,7 +3237,7 @@ function Analytics({ tickets }) {
                   <div style={{ height: 8, background: 'rgba(255,255,255,.05)', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
                     <div style={{ width: b.res / maxBu * 100 + '%', background: '#22C55E', transition: 'width .6s' }} />
                     <div style={{ width: b.prg / maxBu * 100 + '%', background: '#F59E0B', transition: 'width .6s' }} />
-                    <div style={{ width: b.unr / maxBu * 100 + '%', background: '#EF4444', opacity: .7, transition: 'width .6s' }} />
+                    <div style={{ width: b.unr / maxBu * 100 + '%', background: '#C2410C', opacity: .7, transition: 'width .6s' }} />
                   </div>
                 </div>);})}
             </div>
@@ -3200,7 +3269,7 @@ function Analytics({ tickets }) {
           <div style={{ padding: '14px 18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))', gap: 10 }}>
             {byBu.slice().sort(function (a, b) {return b.pct - a.pct;}).map(function (b, i) {
               const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
-              const col = b.pct >= 80 ? '#22C55E' : b.pct >= 50 ? '#F59E0B' : '#EF4444';
+              const col = b.pct >= 80 ? '#22C55E' : b.pct >= 50 ? '#F59E0B' : '#C2410C';
               const circ = 2 * Math.PI * 22;const off = circ * (1 - b.pct / 100);
               return (
                 <div key={b.bu} style={{ background: 'rgba(0,0,0,.18)', borderRadius: 12, padding: '14px', textAlign: 'center', border: '1px solid var(--bsoft)' }}>
@@ -3328,11 +3397,11 @@ function SlotReport({ tickets, showToast }) {
     '<div><div style="font-size:18px;font-weight:800">EKEDP Power App — ' + slot.label + '</div>' +
     '<div style="font-size:12px;opacity:.8;margin-top:4px">Managers Hub · ' + dateStr + '</div></div></div>' +
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">' +
-    [['TOTAL', todayTix.length, '#3B82F6'], ['RESOLVED', resTix.length, '#22C55E'], ['IN PROGRESS', prgTix.length, '#F59E0B'], ['UNRESOLVED', unrTix.length, '#EF4444']].map(function (k) {return '<div style="border:1px solid #E2E8F0;border-top:3px solid ' + k[2] + ';border-radius:8px;padding:14px 16px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94A3B8">' + k[0] + '</div><div style="font-size:28px;font-weight:800;font-family:monospace;color:' + k[2] + ';margin-top:4px">' + k[1] + '</div></div>';}).join('') +
+    [['TOTAL', todayTix.length, '#3B82F6'], ['RESOLVED', resTix.length, '#22C55E'], ['IN PROGRESS', prgTix.length, '#F59E0B'], ['UNRESOLVED', unrTix.length, '#C2410C']].map(function (k) {return '<div style="border:1px solid #E2E8F0;border-top:3px solid ' + k[2] + ';border-radius:8px;padding:14px 16px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94A3B8">' + k[0] + '</div><div style="font-size:28px;font-weight:800;font-family:monospace;color:' + k[2] + ';margin-top:4px">' + k[1] + '</div></div>';}).join('') +
     '</div>' +
     '<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#22C55E;margin-bottom:8px">✅ RESOLVED — ' + resTix.length + ' TICKETS</div>' + section(resTix) + '</div>' +
     '<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#F59E0B;margin-bottom:8px">⏳ IN PROGRESS — ' + prgTix.length + ' TICKETS</div>' + section(prgTix) + '</div>' +
-    '<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#EF4444;margin-bottom:8px">🔴 UNRESOLVED — ' + unrTix.length + ' TICKETS</div>' + section(unrTix) + '</div>' +
+    '<div style="margin-bottom:18px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#C2410C;margin-bottom:8px">🔴 UNRESOLVED — ' + unrTix.length + ' TICKETS</div>' + section(unrTix) + '</div>' +
     '<div style="font-size:10px;color:#94A3B8;text-align:center;padding-top:16px;border-top:1px solid #E2E8F0">EKEDP Power App · Managers Hub · Marina HQ · ' + slot.label + ' · ' + dateStr + '</div>' +
     '</body></html>';
     const blob = new Blob([html], { type: 'text/html' });
@@ -3407,7 +3476,7 @@ function SlotReport({ tickets, showToast }) {
 
         {/* KPIs */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 18 }}>
-          {[{ l: 'TOTAL', v: todayTix.length, c: 'var(--text)' }, { l: 'RESOLVED', v: resTix.length, c: '#22C55E' }, { l: 'IN PROGRESS', v: prgTix.length, c: '#F59E0B' }, { l: 'UNRESOLVED', v: unrTix.length, c: '#EF4444' }].map(function (k) {return (
+          {[{ l: 'TOTAL', v: todayTix.length, c: 'var(--text)' }, { l: 'RESOLVED', v: resTix.length, c: '#22C55E' }, { l: 'IN PROGRESS', v: prgTix.length, c: '#F59E0B' }, { l: 'UNRESOLVED', v: unrTix.length, c: '#C2410C' }].map(function (k) {return (
               <div key={k.l} style={{ background: 'rgba(0,0,0,.22)', border: '1px solid var(--bsoft)', borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ font: '700 10px/1 Sora,sans-serif', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.12em' }}>{k.l}</span>
               <span style={{ font: "800 26px/1 'JetBrains Mono',monospace", color: k.c }}>{k.v}</span>
@@ -3454,7 +3523,7 @@ function SlotReport({ tickets, showToast }) {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', font: '600 11px Sora,sans-serif' }}>
                 <span style={{ color: '#22C55E' }}>✅ {resTix.length} resolved</span>
-                <span style={{ color: '#EF4444' }}>⏳ {unrTix.length + prgTix.length} open</span>
+                <span style={{ color: '#C2410C' }}>⏳ {unrTix.length + prgTix.length} open</span>
               </div>
             </div>
             <div style={{ padding: '22px 24px' }}>
@@ -3515,7 +3584,7 @@ function gradeBadgeHtml(pct) {
   return `<span style="background:#7F1D1D;color:#FCA5A5;padding:2px 8px;border-radius:10px;font:700 10px/1.6 Sora,sans-serif">BELOW TARGET</span>`;
 }
 function pctBarHtml(pct) {
-  const fill = pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#EF4444';
+  const fill = pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#C2410C';
   return `<div style="background:#1E293B;border-radius:4px;height:8px;width:100%;margin-top:4px"><div style="background:${fill};width:${pct}%;height:8px;border-radius:4px"></div></div>`;
 }
 function buildEmailHtml(title, subtitle, bodyHtml) {
@@ -3671,7 +3740,7 @@ function ReportVerify({ tickets, onBulkUpdate, showToast }) {
       {parsed &&
       <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 16 }}>
-            {[{ l: 'SP Tickets', v: spTickets.length, c: '#6366F1' }, { l: 'Matched', v: matched, c: '#22C55E' }, { l: 'Mismatches', v: allMismatches.length, c: allMismatches.length ? '#EF4444' : '#22C55E' }, { l: 'Fixed', v: Object.keys(fixed).length, c: '#22C55E' }].map(function (s) {return (
+            {[{ l: 'SP Tickets', v: spTickets.length, c: '#6366F1' }, { l: 'Matched', v: matched, c: '#22C55E' }, { l: 'Mismatches', v: allMismatches.length, c: allMismatches.length ? '#C2410C' : '#22C55E' }, { l: 'Fixed', v: Object.keys(fixed).length, c: '#22C55E' }].map(function (s) {return (
               <div key={s.l} className="card" style={{ padding: 16, textAlign: 'center' }}>
                 <div style={{ font: '700 28px/1 Sora,sans-serif', color: s.c }}>{s.v}</div>
                 <div style={{ font: '500 11px Sora,sans-serif', color: 'var(--muted)', marginTop: 4 }}>{s.l}</div>
@@ -3698,13 +3767,13 @@ function ReportVerify({ tickets, onBulkUpdate, showToast }) {
                   return (
                     <tr key={m.num} style={{ borderBottom: '1px solid var(--bdark)' }}>
                           <td style={{ padding: '10px 12px', color: 'var(--ek-gold)', fontWeight: 700 }}>#{m.num}</td>
-                          <td style={{ padding: '10px 12px', color: '#EF4444', fontSize: 11 }}>{m.issue}</td>
+                          <td style={{ padding: '10px 12px', color: '#C2410C', fontSize: 11 }}>{m.issue}</td>
                           <td style={{ padding: '10px 12px' }}>
                             {m.diffs && m.diffs.map(function (f) {return (
                             <div key={f} style={{ marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                                 <span style={{ font: '600 10px Sora,sans-serif', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{f}:</span>
                                 <span dangerouslySetInnerHTML={{ __html: f === 'status' ? statusBadgeHtml(m.sp[f]) : '' }} />
-                                {f !== 'status' && <span style={{ font: '500 11px Sora,sans-serif', color: '#EF4444' }}>{m.sp[f]}</span>}
+                                {f !== 'status' && <span style={{ font: '500 11px Sora,sans-serif', color: '#C2410C' }}>{m.sp[f]}</span>}
                                 <span style={{ color: 'var(--muted)' }}>→</span>
                                 <span dangerouslySetInnerHTML={{ __html: f === 'status' ? statusBadgeHtml(m.app[f]) : '' }} />
                                 {f !== 'status' && <span style={{ font: '500 11px Sora,sans-serif', color: 'var(--fg)' }}>{m.app[f]}</span>}
@@ -3783,7 +3852,7 @@ function ReportAnomaly({ tickets, onBulkUpdate, showToast }) {
     <div className="main-inner">
       <ReportHead icon="🚨" title="Anomaly Report" sub="Diagnose &amp; fix SLA breaches, duplicates, orphans, and missing fields — keep your data clean." />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
-        {[{ l: 'SLA Breaches', v: slaBreaches.length, c: '#EF4444' }, { l: 'Duplicates', v: dupeNums.length + ' nums', c: '#F97316' }, { l: 'Orphaned', v: orphans.length, c: '#FBBF24' }, { l: 'Missing Fields', v: missing.length, c: '#A78BFA' }].map(function (s) {return (
+        {[{ l: 'SLA Breaches', v: slaBreaches.length, c: '#C2410C' }, { l: 'Duplicates', v: dupeNums.length + ' nums', c: '#F97316' }, { l: 'Orphaned', v: orphans.length, c: '#FBBF24' }, { l: 'Missing Fields', v: missing.length, c: '#A78BFA' }].map(function (s) {return (
             <div key={s.l} className="card" style={{ padding: 16, textAlign: 'center' }}>
             <div style={{ font: '700 28px/1 Sora,sans-serif', color: s.c }}>{s.v}</div>
             <div style={{ font: '500 11px Sora,sans-serif', color: 'var(--muted)', marginTop: 4 }}>{s.l}</div>
@@ -3794,7 +3863,7 @@ function ReportAnomaly({ tickets, onBulkUpdate, showToast }) {
       {/* SLA BREACHES */}
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="card-head">
-          <h3 style={{ color: '#EF4444' }}>SLA Breaches (&gt;48h unresolved)</h3>
+          <h3 style={{ color: '#C2410C' }}>SLA Breaches (&gt;48h unresolved)</h3>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <span style={{ font: '600 10px Sora,sans-serif', color: 'var(--muted)' }}>{slaBreaches.length} tickets</span>
             {slaBreaches.length > 0 && <button className="btn btn-sm" onClick={function () {fixSLA(slaBreaches.map(function (t) {return t.id;}), 'progress');}} style={{ fontSize: 11, padding: '4px 10px', background: 'rgba(59,130,246,.15)', color: '#93C5FD', border: '1px solid rgba(59,130,246,.3)' }}>Mark All In Progress</button>}
@@ -3811,8 +3880,8 @@ function ReportAnomaly({ tickets, onBulkUpdate, showToast }) {
                     <td style={{ ...CELL, color: 'var(--ek-gold)', fontWeight: 700 }}>#{t.num || '—'}</td>
                     <td style={{ ...CELL, color: 'var(--fg)' }}>{t.name || '—'}</td>
                     <td style={{ ...CELL, color: 'var(--fg)', fontSize: 11 }}>{t.category || '—'}</td>
-                    <td style={{ ...CELL, color: 'var(--fg)' }}>{t.resp || <span style={{ color: '#EF4444' }}>NONE</span>}</td>
-                    <td style={{ ...CELL }}><span dangerouslySetInnerHTML={{ __html: statusBadgeHtml(t.status) }} /><span style={{ font: '500 10px Sora,sans-serif', color: '#EF4444', marginLeft: 6 }}>{hrs}h</span></td>
+                    <td style={{ ...CELL, color: 'var(--fg)' }}>{t.resp || <span style={{ color: '#C2410C' }}>NONE</span>}</td>
+                    <td style={{ ...CELL }}><span dangerouslySetInnerHTML={{ __html: statusBadgeHtml(t.status) }} /><span style={{ font: '500 10px Sora,sans-serif', color: '#C2410C', marginLeft: 6 }}>{hrs}h</span></td>
                     <td style={{ ...CELL, color: 'var(--muted)', fontSize: 11 }}>{rptWatDate(t) || '—'}</td>
                     <td style={{ ...CELL }}>
                       <div style={{ display: 'flex', gap: 4 }}>
@@ -3910,8 +3979,8 @@ function ReportAnomaly({ tickets, onBulkUpdate, showToast }) {
                 const e = missingEdit[t.id] || {};
                 return (
                   <tr key={t.id} style={{ borderBottom: '1px solid var(--bdark)' }}>
-                    <td style={{ ...CELL, color: 'var(--ek-gold)', fontWeight: 700 }}>#{t.num || <span style={{ color: '#EF4444' }}>MISSING</span>}</td>
-                    <td style={{ ...CELL, color: 'var(--fg)' }}>{t.name || <span style={{ color: '#EF4444' }}>MISSING</span>}</td>
+                    <td style={{ ...CELL, color: 'var(--ek-gold)', fontWeight: 700 }}>#{t.num || <span style={{ color: '#C2410C' }}>MISSING</span>}</td>
+                    <td style={{ ...CELL, color: 'var(--fg)' }}>{t.name || <span style={{ color: '#C2410C' }}>MISSING</span>}</td>
                     <td style={{ ...CELL }}>{missingFields.map(function (f) {return <span key={f} style={{ display: 'inline-block', background: 'rgba(167,139,250,.15)', color: '#A78BFA', borderRadius: 4, padding: '1px 6px', fontSize: 10, fontWeight: 700, marginRight: 4, textTransform: 'uppercase' }}>{f}</span>;})}</td>
                     <td style={{ ...CELL, minWidth: 200 }}>
                       {!t.category && <input value={e.category || ''} onChange={function (ev) {var v = ev.target.value;setMissingEdit(function (p) {var sub = Object.assign({}, p[t.id] || {}, { category: v });return Object.assign({}, p, { [t.id]: sub });});}} placeholder="Category…" style={{ ...inlineInput, marginBottom: 4 }} />}
@@ -3939,7 +4008,7 @@ function ReportExecutive({ tickets, showToast, onNav }) {
   const prg = tickets.filter(function (t) {return t.status === 'progress';}).length;
   const unr = tickets.filter(function (t) {return t.status === 'unresolved';}).length;
   const resPct = total ? Math.round(res / total * 100) : 0;
-  const resFill = resPct >= 80 ? '#22C55E' : resPct >= 60 ? '#F59E0B' : '#EF4444';
+  const resFill = resPct >= 80 ? '#22C55E' : resPct >= 60 ? '#F59E0B' : '#C2410C';
 
   // Category data
   const catMap = {};tickets.forEach(function (t) {const c = canonCat(t.category);if (!catMap[c]) catMap[c] = { total: 0, res: 0, prg: 0, unr: 0 };catMap[c].total++;if (t.status === 'resolved') catMap[c].res++;else if (t.status === 'progress') catMap[c].prg++;else catMap[c].unr++;});
@@ -3955,11 +4024,11 @@ function ReportExecutive({ tickets, showToast, onNav }) {
   const TABS = [{ id: 'overview', l: 'Overview' }, { id: 'categories', l: 'By Category' }, { id: 'parties', l: 'By Responsible Party' }];
 
   function exportEmail() {
-    const catRows = cats.map(function (e) {const c = e[0],d = e[1];const p = d.total ? Math.round(d.res / d.total * 100) : 0;return `<tr style="border-bottom:1px solid #E2E8F0"><td style="padding:10px 12px;font:500 12px Sora,sans-serif;color:#1E293B">${c}</td><td style="padding:10px 12px;text-align:center;font:700 13px Sora,sans-serif;color:#1E293B">${d.total}</td><td style="padding:10px 12px;text-align:center;color:#22C55E;font:700 13px Sora,sans-serif">${d.res}</td><td style="padding:10px 12px;text-align:center;color:#EF4444;font:700 13px Sora,sans-serif">${d.unr}</td><td style="padding:10px 12px;min-width:120px">${pctBarHtml(p)}<div style="font:600 11px Sora,sans-serif;color:#64748B;margin-top:2px">${p}%</div></td></tr>`;}).join('');
-    const partyHtml = partyRows.map(function (r) {return `<tr style="border-bottom:1px solid #E2E8F0"><td style="padding:8px 12px;font:500 12px Sora,sans-serif;color:#1E293B">${r.name}</td><td style="padding:8px 12px;text-align:center;font:700 13px Sora,sans-serif">${r.total}</td><td style="padding:8px 12px;text-align:center;color:#22C55E;font:700 13px Sora,sans-serif">${r.res}</td><td style="padding:8px 12px;text-align:center;color:#EF4444;font:700 13px Sora,sans-serif">${r.unr}</td><td style="padding:8px 12px">${pctBarHtml(r.pct)}<div style="font:600 10px Sora,sans-serif;color:#64748B;margin-top:2px">${r.pct}%</div></td><td style="padding:8px 12px">${gradeBadgeHtml(r.pct)}</td></tr>`;}).join('');
+    const catRows = cats.map(function (e) {const c = e[0],d = e[1];const p = d.total ? Math.round(d.res / d.total * 100) : 0;return `<tr style="border-bottom:1px solid #E2E8F0"><td style="padding:10px 12px;font:500 12px Sora,sans-serif;color:#1E293B">${c}</td><td style="padding:10px 12px;text-align:center;font:700 13px Sora,sans-serif;color:#1E293B">${d.total}</td><td style="padding:10px 12px;text-align:center;color:#22C55E;font:700 13px Sora,sans-serif">${d.res}</td><td style="padding:10px 12px;text-align:center;color:#C2410C;font:700 13px Sora,sans-serif">${d.unr}</td><td style="padding:10px 12px;min-width:120px">${pctBarHtml(p)}<div style="font:600 11px Sora,sans-serif;color:#64748B;margin-top:2px">${p}%</div></td></tr>`;}).join('');
+    const partyHtml = partyRows.map(function (r) {return `<tr style="border-bottom:1px solid #E2E8F0"><td style="padding:8px 12px;font:500 12px Sora,sans-serif;color:#1E293B">${r.name}</td><td style="padding:8px 12px;text-align:center;font:700 13px Sora,sans-serif">${r.total}</td><td style="padding:8px 12px;text-align:center;color:#22C55E;font:700 13px Sora,sans-serif">${r.res}</td><td style="padding:8px 12px;text-align:center;color:#C2410C;font:700 13px Sora,sans-serif">${r.unr}</td><td style="padding:8px 12px">${pctBarHtml(r.pct)}<div style="font:600 10px Sora,sans-serif;color:#64748B;margin-top:2px">${r.pct}%</div></td><td style="padding:8px 12px">${gradeBadgeHtml(r.pct)}</td></tr>`;}).join('');
     const body = `
 <table width="100%" cellpadding="0" cellspacing="6" style="margin:0 0 24px;border-collapse:separate"><tr>
-${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#3B82F6' }, { l: 'Unresolved', v: unr, c: '#EF4444' }, { l: 'Resolution Rate', v: resPct + '%', c: resFill }].map(function (s) {return `<td width="20%" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px 6px;text-align:center;vertical-align:middle"><div style="font:800 24px/1 Arial,sans-serif;color:${s.c}">${s.v}</div><div style="font:500 9px Arial,sans-serif;color:#64748B;margin-top:4px;text-transform:uppercase;letter-spacing:.06em">${s.l}</div></td>`;}).join('')}
+${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#C2410C' }, { l: 'Resolution Rate', v: resPct + '%', c: resFill }].map(function (s) {return `<td width="20%" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px 6px;text-align:center;vertical-align:middle"><div style="font:800 24px/1 Arial,sans-serif;color:${s.c}">${s.v}</div><div style="font:500 9px Arial,sans-serif;color:#64748B;margin-top:4px;text-transform:uppercase;letter-spacing:.06em">${s.l}</div></td>`;}).join('')}
 </tr></table>
 <h3 style="font:700 14px Sora,sans-serif;color:#0A1628;margin:0 0 10px">Category Breakdown</h3>
 <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden;margin-bottom:24px">
@@ -3981,7 +4050,7 @@ ${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E'
 
       {/* KPI row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12, marginBottom: 20 }}>
-        {[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#3B82F6' }, { l: 'Unresolved', v: unr, c: '#EF4444' }, { l: 'Resolution %', v: resPct + '%', c: resFill }].map(function (s) {return (
+        {[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#C2410C' }, { l: 'Resolution %', v: resPct + '%', c: resFill }].map(function (s) {return (
             <div key={s.l} className="card" style={{ padding: 16, textAlign: 'center' }}>
             <div style={{ font: '800 28px/1 Sora,sans-serif', color: s.c }}>{s.v}</div>
             <div style={{ font: '500 10px Sora,sans-serif', color: 'var(--muted)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.1em' }}>{s.l}</div>
@@ -4005,7 +4074,7 @@ ${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E'
               </div>
             </div>
             <div style={{ flex: 1 }}>
-              {[{ l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#3B82F6' }, { l: 'Unresolved', v: unr, c: '#EF4444' }].map(function (s) {return (
+              {[{ l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#C2410C' }].map(function (s) {return (
                   <div key={s.l} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: s.c, flexShrink: 0 }} />
                   <span style={{ flex: 1, font: '500 12px Sora,sans-serif', color: 'var(--muted)' }}>{s.l}</span>
@@ -4018,12 +4087,12 @@ ${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E'
         </div>
         <div className="card" style={{ padding: 20 }}>
           <div style={{ font: '700 12px Sora,sans-serif', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 12 }}>Top 5 — Most Unresolved</div>
-          {top5unr.map(function (r, i) {const colors = ['#EF4444', '#F97316', '#F59E0B', '#FBBF24', '#A78BFA'];return (
+          {top5unr.map(function (r, i) {const colors = ['#C2410C', '#F97316', '#F59E0B', '#FBBF24', '#A78BFA'];return (
               <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <span style={{ font: '800 13px Sora,sans-serif', color: colors[i], minWidth: 20 }}>#{i + 1}</span>
               <span style={{ flex: 1, font: '500 12px Sora,sans-serif', color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
               <div style={{ minWidth: 60, textAlign: 'right' }}>
-                <span style={{ font: '700 13px Sora,sans-serif', color: '#EF4444' }}>{r.unr}</span>
+                <span style={{ font: '700 13px Sora,sans-serif', color: '#C2410C' }}>{r.unr}</span>
                 <span style={{ font: '500 10px Sora,sans-serif', color: 'var(--muted)', marginLeft: 4 }}>unresolved</span>
               </div>
             </div>);
@@ -4042,7 +4111,7 @@ ${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E'
           <div className="card">
             <div className="card-head"><h3>Category Volume</h3></div>
             <div style={{ padding: '0 16px 16px' }}>
-              {cats.slice(0, 8).map(function (e) {const pctC = total ? Math.round(e[1].total / total * 100) : 0;const fill = e[1].total ? Math.round(e[1].res / e[1].total * 100) : 0;const fCol = fill >= 80 ? '#22C55E' : fill >= 60 ? '#F59E0B' : '#EF4444';return (
+              {cats.slice(0, 8).map(function (e) {const pctC = total ? Math.round(e[1].total / total * 100) : 0;const fill = e[1].total ? Math.round(e[1].res / e[1].total * 100) : 0;const fCol = fill >= 80 ? '#22C55E' : fill >= 60 ? '#F59E0B' : '#C2410C';return (
                 <div key={e[0]} style={{ marginBottom: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', font: '500 12px Sora,sans-serif', color: 'var(--fg)', marginBottom: 3 }}>
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>{e[0]}</span>
@@ -4071,7 +4140,7 @@ ${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E'
                     </span>
                   </div>
                   <div style={{ background: 'var(--bg2)', borderRadius: 4, height: 6 }}>
-                    <div style={{ background: r.pct >= 80 ? '#22C55E' : r.pct >= 60 ? '#F59E0B' : '#EF4444', width: r.pct + '%', height: 6, borderRadius: 4 }} />
+                    <div style={{ background: r.pct >= 80 ? '#22C55E' : r.pct >= 60 ? '#F59E0B' : '#C2410C', width: r.pct + '%', height: 6, borderRadius: 4 }} />
                   </div>
                   <div style={{ font: '500 10px Sora,sans-serif', color: 'var(--muted)', marginTop: 2 }}>{r.res} resolved / {r.total} total</div>
                 </div>);
@@ -4088,13 +4157,13 @@ ${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E'
             <table style={{ width: '100%', borderCollapse: 'collapse', font: '500 12px/1.5 Sora,sans-serif' }}>
               <thead><tr style={{ borderBottom: '1px solid var(--bsoft)' }}>
                 {['Category', 'Total', 'Resolved', 'In Progress', 'Unresolved', 'Resolution Rate'].map(function (h) {return <th key={h} style={{ padding: '8px 12px', textAlign: h === 'Category' ? 'left' : 'center', color: 'var(--muted)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>{h}</th>;})}</tr></thead>
-              <tbody>{cats.map(function (e) {const c = e[0],d = e[1];const p = d.total ? Math.round(d.res / d.total * 100) : 0;const fill = p >= 80 ? '#22C55E' : p >= 60 ? '#F59E0B' : '#EF4444';return (
+              <tbody>{cats.map(function (e) {const c = e[0],d = e[1];const p = d.total ? Math.round(d.res / d.total * 100) : 0;const fill = p >= 80 ? '#22C55E' : p >= 60 ? '#F59E0B' : '#C2410C';return (
                   <tr key={c} style={{ borderBottom: '1px solid var(--bdark)' }}>
                   <td style={{ padding: '8px 12px', color: 'var(--fg)' }}>{c}</td>
                   <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: 'var(--fg)' }}>{d.total}</td>
                   <td style={{ padding: '8px 12px', textAlign: 'center', color: '#22C55E', fontWeight: 700 }}>{d.res}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center', color: '#3B82F6', fontWeight: 700 }}>{d.prg}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center', color: '#EF4444', fontWeight: 700 }}>{d.unr}</td>
+                  <td style={{ padding: '8px 12px', textAlign: 'center', color: '#F59E0B', fontWeight: 700 }}>{d.prg}</td>
+                  <td style={{ padding: '8px 12px', textAlign: 'center', color: '#C2410C', fontWeight: 700 }}>{d.unr}</td>
                   <td style={{ padding: '8px 12px', minWidth: 140 }}>
                     <div style={{ background: 'var(--bg2)', borderRadius: 4, height: 7 }}><div style={{ background: fill, width: p + '%', height: 7, borderRadius: 4 }} /></div>
                     <div style={{ font: '600 10px Sora,sans-serif', color: 'var(--muted)', marginTop: 2 }}>{p}%</div>
@@ -4116,13 +4185,13 @@ ${[{ l: 'Total', v: total, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E'
                 {['Responsible Party', 'Total', 'Resolved', 'In Progress', 'Unresolved', 'Rate', 'Rating'].map(function (h) {return <th key={h} style={{ padding: '10px 12px', textAlign: h === 'Responsible Party' ? 'left' : 'center', color: 'var(--muted)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>{h}</th>;})}
               </tr></thead>
               <tbody>
-                {partyRows.map(function (r) {const fill = r.pct >= 80 ? '#22C55E' : r.pct >= 60 ? '#F59E0B' : '#EF4444';return (
+                {partyRows.map(function (r) {const fill = r.pct >= 80 ? '#22C55E' : r.pct >= 60 ? '#F59E0B' : '#C2410C';return (
                   <tr key={r.name} style={{ borderBottom: '1px solid var(--bdark)' }}>
-                    <td style={{ padding: '10px 12px', color: 'var(--fg)', fontWeight: 600 }}>{r.name === 'Unassigned' && onNav ? <button onClick={function () {window.__ekJumpUnassigned = true;onNav('all');}} style={{ background: 'rgba(239,68,68,.12)', color: '#EF4444', border: '1px solid rgba(239,68,68,.35)', borderRadius: 6, padding: '3px 10px', font: '700 11px Sora,sans-serif', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5 }} title="Click to view &amp; assign these tickets">⚠ Unassigned →</button> : r.name}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--fg)', fontWeight: 600 }}>{r.name === 'Unassigned' && onNav ? <button onClick={function () {window.__ekJumpUnassigned = true;onNav('all');}} style={{ background: 'rgba(239,68,68,.12)', color: '#C2410C', border: '1px solid rgba(239,68,68,.35)', borderRadius: 6, padding: '3px 10px', font: '700 11px Sora,sans-serif', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5 }} title="Click to view &amp; assign these tickets">⚠ Unassigned →</button> : r.name}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700, color: 'var(--fg)' }}>{r.total}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'center', color: '#22C55E', fontWeight: 700 }}>{r.res}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'center', color: '#3B82F6', fontWeight: 700 }}>{r.prg}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'center', color: '#EF4444', fontWeight: 700 }}>{r.unr}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'center', color: '#F59E0B', fontWeight: 700 }}>{r.prg}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'center', color: '#C2410C', fontWeight: 700 }}>{r.unr}</td>
                     <td style={{ padding: '10px 12px', minWidth: 130 }}>
                       <div style={{ background: 'var(--bg2)', borderRadius: 4, height: 8 }}><div style={{ background: fill, width: r.pct + '%', height: 8, borderRadius: 4 }} /></div>
                       <div style={{ font: '600 10px Sora,sans-serif', color: 'var(--muted)', marginTop: 2 }}>{r.pct}%</div>
@@ -4161,7 +4230,7 @@ function ReportWeekly({ tickets, showToast }) {
     const catRows = cats.map(function (e) {return `<tr style="border-bottom:1px solid #E2E8F0"><td style="padding:8px 12px;font:500 12px Sora,sans-serif;color:#1E293B">${e[0]}</td><td style="padding:8px 12px;text-align:center;font:700 13px Sora,sans-serif;color:#1E293B">${e[1]}</td></tr>`;}).join('');
     const body = `
 <table width="100%" cellpadding="0" cellspacing="6" style="margin:0 0 20px;border-collapse:separate"><tr>
-${[{ l: 'Total', v: wTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#3B82F6' }, { l: 'Unresolved', v: unr, c: '#EF4444' }, { l: 'Rate', v: pct + '%', c: pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#EF4444' }].map(function (s) {return `<td width="20%" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 6px;text-align:center;vertical-align:middle"><div style="font:800 22px/1 Arial,sans-serif;color:${s.c}">${s.v}</div><div style="font:500 9px Arial,sans-serif;color:#64748B;margin-top:4px;text-transform:uppercase;letter-spacing:.06em">${s.l}</div></td>`;}).join('')}
+${[{ l: 'Total', v: wTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#C2410C' }, { l: 'Rate', v: pct + '%', c: pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#C2410C' }].map(function (s) {return `<td width="20%" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 6px;text-align:center;vertical-align:middle"><div style="font:800 22px/1 Arial,sans-serif;color:${s.c}">${s.v}</div><div style="font:500 9px Arial,sans-serif;color:#64748B;margin-top:4px;text-transform:uppercase;letter-spacing:.06em">${s.l}</div></td>`;}).join('')}
 </tr></table>
 <h3 style="font:700 14px Sora,sans-serif;color:#0A1628;margin:0 0 10px">By Category</h3>
 <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden">
@@ -4182,7 +4251,7 @@ ${[{ l: 'Total', v: wTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#2
           <button className="btn btn-primary" onClick={exportEmail}>Copy Email HTML</button>
         </div>} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12, marginBottom: 20 }}>
-        {[{ l: 'Total', v: wTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#3B82F6' }, { l: 'Unresolved', v: unr, c: '#EF4444' }, { l: 'Rate', v: pct + '%', c: pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#EF4444' }].map(function (s) {return (
+        {[{ l: 'Total', v: wTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#C2410C' }, { l: 'Rate', v: pct + '%', c: pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#C2410C' }].map(function (s) {return (
             <div key={s.l} className="card" style={{ padding: 16, textAlign: 'center' }}>
             <div style={{ font: '800 28px/1 Sora,sans-serif', color: s.c }}>{s.v}</div>
             <div style={{ font: '500 10px Sora,sans-serif', color: 'var(--muted)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.1em' }}>{s.l}</div>
@@ -4250,14 +4319,14 @@ function ReportMonthly({ tickets, onBulkUpdate, showToast }) {
   const knownParties = [...new Set(tickets.map(function (t) {return t.resp;}).filter(Boolean))].sort();
   function startEdit(t) {setEditRow({ id: t.id, status: t.status || 'unresolved', category: t.category || '', resp: t.resp || '', note: t.note || '' });}
   function saveEdit() {if (!editRow) return;onBulkUpdate([editRow.id], { status: editRow.status, category: editRow.category, resp: editRow.resp, note: editRow.note });showToast('Ticket updated ✓');setEditRow(null);}
-  const STATUS_OPTS = [{ v: 'resolved', l: 'Resolved', c: '#22C55E' }, { v: 'progress', l: 'In Progress', c: '#3B82F6' }, { v: 'unresolved', l: 'Unresolved', c: '#EF4444' }];
+  const STATUS_OPTS = [{ v: 'resolved', l: 'Resolved', c: '#22C55E' }, { v: 'progress', l: 'In Progress', c: '#F59E0B' }, { v: 'unresolved', l: 'Unresolved', c: '#C2410C' }];
 
   function exportEmail() {
     const catRows = cats.map(function (e) {return `<tr style="border-bottom:1px solid #E2E8F0"><td style="padding:8px 12px;font:500 12px Sora,sans-serif;color:#1E293B">${e[0]}</td><td style="padding:8px 12px;text-align:center;font:700 13px Sora,sans-serif;color:#1E293B">${e[1]}</td></tr>`;}).join('');
     const partyRowsHtml = partyRows.map(function (r) {return `<tr style="border-bottom:1px solid #E2E8F0"><td style="padding:8px 12px;font:500 12px Sora,sans-serif;color:#1E293B">${r.name}</td><td style="padding:8px 12px;text-align:center;font:700 13px Sora,sans-serif;color:#1E293B">${r.total}</td><td style="padding:8px 12px;text-align:center;font:700 13px Sora,sans-serif;color:#22C55E">${r.res}</td><td style="padding:8px 12px;text-align:center">${gradeBadgeHtml(r.pct)}</td></tr>`;}).join('');
     const body = `
 <table width="100%" cellpadding="0" cellspacing="6" style="margin:0 0 20px;border-collapse:separate"><tr>
-${[{ l: 'Total', v: mTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#3B82F6' }, { l: 'Unresolved', v: unr, c: '#EF4444' }, { l: 'Rate', v: pct + '%', c: pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#EF4444' }].map(function (s) {return `<td width="20%" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 6px;text-align:center;vertical-align:middle"><div style="font:800 22px/1 Arial,sans-serif;color:${s.c}">${s.v}</div><div style="font:500 9px Arial,sans-serif;color:#64748B;margin-top:4px;text-transform:uppercase;letter-spacing:.06em">${s.l}</div></td>`;}).join('')}
+${[{ l: 'Total', v: mTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#C2410C' }, { l: 'Rate', v: pct + '%', c: pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#C2410C' }].map(function (s) {return `<td width="20%" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 6px;text-align:center;vertical-align:middle"><div style="font:800 22px/1 Arial,sans-serif;color:${s.c}">${s.v}</div><div style="font:500 9px Arial,sans-serif;color:#64748B;margin-top:4px;text-transform:uppercase;letter-spacing:.06em">${s.l}</div></td>`;}).join('')}
 </tr></table>
 <h3 style="font:700 14px Sora,sans-serif;color:#0A1628;margin:0 0 10px">By Category</h3>
 <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden;margin-bottom:20px">
@@ -4281,7 +4350,7 @@ ${[{ l: 'Total', v: mTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#2
           <button className="btn btn-primary" onClick={exportEmail}>Copy Email HTML</button>
         </div>} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12, marginBottom: 20 }}>
-        {[{ l: 'Total', v: mTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#3B82F6' }, { l: 'Unresolved', v: unr, c: '#EF4444' }, { l: 'Rate', v: pct + '%', c: pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#EF4444' }].map(function (s) {return (
+        {[{ l: 'Total', v: mTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#22C55E' }, { l: 'In Progress', v: prg, c: '#F59E0B' }, { l: 'Unresolved', v: unr, c: '#C2410C' }, { l: 'Rate', v: pct + '%', c: pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#C2410C' }].map(function (s) {return (
             <div key={s.l} className="card" style={{ padding: 16, textAlign: 'center' }}>
             <div style={{ font: '800 28px/1 Sora,sans-serif', color: s.c }}>{s.v}</div>
             <div style={{ font: '500 10px Sora,sans-serif', color: 'var(--muted)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.1em' }}>{s.l}</div>
@@ -4335,7 +4404,7 @@ ${[{ l: 'Total', v: mTix.length, c: '#6366F1' }, { l: 'Resolved', v: res, c: '#2
             <tbody>
               {mTix.map(function (t, i) {
                 const isEditing = editRow && editRow.id === t.id;
-                const statusColor = { resolved: '#22C55E', progress: '#3B82F6', unresolved: '#EF4444' }[t.status] || '#94A3B8';
+                const statusColor = { resolved: '#22C55E', progress: '#F59E0B', unresolved: '#C2410C' }[t.status] || '#94A3B8';
                 if (isEditing) {return (
                     <tr key={t.id} style={{ borderBottom: '1px solid var(--bsoft)', background: 'var(--bg2)' }}>
                     <td style={{ padding: '8px 10px', color: 'var(--muted)', fontWeight: 600, fontSize: 11 }}>{i + 1}</td>
@@ -4638,7 +4707,7 @@ function DataPage({ tickets, setTickets, showToast }) {
         function g(row, idx) {return idx >= 0 && row[idx] ? row[idx].trim() : '';}
         function mapSt(s) {s = (s || '').toLowerCase();if (s.includes('closed') || s.includes('resolved')) return 'resolved';if (s.includes('assigned') || s.includes('progress')) return 'progress';return 'unresolved';}
         const imported = dataRows.map(function (row, i) {
-          return { id: 'tk_sp_' + (g(row, iNum) || i), num: g(row, iNum), name: g(row, iName), phone: g(row, iPhone), bu: g(row, iBU), category: g(row, iCat), issue: g(row, iDesc), resp: g(row, iResp), status: mapSt(g(row, iStatus)), note: g(row, iNote), agent: 'manager' };
+          return { id: 'tk_sp_' + (g(row, iNum) || i), num: g(row, iNum), name: g(row, iName), phone: g(row, iPhone), bu: g(row, iBU), category: g(row, iCat), issue: g(row, iDesc), resp: g(row, iResp), status: mapSt(g(row, iStatus)), note: function () {var nt = g(row, iNote);var iss = g(row, iDesc);return nt && iss && nt.trim().toLowerCase() === iss.trim().toLowerCase() ? '' : nt;}(), agent: 'manager' };
         }).filter(function (t) {return t.num || t.name;});
         if (!imported.length) throw new Error('Could not extract any tickets');
         setPreview({ count: imported.length, by: { name: 'SharePoint HTML: ' + file.name }, tickets: imported });
@@ -4689,19 +4758,19 @@ function DataPage({ tickets, setTickets, showToast }) {
               <div className="card-head"><h3>📊 Current Dataset</h3></div>
               <div style={{ padding: 16 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8, marginBottom: 16 }}>
-                  {[{ l: 'Total', v: tickets.length, c: '#60A5FA' }, { l: 'Resolved', v: res.length, c: '#22C55E' }, { l: 'In Progress', v: prg.length, c: '#F59E0B' }, { l: 'Unresolved', v: unr.length, c: '#EF4444' }].map(function (k) {return (
+                  {[{ l: 'Total', v: tickets.length, c: '#60A5FA' }, { l: 'Resolved', v: res.length, c: '#22C55E' }, { l: 'In Progress', v: prg.length, c: '#F59E0B' }, { l: 'Unresolved', v: unr.length, c: '#C2410C' }].map(function (k) {return (
                     <div key={k.l} style={{ background: 'rgba(0,0,0,.2)', border: '1px solid var(--bsoft)', borderRadius: 9, padding: '12px', textAlign: 'center' }}>
                       <div style={{ font: '700 8px Sora,sans-serif', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 6 }}>{k.l}</div>
                       <div style={{ font: "800 24px/1 'JetBrains Mono',monospace", color: k.c }}>{k.v}</div>
                     </div>);
                 })}
                 </div>
-                {(function () {
-                  var g = {};tickets.forEach(function (t) {var m = String(t.created || t.received || '').slice(0, 7);if (!m) return;if (!g[m]) g[m] = { total: 0, res: 0 };g[m].total++;if (t.status === 'resolved') g[m].res++;});
-                  var months = Object.keys(g).sort();
-                  if (!months.length) return null;
-                  return (
-                    <div style={{ marginBottom: 16 }}>
+                {function () {
+                var g = {};tickets.forEach(function (t) {var m = String(t.created || t.received || '').slice(0, 7);if (!m) return;if (!g[m]) g[m] = { total: 0, res: 0 };g[m].total++;if (t.status === 'resolved') g[m].res++;});
+                var months = Object.keys(g).sort();
+                if (!months.length) return null;
+                return (
+                  <div style={{ marginBottom: 16 }}>
                       <div style={{ font: '700 9px Sora,sans-serif', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>By Month</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(118px,1fr))', gap: 8 }}>
                         {months.map(function (m) {var lbl = new Date(m + '-15').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });var rate = g[m].total ? Math.round(g[m].res / g[m].total * 100) : 0;return (
@@ -4712,7 +4781,7 @@ function DataPage({ tickets, setTickets, showToast }) {
                           </div>);})}
                       </div>
                     </div>);
-                })()}
+              }()}
                 <div style={{ font: '500 11px/1.6 Sora,sans-serif', color: 'var(--muted)', padding: '10px 12px', background: 'rgba(99,102,241,.08)', border: '1px solid rgba(99,102,241,.2)', borderRadius: 9 }}>
                   💡 <b style={{ color: 'var(--text)' }}>Export All</b> produces the same JSON format that agents upload — ready to re-import into any session.{exFrom || exTo ? ' Exports below respect the date range above.' : ''}
                 </div>
@@ -4744,7 +4813,7 @@ function DataPage({ tickets, setTickets, showToast }) {
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-                {[{ label: '✅ Resolved', key: 'resolved', color: '#22C55E', count: res.length }, { label: '⏳ In Progress', key: 'progress', color: '#F59E0B', count: prg.length }, { label: '🔴 Unresolved', key: 'unresolved', color: '#EF4444', count: unr.length }].map(function (s) {return (
+                {[{ label: '✅ Resolved', key: 'resolved', color: '#22C55E', count: res.length }, { label: '⏳ In Progress', key: 'progress', color: '#F59E0B', count: prg.length }, { label: '🔴 Unresolved', key: 'unresolved', color: '#C2410C', count: unr.length }].map(function (s) {return (
                   <button key={s.key} onClick={function () {dlFiltered(s.key);}}
                   style={{ padding: '10px 8px', background: 'rgba(0,0,0,.2)', border: '1px solid var(--bsoft)', borderRadius: 9, color: s.color, font: '700 11px Sora,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
                     {s.label}<br /><span style={{ font: "700 16px/1.4 'JetBrains Mono',monospace" }}>{s.count}</span>
@@ -4784,7 +4853,7 @@ function DataPage({ tickets, setTickets, showToast }) {
                     </tr></thead>
                     <tbody>
                       {preview.tickets.slice(0, 25).map(function (t, i) {
-                    const sc = t.status === 'resolved' ? '#22C55E' : t.status === 'progress' ? '#F59E0B' : '#EF4444';
+                    const sc = t.status === 'resolved' ? '#22C55E' : t.status === 'progress' ? '#F59E0B' : '#C2410C';
                     return (
                       <tr key={i} style={{ borderBottom: '1px solid var(--bsoft)' }}>
                             <td style={{ padding: '7px 10px', color: 'var(--muted)', fontSize: 10 }}>{i + 1}</td>
@@ -4832,7 +4901,7 @@ function DataPage({ tickets, setTickets, showToast }) {
                       {['#', 'Ticket', 'Customer', 'BU', 'Category', 'Status'].map(function (h) {return <th key={h} style={{ padding: '7px 10px', textAlign: 'left', font: '700 9px Sora,sans-serif', color: 'rgba(255,255,255,.5)', textTransform: 'uppercase' }}>{h}</th>;})}
                     </tr></thead>
                     <tbody>
-                      {preview.tickets.slice(0, 25).map(function (t, i) {const sc = t.status === 'resolved' ? '#22C55E' : t.status === 'progress' ? '#F59E0B' : '#EF4444';return (
+                      {preview.tickets.slice(0, 25).map(function (t, i) {const sc = t.status === 'resolved' ? '#22C55E' : t.status === 'progress' ? '#F59E0B' : '#C2410C';return (
                       <tr key={i} style={{ borderBottom: '1px solid var(--bsoft)' }}>
                           <td style={{ padding: '7px 10px', color: 'var(--muted)', fontSize: 10 }}>{i + 1}</td>
                           <td style={{ padding: '7px 10px', fontFamily: 'JetBrains Mono,monospace', fontWeight: 700, color: 'var(--infob)' }}>#{t.num}</td>
@@ -4880,7 +4949,7 @@ function DataPage({ tickets, setTickets, showToast }) {
                       {['#', 'Ticket', 'Customer', 'BU', 'Status'].map(function (h) {return <th key={h} style={{ padding: '7px 10px', textAlign: 'left', font: '700 9px Sora,sans-serif', color: 'rgba(255,255,255,.5)', textTransform: 'uppercase' }}>{h}</th>;})}
                     </tr></thead>
                     <tbody>
-                      {preview.tickets.slice(0, 25).map(function (t, i) {const sc = t.status === 'resolved' ? '#22C55E' : t.status === 'progress' ? '#F59E0B' : '#EF4444';return (
+                      {preview.tickets.slice(0, 25).map(function (t, i) {const sc = t.status === 'resolved' ? '#22C55E' : t.status === 'progress' ? '#F59E0B' : '#C2410C';return (
                       <tr key={i} style={{ borderBottom: '1px solid var(--bsoft)' }}>
                           <td style={{ padding: '7px 10px', color: 'var(--muted)', fontSize: 10 }}>{i + 1}</td>
                           <td style={{ padding: '7px 10px', fontFamily: 'JetBrains Mono,monospace', fontWeight: 700, color: 'var(--infob)' }}>#{t.num}</td>
@@ -5152,7 +5221,7 @@ function CloudSync({ tickets, setTickets, showToast }) {
               category: t.category && t.subcategory ? t.category + ' — ' + t.subcategory : t.category || '',
               issue: t.note || t.title || '', resp: t.assignee || '',
               status: STATUS_MAP_N[(t.status || '').toLowerCase()] || 'unresolved',
-              note: t.resolutionNote || '', day: day.dayNum || new Date().getDate(),
+              note: function () {var iss = t.note || t.title || '';var nt = t.resolutionNote || '';return nt && iss && nt.trim().toLowerCase() === iss.trim().toLowerCase() ? '' : nt;}(), day: day.dayNum || new Date().getDate(),
               agent: t.agent || 'manager', created: t.created || t.received || t.receivedAt || t.createdAt || t.date || t.Date || t.dateCreated || t.receivedDate || t.Created || t.timestamp || ''
             });
           });
@@ -5396,7 +5465,7 @@ function CloudSync({ tickets, setTickets, showToast }) {
           </div>
 
           {(pullUrl || pushUrl) &&
-          <button onClick={clearUrls} style={{ padding: '9px 16px', background: 'rgba(239,68,68,.12)', color: '#EF4444', border: '1px solid rgba(239,68,68,.3)', borderRadius: 8, font: '700 12px Sora,sans-serif', cursor: 'pointer', alignSelf: 'flex-start' }}>
+          <button onClick={clearUrls} style={{ padding: '9px 16px', background: 'rgba(239,68,68,.12)', color: '#C2410C', border: '1px solid rgba(239,68,68,.3)', borderRadius: 8, font: '700 12px Sora,sans-serif', cursor: 'pointer', alignSelf: 'flex-start' }}>
               ✕ Clear all URLs
             </button>
           }
