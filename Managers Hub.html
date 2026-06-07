@@ -2095,7 +2095,19 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
     const ticketDate = rptWatDate(t) || (t.created || '').slice(0, 10);
     if (fFrom && ticketDate < fFrom) return false;
     if (fTo && ticketDate > fTo) return false;
-    if (search) {var q = search.toLowerCase();return (t.num + t.name + t.phone + (t.bu || '') + (t.category || '') + (t.addr || t.address || '') + (t.issue || '')).toLowerCase().includes(q);}
+    if (search) {
+      // Split by spaces or commas — support multi-ticket search like "727737 727988 729814"
+      var terms = search.split(/[\s,]+/).map(function(s){return s.trim().toLowerCase();}).filter(Boolean);
+      if (terms.length === 0) return true;
+      // If ALL terms look like ticket numbers (digits only), match any of them against t.num
+      var allNums = terms.every(function(s){return /^\d+$/.test(s);});
+      if (allNums) {
+        return terms.some(function(n){return (t.num || '').toLowerCase() === n || (t.num || '').toLowerCase().includes(n);});
+      }
+      // Otherwise single-term general search
+      var q = terms[0];
+      return (t.num + t.name + t.phone + (t.bu || '') + (t.category || '') + (t.addr || t.address || '') + (t.issue || '')).toLowerCase().includes(q);
+    }
     return true;
   }).sort(function (a, b) {
     const an = parseInt(a.num, 10) || 0;const bn = parseInt(b.num, 10) || 0;
@@ -2281,7 +2293,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ position: 'relative', flex: '1 1 260px', minWidth: 200 }}>
             <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.5)', display: 'flex' }}>{Ico.search}</span>
-            <input className="inp" style={{ paddingLeft: 34, height: 36 }} value={search} onChange={function (e) {setSearch(e.target.value);}} placeholder="Search ticket #, customer, phone, address…" />
+            <input className="inp" style={{ paddingLeft: 34, height: 36 }} value={search} onChange={function (e) {setSearch(e.target.value);}} placeholder="Search ticket #, customer, phone… or paste multiple ticket numbers" />
           </div>
           {function () {
             function todayStr() {var n = new Date();return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');}
