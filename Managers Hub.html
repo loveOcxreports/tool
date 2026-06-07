@@ -2574,7 +2574,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
         if (!t) return null;
         return ReactDOM.createPortal(
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(3,8,28,.72)', backdropFilter: 'blur(3px)', zIndex: 9100, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 20px', overflowY: 'auto' }} onClick={function () {setExpanded(null);}}>
-            <div onClick={function (e) {e.stopPropagation();}} onKeyDown={function (e) {if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {e.preventDefault();saveEdit(t);setExpanded(null);} else if (e.key === 'Escape') {setExpanded(null);}}} style={{ width: 'min(780px,96vw)', background: 'var(--surface)', border: '2px solid var(--ek-gold)', borderRadius: 14, overflow: 'visible', boxShadow: '0 30px 90px rgba(0,0,0,.6)', flexShrink: 0 }}>
+            <div onClick={function (e) {e.stopPropagation();}} onKeyDown={function (e) {if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {e.preventDefault();saveEdit(t);setExpanded(null);} else if (e.key === 'Escape') {setExpanded(null);}}} tabIndex={-1} style={{ width: 'min(780px,96vw)', background: 'var(--surface)', border: '2px solid var(--ek-gold)', borderRadius: 14, overflow: 'visible', boxShadow: '0 30px 90px rgba(0,0,0,.6)', flexShrink: 0 }}>
               {/* Header */}
               <div style={{ background: 'linear-gradient(135deg,#1E3A8A,#0F2461)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,.08)', borderRadius: '12px 12px 0 0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

@@ -1740,7 +1740,7 @@ function AllComplaints({ agent, allTix, onUpdate, onDelete, onDeleteBulk, showTo
         const me = getEdit(mt);
         return (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(3px)' }} onClick={function () {setExpanded(null);}}>
-            <div style={{ background: 'var(--surface)', borderRadius: 14, width: 'min(600px,94vw)', maxHeight: '92vh', overflowY: 'auto', border: '2px solid var(--info)', boxShadow: '0 24px 80px rgba(0,0,0,.6)', display: 'flex', flexDirection: 'column' }} onClick={function (ev) {ev.stopPropagation();}}>
+            <div style={{ background: 'var(--surface)', borderRadius: 14, width: 'min(600px,94vw)', maxHeight: '92vh', overflowY: 'auto', border: '2px solid var(--info)', boxShadow: '0 24px 80px rgba(0,0,0,.6)', display: 'flex', flexDirection: 'column' }} onClick={function (ev) {ev.stopPropagation();}} onKeyDown={function (e) {if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {e.preventDefault();saveUpdate(mt);setExpanded(null);} else if (e.key === 'Escape') {setExpanded(null);}}} tabIndex={-1}>
               {/* Header */}
               <div style={{ background: 'linear-gradient(135deg,#1E3A8A,#0F2461)', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '12px 12px 0 0', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
