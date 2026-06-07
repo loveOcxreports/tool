@@ -1959,7 +1959,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
     if (!cellEdit || cellEdit.id !== t.id) return;
     const val = cellEdit.val;
     const upd = Object.assign({}, t, { [cellEdit.field]: val });
-    if (cellEdit.field === 'category') {upd.issue = val;const ar = EK_RESP.find(function (r) {return r.cat.toLowerCase().split('/').some(function (k) {return val.toLowerCase().includes(k.trim());});});if (ar) upd.resp = ar.name;}
+    if (cellEdit.field === 'category') {upd.category = val;const ar = EK_RESP.find(function (r) {return r.cat.toLowerCase().split('/').some(function (k) {return val.toLowerCase().includes(k.trim());});});if (ar) upd.resp = ar.name;}
     if (cellEdit.field === 'status' && val === 'resolved' && !upd.resolvedDate) upd.resolvedDate = new Date().toISOString().slice(0, 10);
     onUpdate && onUpdate(upd);
     if (!noClose) setCellEdit(null);
@@ -2035,8 +2035,6 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
   React.useEffect(function () {
     if (!openCol) return;
     function close(e) {
-      // Don't close if the click is inside the popover itself
-      if (e.target && e.target.closest && e.target.closest('[data-filter-pop]')) return;
       setOpenCol(null);
     }
     document.addEventListener('mousedown', close);
@@ -2059,7 +2057,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 5, justifyContent: align === 'right' ? 'flex-end' : 'flex-start' }}>
         <span>{label}</span>
-        <span onClick={toggle} title="Filter column"
+        <span onMouseDown={function(e){e.preventDefault();toggle(e);}} title="Filter column"
         style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: 4, cursor: 'pointer', flexShrink: 0, background: active ? 'var(--ek-gold)' : 'rgba(255,255,255,.12)', color: active ? '#0A1628' : 'rgba(255,255,255,.75)', font: '700 9px Sora,sans-serif', lineHeight: 1 }}>▾</span>
         {open &&
         <div data-filter-pop="1" onClick={function (e) {e.stopPropagation();}}
@@ -2067,7 +2065,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
             {extra && <div style={{ padding: '4px 6px 8px', borderBottom: options && options.length ? '1px solid var(--bsoft)' : 'none', marginBottom: options && options.length ? 4 : 0 }}>{extra}</div>}
             {(options || []).map(function (o) {
             var on = value === o.v;
-            return <div key={o.v} onClick={function () {setValue(o.v);setOpenCol(null);}}
+            return <div key={o.v} onMouseDown={function (e) {e.preventDefault();e.stopPropagation();setValue(o.v);setOpenCol(null);}}
             style={{ padding: '7px 10px', borderRadius: 5, cursor: 'pointer', font: on ? '700 12px Sora,sans-serif' : '500 12px Sora,sans-serif', color: on ? '#0A1628' : 'var(--fg)', background: on ? 'var(--ek-gold)' : 'transparent', whiteSpace: 'normal', wordBreak: 'break-word' }}
             onMouseEnter={function (e) {if (!on) e.currentTarget.style.background = 'rgba(255,255,255,.08)';}}
             onMouseLeave={function (e) {if (!on) e.currentTarget.style.background = 'transparent';}}>{o.l}</div>;
@@ -4683,12 +4681,22 @@ function DataPage({ tickets, setTickets, showToast }) {
         // 1. {tickets:[...]} — agent export
         // 2. {manager:[...], racheal:[...]} — Gist format
         // 3. [...] — raw array
-        // 4. {days:[{tickets:[...]}]} — PA snapshot format
+        // 4. {days:[{tickets:[...]}]} — PA snapshot / by-day format
+        // 5. {months:[{tickets:[...]}]} — by-month export format
         let imported = [];
         if (Array.isArray(data)) {
           imported = data;
         } else if (Array.isArray(data.tickets)) {
           imported = data.tickets;
+        } else if (Array.isArray(data.months)) {
+          // By-month export: months[].tickets (flat) or months[].days[].tickets (nested)
+          data.months.forEach(function (m) {
+            if (Array.isArray(m.tickets)) {
+              m.tickets.forEach(function (t) {imported.push(t);});
+            } else if (Array.isArray(m.days)) {
+              m.days.forEach(function (day) {(day.tickets || []).forEach(function (t) {imported.push(t);});});
+            }
+          });
         } else if (Array.isArray(data.days)) {
           data.days.forEach(function (day) {(day.tickets || []).forEach(function (t) {imported.push(t);});});
         } else {
@@ -6089,6 +6097,35 @@ function App() {
       return next;
     });
     showToast('✓ Ticket #' + updated.num + ' updated');
+
+    // Auto-push to SharePoint if push URL is set
+    const pUrl = localStorage.getItem('ek_pa_push_url') || '';
+    if (!pUrl || !updated.num) return;
+    const watNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+    const todayStr = watNow.getFullYear() + '-' + String(watNow.getMonth() + 1).padStart(2, '0') + '-' + String(watNow.getDate()).padStart(2, '0');
+    const payload = {
+      num: updated.num || '',
+      status: updated.status || 'unresolved',
+      responsible: updated.resp || updated.responsible || '',
+      actionTaken: updated.note || '',
+      resolvedBy: updated.status === 'resolved' ? (updated.resp || 'Manager') : '',
+      resolvedDate: updated.status === 'resolved' ? (updated.resolvedDate || todayStr) : '',
+      agentName: updated.agent || 'manager',
+      updatedBy: 'Manager',
+      category: updated.category || ''
+    };
+    showToast('⏳ Pushing #' + updated.num + ' to SharePoint…', 'info');
+    fetch(pUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (r) {
+        if (r.ok || r.status === 200) {
+          showToast('✅ #' + updated.num + ' pushed to SharePoint!', 'success');
+        } else {
+          showToast('⚠️ Push failed for #' + updated.num + ' (HTTP ' + r.status + ')', 'error');
+        }
+      })
+      .catch(function (err) {
+        showToast('⚠️ Push error for #' + updated.num + ': ' + (err.message || 'Network error'), 'error');
+      });
   }
 
   function onSignIn(email, name) {setSignedIn(true);if (name) {setSignedInName(name);localStorage.setItem('ek_v2_name', name);}localStorage.setItem('ek_v2_auth', '1');showToast('Welcome back ⚡');}
