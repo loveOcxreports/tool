@@ -618,7 +618,7 @@ var EK_RESP_DEFAULTS=[
   {sn:2,name:'Holyland Umude',         cat:'Metering',                       color:'#60A5FA'},
   {sn:3,name:'Mojibola Adefuwa',       cat:'Billing',                        color:'#34D399'},
   {sn:4,name:'David Obisesan',         cat:'PPM Support',                    color:'#FBBF24'},
-  {sn:5,name:'Owokade Olusegun',       cat:'PPM Maintenance',                color:'#F97316'},
+  {sn:5,name:'Olusegun Owokade',       cat:'PPM Maintenance',                color:'#F97316'},
   {sn:6,name:'Clara Olutola',          cat:'Onboarding',                     color:'#A78BFA'},
   {sn:7,name:'Glory Chinyere',         cat:'MYCRON',                         color:'#2DD4BF'},
   {sn:8,name:'Festus Moko',            cat:'AMISA',                          color:'#FB7185'},
@@ -2001,7 +2001,7 @@ function AllComplaints({ tickets, onUpdate, onBulkUpdate, onBatchUpdate, onDelet
   function getF(t, k) {return edits[t.id] && edits[t.id][k] !== undefined ? edits[t.id][k] : t[k];}
   function setF(id, k, v) {setEdits(function (e) {return Object.assign({}, e, { [id]: Object.assign({}, e[id] || {}, { [k]: v }) });});}
   function clearEdit(id) {setEdits(function (e) {const c = Object.assign({}, e);delete c[id];return c;});}
-  function saveEdit(t) {if (!edits[t.id]) return;var merged = Object.assign({}, t, edits[t.id]);if (merged.status === 'resolved' && !merged.resolvedDate) merged.resolvedDate = watTodayStr();onUpdate && onUpdate(merged);clearEdit(t.id);}
+  function saveEdit(t) {if (!edits[t.id]) return;var merged = Object.assign({}, t, edits[t.id]);if (merged.status === 'resolved' && !merged.resolvedDate) merged.resolvedDate = watTodayStr();onUpdate && onUpdate(merged, {push: true});clearEdit(t.id);}
 
   useEffect(() => {setPage(0);}, [search, fSt, fBu, fCat, fResp, fFrom, fTo, sort]);
   // Jump-to-unassigned: when another screen requests it, pre-apply the filter
@@ -5720,14 +5720,14 @@ function CloudSync({ tickets, setTickets, showToast }) {
         // Matches the flow's single-ticket trigger schema exactly
         const payload = {
           num: t.num || '',
-          status: t.status || 'unresolved',
+          status: (function(s){return s==='resolved'?'resolved':s==='progress'?'progress':'unresolved';})(t.status || 'unresolved'),
           responsible: t.resp || t.responsible || '',
           actionTaken: t.note || '',
           resolvedBy: t.status === 'resolved' ? t.resp || 'Manager' : '',
           resolvedDate: t.status === 'resolved' ? todayStr : '',
           agentName: t.agent || 'manager',
           updatedBy: 'Manager',
-          category: t.category || ''
+          category: (t.category || '').split(' — ')[0].split(' / ')[0].trim()
         };
 
         let res, lastErr;
@@ -6090,7 +6090,7 @@ function App() {
     });
   }
 
-  function onUpdate(updated) {
+  function onUpdate(updated, opts) {
     setTickets(function (prev) {
       const next = prev.map(function (t) {return t.id === updated.id ? updated : t;});
       persistTickets(next);
@@ -6098,21 +6098,21 @@ function App() {
     });
     showToast('✓ Ticket #' + updated.num + ' updated');
 
-    // Auto-push to SharePoint if push URL is set
+    // Only push to SharePoint when explicitly triggered from the popout Save button
+    if (!opts || !opts.push) return;
     const pUrl = localStorage.getItem('ek_pa_push_url') || '';
     if (!pUrl || !updated.num) return;
     const watNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
     const todayStr = watNow.getFullYear() + '-' + String(watNow.getMonth() + 1).padStart(2, '0') + '-' + String(watNow.getDate()).padStart(2, '0');
     const payload = {
       num: updated.num || '',
-      status: updated.status || 'unresolved',
-      responsible: updated.resp || updated.responsible || '',
+      status: (function(s){return s==='resolved'?'resolved':s==='progress'?'progress':'unresolved';})(updated.status || 'unresolved'),
       actionTaken: updated.note || '',
       resolvedBy: updated.status === 'resolved' ? (updated.resp || 'Manager') : '',
       resolvedDate: updated.status === 'resolved' ? (updated.resolvedDate || todayStr) : '',
       agentName: updated.agent || 'manager',
       updatedBy: 'Manager',
-      category: updated.category || ''
+      category: (updated.category || '').split(' — ')[0].split(' / ')[0].trim()
     };
     showToast('⏳ Pushing #' + updated.num + ' to SharePoint…', 'info');
     fetch(pUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
