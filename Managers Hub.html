@@ -5690,7 +5690,7 @@ function CloudSync({ tickets, setTickets, showToast }) {
       });
       if (!todayTix.length) {showToast('No tickets for today to push.', 'error');setSaving(false);return;}
 
-      function toSpStatus(s) {return s === 'resolved' ? 'Closed' : s === 'progress' ? 'Assigned' : 'Pending';}
+      // Status sent as-is: 'resolved', 'progress', 'unresolved' — flow maps to SP choice values
 
       let pushed = 0,failed = 0;
       for (let i = 0; i < todayTix.length; i++) {
@@ -5700,13 +5700,14 @@ function CloudSync({ tickets, setTickets, showToast }) {
         // Matches the flow's single-ticket trigger schema exactly
         const payload = {
           num: t.num || '',
-          status: toSpStatus(t.status),
+          status: t.status || 'unresolved',
           responsible: t.resp || t.responsible || '',
           actionTaken: t.note || '',
           resolvedBy: t.status === 'resolved' ? t.resp || 'Manager' : '',
           resolvedDate: t.status === 'resolved' ? todayStr : '',
           agentName: t.agent || 'manager',
-          updatedBy: 'Manager'
+          updatedBy: 'Manager',
+          category: t.category || ''
         };
 
         let res, lastErr;
