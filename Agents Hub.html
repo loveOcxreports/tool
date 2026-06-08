@@ -452,8 +452,8 @@ const AGENTS = [
 
 const BUS = ['ISLAND', 'IJORA', 'MUSHIN', 'AJAH', 'LEKKI', 'APAPA', 'AGBARA', 'AJELE', 'OJO', 'FESTAC', 'ORILE', 'IBEJU-LEKKI'];
 const CATS = ['Band Reclassification', 'Billing', 'Interruption / Voltage / Safety', 'Metering', 'PPM Support', 'PPM Maintenance', 'Onboarding', 'MYCRON', 'AMISA', 'General'];
-const RESP_LIST = ['Holyland Umude', 'Mojibola Adefuwa', 'Ogheneyoreme Agbroko', 'Adetoun Adetola', 'Olusegun Owokade', 'Clara Olutola', 'Glory (BPS Africa)', 'Festus Moko', 'Nonye Angelina Nnadozie', 'Customer Experience'];
-const RESP_MAP = { 'Band Reclassification': 'Nonye Angelina Nnadozie', 'Billing': 'Mojibola Adefuwa', 'Interruption': 'Ogheneyoreme Agbroko', 'Voltage': 'Ogheneyoreme Agbroko', 'Metering': 'Holyland Umude', 'PPM Support': 'Adetoun Adetola', 'PPM Maintenance': 'Olusegun Owokade', 'Onboarding': 'Clara Olutola', 'MYCRON': 'Glory (BPS Africa)', 'AMISA': 'Festus Moko', 'CX': 'Customer Experience', 'Customer Experience': 'Customer Experience', 'General': 'Customer Experience' };
+const RESP_LIST = ['Holyland Umude', 'Mojibola Adefuwa', 'Ogheneyoreme Agbroko', 'David Obisesan', 'Olusegun Owokade', 'Clara Olutola', 'Glory (BPS Africa)', 'Festus Moko', 'Nonye Angelina Nnadozie', 'Customer Experience'];
+const RESP_MAP = { 'Band Reclassification': 'Nonye Angelina Nnadozie', 'Billing': 'Mojibola Adefuwa', 'Interruption': 'Ogheneyoreme Agbroko', 'Voltage': 'Ogheneyoreme Agbroko', 'Metering': 'Holyland Umude', 'PPM Support': 'David Obisesan', 'PPM Maintenance': 'Olusegun Owokade', 'Onboarding': 'Clara Olutola', 'MYCRON': 'Glory (BPS Africa)', 'AMISA': 'Festus Moko', 'CX': 'Customer Experience', 'Customer Experience': 'Customer Experience', 'General': 'Customer Experience' };
 function getResp(cat) {const k = Object.keys(RESP_MAP).find(function (k) {return (cat || '').includes(k);});return k ? RESP_MAP[k] : '';}
 const THEMES = [
 { id: 'bright', label: 'Bright ☀️', sw: 'linear-gradient(135deg,#EAF0FF 0%,#C9B8FF 60%,#7FE6FF 120%)', desc: 'Pastel rings — light wallpaper' },
@@ -3442,6 +3442,7 @@ function App() {
       resolvedBy: t.status === 'resolved' ? t.resp || agent.name : '',
       resolvedDate: t.status === 'resolved' ? new Date().toISOString().slice(0, 10) : '',
       agentName: agent.name,
+      agentEmail: agent.email || '',
       updatedBy: agent.name
     };
     fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).
