@@ -6223,6 +6223,8 @@ function App() {
     const payload = {
       num: updated.num || '',
       status: (function(s){return s==='resolved'?'resolved':s==='progress'?'progress':'unresolved';})(updated.status || 'unresolved'),
+      appStatus: (function(s){return s==='resolved'?'RESOLVED':s==='progress'?'IN PROGRESS':'UNRESOLVED';})(updated.status || 'unresolved'),
+      responsible: updated.resp || '',
       actionTaken: updated.note || '',
       resolvedBy: updated.status === 'resolved' ? (updated.resp || 'Manager') : '',
       resolvedDate: updated.status === 'resolved' ? (updated.resolvedDate || todayStr) : '',

@@ -3429,12 +3429,14 @@ function App() {
   function setPaUrl(url) {try {localStorage.setItem('ek_pa_push_url', url.trim());} catch (e) {}}
 
   function pushToSharePoint(t) {
+    if (!t.num || !String(t.num).trim()) return; // no SharePoint ID — skip push
     const url = getPaUrl();
     if (!url) return; // silent if not configured
     const body = {
       num: String(t.num || ''),
-      status: t.status === 'resolved' ? 'RESOLVED' : t.status === 'progress' ? 'IN PROGRESS' : 'UNRESOLVED',
+      status: t.status === 'resolved' ? 'resolved' : t.status === 'progress' ? 'in progress' : 'unresolved',
       appStatus: t.status === 'resolved' ? 'RESOLVED' : t.status === 'progress' ? 'IN PROGRESS' : 'UNRESOLVED',
+      category: t.category || '',
       responsible: t.resp || '',
       actionTaken: t.note || '',
       resolvedBy: t.status === 'resolved' ? t.resp || agent.name : '',
