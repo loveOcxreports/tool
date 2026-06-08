@@ -788,15 +788,29 @@ async function ekCloudAutoPull(overrideUrl){
     if(agentId==='_shifts'&&cloudNorm._shifts&&typeof cloudNorm._shifts==='object'){try{localStorage.setItem('ek_v2_shifts',JSON.stringify(cloudNorm._shifts));}catch(e){}return;}
     if(agentId.charAt(0)==='_')return;
     if(!Array.isArray(cloudNorm[agentId]))return;
-    var existingNums=new Set(merged.map(function(x){return String(x.num||'').trim().toLowerCase();}));
-    var existingIds=new Set(merged.map(function(x){return x.id||'';}));
+    var byNum={};merged.forEach(function(x,i){if(x.num)byNum[String(x.num).trim().toLowerCase()]=i;});
+    var byId={};merged.forEach(function(x,i){if(x.id)byId[x.id]=i;});
     cloudNorm[agentId].forEach(function(t){
       if(!t.created){var d=t.received||t.receivedAt||t.createdAt||t.date||t.Date||t.timestamp||'';if(d)t=Object.assign({},t,{created:d});}
       var n=String(t.num||'').trim().toLowerCase();
-      if(n&&existingNums.has(n)||t.id&&existingIds.has(t.id))return;
+      var idx=n&&byNum[n]!=null?byNum[n]:t.id&&byId[t.id]!=null?byId[t.id]:-1;
+      if(idx>=0){
+        // UPDATE existing ticket — sync status, note, resp, category from SharePoint
+        var ex=merged[idx];
+        merged[idx]=Object.assign({},ex,{
+          status:t.status||ex.status,
+          note:t.note||ex.note,
+          resp:t.resp||ex.resp,
+          category:t.category||ex.category,
+          resolvedDate:t.resolvedDate||ex.resolvedDate,
+          resolvedBy:t.resolvedBy||ex.resolvedBy
+        });
+        count++;
+        return;
+      }
       if((!t.email||!String(t.email).includes('@'))&&typeof EK_EMAIL_BACKFILL!=='undefined'&&EK_EMAIL_BACKFILL[t.num])t.email=EK_EMAIL_BACKFILL[t.num];
       if(!t.category||!t.category.trim()){var cc=classifyComplaint(t.issue);if(cc){t.category=cc;if(!t.resp){var rr=respForCat(cc);if(rr)t.resp=rr;}}}
-      merged.push(t);if(n)existingNums.add(n);if(t.id)existingIds.add(t.id);count++;
+      merged.push(t);if(n)byNum[n]=merged.length-1;if(t.id)byId[t.id]=merged.length-1;count++;
     });
   });
   if(count>0)persistTickets(merged);
@@ -5759,13 +5773,26 @@ function CloudSync({ tickets, setTickets, showToast }) {
           var d = t.received || t.receivedAt || t.createdAt || t.date || t.Date || t.dateCreated || t.receivedDate || t.Created || t.timestamp || '';
           return d ? Object.assign({}, t, { created: d }) : t;
         });
-        // Log-only mode: never overwrite existing ticket status/note — only add brand new tickets
-        var existingNums = new Set(merged.map(function (x) {return _norm(x.num || '');}));
-        var existingIds = new Set(merged.map(function (x) {return x.id || '';}));
+        // Update-or-add mode: update existing tickets from SharePoint, add new ones
+        var byNum2 = {};merged.forEach(function (x, i) {if (x.num) byNum2[_norm(x.num)] = i;});
+        var byId2 = {};merged.forEach(function (x, i) {if (x.id) byId2[x.id] = i;});
         normalised.forEach(function (t) {
           var n = _norm(t.num || '');
-          if (n && existingNums.has(n) || t.id && existingIds.has(t.id)) return;
-          merged.push(t);if (n) existingNums.add(n);if (t.id) existingIds.add(t.id);count++;
+          var idx = n && byNum2[n] != null ? byNum2[n] : t.id && byId2[t.id] != null ? byId2[t.id] : -1;
+          if (idx >= 0) {
+            var ex = merged[idx];
+            merged[idx] = Object.assign({}, ex, {
+              status: t.status || ex.status,
+              note: t.note || ex.note,
+              resp: t.resp || ex.resp,
+              category: t.category || ex.category,
+              resolvedDate: t.resolvedDate || ex.resolvedDate,
+              resolvedBy: t.resolvedBy || ex.resolvedBy
+            });
+            count++;
+            return;
+          }
+          merged.push(t);if (n) byNum2[n] = merged.length - 1;if (t.id) byId2[t.id] = merged.length - 1;count++;
         });
       });
       persistTickets(merged);setTickets(merged);

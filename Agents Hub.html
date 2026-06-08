@@ -643,17 +643,30 @@ async function agCloudAutoPull(overrideUrl) {
   // Handle _shifts / _guide side-loads
   if (normalized._shifts && typeof normalized._shifts === 'object') {try {localStorage.setItem('ek_v2_shifts', JSON.stringify(normalized._shifts));} catch (e) {}}
   if (Array.isArray(normalized._guide) && normalized._guide.length) {try {localStorage.setItem('ek_guide', JSON.stringify(normalized._guide));} catch (e) {}}
-  // Merge into shared pool — never overwrite existing tickets (log-only)
+  // Update-or-add mode: update existing tickets from SharePoint, add new ones
   var existing = [];try {existing = JSON.parse(localStorage.getItem('ek_v2_tickets') || '[]');} catch (e) {}
-  var existingNums = new Set(existing.map(function (x) {return (x.num || '').trim().toLowerCase();}));
-  var existingIds = new Set(existing.map(function (x) {return x.id || '';}));
+  var byNum = {};existing.forEach(function (x, i) {if (x.num) byNum[(x.num || '').trim().toLowerCase()] = i;});
+  var byId = {};existing.forEach(function (x, i) {if (x.id) byId[x.id] = i;});
   var added = 0;
   Object.keys(normalized).forEach(function (agId) {
     if (agId.charAt(0) === '_' || !Array.isArray(normalized[agId])) return;
     normalized[agId].forEach(function (t) {
       var n = (t.num || '').trim().toLowerCase();
-      if (n && existingNums.has(n) || t.id && existingIds.has(t.id)) return;
-      existing.push(t); if (n) existingNums.add(n); if (t.id) existingIds.add(t.id); added++;
+      var idx = n && byNum[n] != null ? byNum[n] : t.id && byId[t.id] != null ? byId[t.id] : -1;
+      if (idx >= 0) {
+        var ex = existing[idx];
+        existing[idx] = Object.assign({}, ex, {
+          status: t.status || ex.status,
+          note: t.note || ex.note,
+          resp: t.resp || ex.resp,
+          category: t.category || ex.category,
+          resolvedDate: t.resolvedDate || ex.resolvedDate,
+          resolvedBy: t.resolvedBy || ex.resolvedBy
+        });
+        added++;
+        return;
+      }
+      existing.push(t); if (n) byNum[n] = existing.length - 1; if (t.id) byId[t.id] = existing.length - 1; added++;
     });
   });
   if (added > 0) {try {localStorage.setItem('ek_v2_tickets', JSON.stringify(existing));} catch (e) {}}
@@ -2681,13 +2694,26 @@ function CloudSync({ agent, tickets, setTickets, showToast, agentShift }) {
           var d = t.received || t.receivedAt || t.createdAt || t.date || t.Date || t.dateCreated || t.receivedDate || t.Created || t.timestamp || '';
           return d ? Object.assign({}, t, { created: d }) : t;
         });
-        // Log-only mode: never overwrite existing ticket status/note — only add brand new tickets
-        var existingNums = new Set(merged.map(function (x) {return _norm(x.num || '');}));
-        var existingIds = new Set(merged.map(function (x) {return x.id || '';}));
+        // Update-or-add mode: update existing tickets from SharePoint, add new ones
+        var byNum2 = {};merged.forEach(function (x, i) {if (x.num) byNum2[_norm(x.num)] = i;});
+        var byId2 = {};merged.forEach(function (x, i) {if (x.id) byId2[x.id] = i;});
         normalised.forEach(function (t) {
           var n = _norm(t.num || '');
-          if (n && existingNums.has(n) || t.id && existingIds.has(t.id)) return;
-          merged.push(t);if (n) existingNums.add(n);if (t.id) existingIds.add(t.id);added++;
+          var idx = n && byNum2[n] != null ? byNum2[n] : t.id && byId2[t.id] != null ? byId2[t.id] : -1;
+          if (idx >= 0) {
+            var ex = merged[idx];
+            merged[idx] = Object.assign({}, ex, {
+              status: t.status || ex.status,
+              note: t.note || ex.note,
+              resp: t.resp || ex.resp,
+              category: t.category || ex.category,
+              resolvedDate: t.resolvedDate || ex.resolvedDate,
+              resolvedBy: t.resolvedBy || ex.resolvedBy
+            });
+            added++;
+            return;
+          }
+          merged.push(t);if (n) byNum2[n] = merged.length - 1;if (t.id) byId2[t.id] = merged.length - 1;added++;
         });
       });
       function persistTickets(tix) {try {localStorage.setItem('ek_v2_tickets', JSON.stringify(tix));} catch (e) {console.warn('persistTickets failed', e);}}
