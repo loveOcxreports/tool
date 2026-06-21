@@ -1,38 +1,19 @@
 // netlify/functions/blob-read.js
-// Reads monthly tickets from Netlify Blob store.
-// Handles both 302 redirect and {url:...} JSON response from Netlify API.
-// GET /.netlify/functions/blob-read?token=ekedp-blob-2026 (no npm dependencies)
+// Uses NETLIFY_BLOBS_CONTEXT (auto-injected) for internal blob access — no S3 dance.
+// Falls back to external API if context not available.
+// GET /.netlify/functions/blob-read?token=ekedp-blob-2026
 
 const https = require('https');
 
-function httpsGet(urlStr) {
+function httpGet(urlStr, headers) {
   return new Promise(function (resolve, reject) {
     var url = new URL(urlStr);
-    var opts = { hostname: url.hostname, path: url.pathname + url.search, method: 'GET', headers: { 'User-Agent': 'EKEDP-BlobRead/1.0' } };
+    var opts = { hostname: url.hostname, path: url.pathname + url.search, method: 'GET', headers: headers || {} };
     https.request(opts, function (res) {
-      // Follow redirects (301/302/307)
       if ((res.statusCode === 301 || res.statusCode === 302 || res.statusCode === 307) && res.headers.location) {
-        return httpsGet(res.headers.location).then(resolve).catch(reject);
+        return httpGet(res.headers.location, {}).then(resolve).catch(reject);
       }
-      var data = '';
-      res.on('data', function (c) { data += c; });
-      res.on('end', function () { resolve({ status: res.statusCode, body: data }); });
-    }).on('error', reject).end();
-  });
-}
-
-function netlifyGet(siteId, netlifyToken) {
-  return new Promise(function (resolve, reject) {
-    var opts = {
-      hostname: 'api.netlify.com',
-      path: '/api/v1/sites/' + siteId + '/blobs/monthly-tickets?store=ek-monthly',
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + netlifyToken, 'User-Agent': 'EKEDP-BlobRead/1.0' }
-    };
-    https.request(opts, function (res) {
-      var data = '';
-      res.on('data', function (c) { data += c; });
-      res.on('end', function () { resolve({ status: res.statusCode, headers: res.headers, body: data }); });
+      var data = ''; res.on('data', function (c) { data += c; }); res.on('end', function () { resolve({ status: res.statusCode, body: data, headers: res.headers }); });
     }).on('error', reject).end();
   });
 }
@@ -44,46 +25,51 @@ exports.handler = async function (event) {
   var qs = event.queryStringParameters || {};
   var token = (event.headers && (event.headers['x-app-token'] || event.headers['X-App-Token'])) || qs.token || qs['x-app-token'] || '';
   if (!process.env.EK_BLOB_TOKEN || token !== process.env.EK_BLOB_TOKEN) {
-    return { statusCode: 401, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Unauthorized — check your token' }) };
+    return { statusCode: 401, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
-  var netlifyToken = process.env.NETLIFY_API_TOKEN || '';
-  var siteId = process.env.NETLIFY_SITE_ID || '295cb737-81ef-436d-91e5-0def385f4b88';
-  if (!netlifyToken) return { statusCode: 500, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'NETLIFY_API_TOKEN not set' }) };
-
   try {
-    // Step 1: Call Netlify Blob API
-    var step1 = await netlifyGet(siteId, netlifyToken);
+    var res;
 
-    if (step1.status === 404) {
-      return { statusCode: 404, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'No cached data yet — run the PA pull flow first.' }) };
+    // Method 1: Use NETLIFY_BLOBS_CONTEXT (auto-injected internal access — fastest, no S3 redirect)
+    var ctx = process.env.NETLIFY_BLOBS_CONTEXT ? JSON.parse(process.env.NETLIFY_BLOBS_CONTEXT) : null;
+    if (ctx && ctx.url && ctx.token) {
+      var internalUrl = ctx.url.replace(/\/$/, '') + '/' + (ctx.siteID || process.env.NETLIFY_SITE_ID || '295cb737-81ef-436d-91e5-0def385f4b88') + '/ek-monthly/monthly-tickets';
+      res = await httpGet(internalUrl, { 'Authorization': 'Bearer ' + ctx.token });
     }
 
-    // Case A: Netlify returned a redirect to S3
-    if ((step1.status === 301 || step1.status === 302 || step1.status === 307) && step1.headers.location) {
-      var s3 = await httpsGet(step1.headers.location);
-      var finalData = JSON.parse(s3.body);
-      if (Array.isArray(finalData)) finalData = { tickets: finalData, cachedAt: new Date().toISOString(), count: finalData.length };
-      return { statusCode: 200, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify(finalData) };
+    // Method 2: External Netlify API
+    if (!res || res.status === 404) {
+      var netlifyToken = process.env.NETLIFY_API_TOKEN || '';
+      var siteId = process.env.NETLIFY_SITE_ID || '295cb737-81ef-436d-91e5-0def385f4b88';
+      if (netlifyToken) {
+        // Try path-based format
+        res = await httpGet('https://api.netlify.com/api/v1/blobs/' + siteId + '/ek-monthly/monthly-tickets', { 'Authorization': 'Bearer ' + netlifyToken });
+        // If that 404s, try query-param format
+        if (res.status === 404) {
+          res = await httpGet('https://api.netlify.com/api/v1/sites/' + siteId + '/blobs/monthly-tickets?store=ek-monthly', { 'Authorization': 'Bearer ' + netlifyToken });
+        }
+      }
     }
 
-    // Case B: Netlify returned JSON with {url: "..."}
-    var meta;
-    try { meta = JSON.parse(step1.body); } catch (e) { meta = null; }
+    if (!res) return { statusCode: 500, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'No read method available' }) };
+    if (res.status === 404) return { statusCode: 404, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'No cached data yet — run the PA pull flow first.' }) };
+    if (res.status >= 400) return { statusCode: 502, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'API error: HTTP ' + res.status, detail: res.body.slice(0, 200) }) };
 
-    if (meta && meta.url) {
-      var s3b = await httpsGet(meta.url);
-      var finalDataB = JSON.parse(s3b.body);
-      if (Array.isArray(finalDataB)) finalDataB = { tickets: finalDataB, cachedAt: new Date().toISOString(), count: finalDataB.length };
-      return { statusCode: 200, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify(finalDataB) };
+    // Parse response — might be JSON with {url:...} or direct data
+    var parsed;
+    try { parsed = JSON.parse(res.body); } catch (e) { parsed = null; }
+
+    // If it returned a presigned URL, follow it
+    if (parsed && parsed.url) {
+      var s3 = await httpGet(parsed.url, {});
+      try { parsed = JSON.parse(s3.body); } catch (e) { parsed = null; }
     }
 
-    // Case C: Netlify returned data directly
-    if (meta && (meta.tickets || meta.count)) {
-      return { statusCode: 200, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify(meta) };
-    }
+    if (!parsed) return { statusCode: 502, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Could not parse blob data' }) };
+    if (Array.isArray(parsed)) parsed = { tickets: parsed, cachedAt: new Date().toISOString(), count: parsed.length };
 
-    return { statusCode: 502, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Unexpected API response: ' + step1.status, detail: step1.body.slice(0, 200) }) };
+    return { statusCode: 200, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify(parsed) };
 
   } catch (e) {
     return { statusCode: 500, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Read failed: ' + e.message }) };
