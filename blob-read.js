@@ -36,8 +36,9 @@ exports.handler = async function (event) {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
 
+  var qs = event.queryStringParameters || {};
   var token = (event.headers && (event.headers['x-app-token'] || event.headers['X-App-Token'])) ||
-    (event.queryStringParameters && event.queryStringParameters.token) || '';
+    qs.token || qs['x-app-token'] || '';
   if (!process.env.EK_BLOB_TOKEN || token !== process.env.EK_BLOB_TOKEN) {
     return { statusCode: 401, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }),
       body: JSON.stringify({ error: 'Unauthorized — check your token' }) };
