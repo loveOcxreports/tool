@@ -1,12 +1,6 @@
 // netlify/functions/blob-read.js
 // Reads monthly tickets cached by the PA flow via Netlify Blob REST API.
-// PA writes: PUT https://api.netlify.com/api/v1/sites/{siteId}/blobs/monthly-tickets
-// This function reads the same blob and returns it to the app.
-//
-// Required env vars in Netlify site settings:
-//   EK_BLOB_TOKEN      — your custom app secret (checked in x-app-token header)
-//   NETLIFY_API_TOKEN  — the Netlify personal access token (same one used in PA)
-//   NETLIFY_SITE_ID    — your Netlify site ID (optional, falls back to built-in)
+// Netlify Blob API returns a signed S3 redirect URL — we follow it to get data.
 
 exports.handler = async (event) => {
   const CORS = {
@@ -33,7 +27,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // ── Read from same Netlify Blob the PA flow writes to ─────────
   const siteId = process.env.NETLIFY_SITE_ID || '295cb737-81ef-436d-91e5-0def385f4b88';
   const netlifyToken = process.env.NETLIFY_API_TOKEN || '';
 
@@ -45,46 +38,62 @@ exports.handler = async (event) => {
     };
   }
 
-  let blobRes;
   try {
-    blobRes = await fetch(
+    // Step 1: Ask Netlify Blob API for the blob — returns {url: "signed-S3-url"}
+    const metaRes = await fetch(
       `https://api.netlify.com/api/v1/sites/${siteId}/blobs/monthly-tickets`,
       { headers: { 'Authorization': `Bearer ${netlifyToken}` } }
     );
+
+    if (metaRes.status === 404) {
+      return {
+        statusCode: 404,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'No cached data yet — run the PA pull flow first.' }),
+      };
+    }
+    if (!metaRes.ok) {
+      return {
+        statusCode: 502,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Netlify API error: HTTP ' + metaRes.status }),
+      };
+    }
+
+    const meta = await metaRes.json();
+
+    // Step 2: Follow the signed S3 URL to get the actual blob data
+    let data;
+    if (meta && meta.url) {
+      const s3Res = await fetch(meta.url);
+      if (!s3Res.ok) {
+        return {
+          statusCode: 502,
+          headers: { ...CORS, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ error: 'S3 fetch error: HTTP ' + s3Res.status }),
+        };
+      }
+      data = await s3Res.json();
+    } else {
+      // Already the data (some Netlify versions return directly)
+      data = meta;
+    }
+
+    // Normalise: PA writes a raw array; wrap into {tickets, cachedAt}
+    const normalized = Array.isArray(data)
+      ? { tickets: data, cachedAt: new Date().toISOString(), count: data.length }
+      : data;
+
+    return {
+      statusCode: 200,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+      body: JSON.stringify(normalized),
+    };
   } catch (e) {
     return {
-      statusCode: 502,
+      statusCode: 500,
       headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Blob fetch failed: ' + e.message }),
+      body: JSON.stringify({ error: 'Function error: ' + e.message }),
     };
   }
-
-  if (blobRes.status === 404) {
-    return {
-      statusCode: 404,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'No cached data yet — run the PA pull flow first to populate the blob.' }),
-    };
-  }
-
-  if (!blobRes.ok) {
-    return {
-      statusCode: 502,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Netlify Blob error: HTTP ' + blobRes.status }),
-    };
-  }
-
-  const data = await blobRes.json();
-
-  // PA writes a raw array; normalise to {tickets, cachedAt} for the app
-  const normalized = Array.isArray(data)
-    ? { tickets: data, cachedAt: new Date().toISOString(), count: data.length }
-    : data;
-
-  return {
-    statusCode: 200,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
-    body: JSON.stringify(normalized),
-  };
 };
