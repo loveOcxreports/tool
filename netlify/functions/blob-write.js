@@ -103,9 +103,7 @@ exports.handler = async function (event) {
     var payload = JSON.stringify({ tickets: tickets, count: tickets.length, cachedAt: new Date().toISOString(), source: store });
     var res = await httpsReq('PUT', 'https://api.netlify.com/api/v1/sites/' + siteId + '/blobs/' + blobKey, { 'Authorization': 'Bearer ' + netlifyToken, 'Content-Type': 'application/json' }, payload);
 
-    if (res.status >= 300) return { statusCode: 502, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Blob write failed: HTTP ' + res.status }) };
-
-    return { statusCode: 200, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ ok: true, store: blobKey, count: tickets.length, itemsReceived: items.length, sampleKeys: sampleKeys, firstId: firstId }) };
+    return { statusCode: 200, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ ok: res.status < 300, putStatus: res.status, putBody: res.body.slice(0, 200), store: blobKey, count: tickets.length, itemsReceived: items.length, sampleKeys: sampleKeys, firstId: firstId }) };
   } catch (e) {
     return { statusCode: 500, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: e.message }) };
   }
