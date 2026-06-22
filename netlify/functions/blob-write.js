@@ -1,10 +1,7 @@
 // netlify/functions/blob-write.js
-// Receives ticketsArray from Power Automate and saves to Netlify Blobs
-// Saves under month key e.g. "2026-06" so frontend can read by month
-// Called by: POST /.netlify/functions/blob-write?x-app-token=ekedp-blob-2026
-// Body: JSON array of ticket objects (built by Power Automate)
-
-const { getStore } = require("@netlify/blobs");
+// Uses Netlify Blobs REST API directly — no npm package needed
+// POST /.netlify/functions/blob-write?x-app-token=ekedp-blob-2026
+// Body: JSON array of ticket objects
 
 exports.handler = async (event) => {
   const CORS = {
@@ -14,21 +11,12 @@ exports.handler = async (event) => {
     "Content-Type": "application/json",
   };
 
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 204, headers: CORS, body: "" };
-  }
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers: CORS, body: "" };
+  if (event.httpMethod !== "POST") return { statusCode: 405, headers: CORS, body: JSON.stringify({ success: false, error: "Method not allowed" }) };
 
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers: CORS, body: JSON.stringify({ success: false, error: "Method not allowed" }) };
-  }
-
-  // Token check
   const appToken = (event.queryStringParameters || {})["x-app-token"];
-  if (appToken !== "ekedp-blob-2026") {
-    return { statusCode: 401, headers: CORS, body: JSON.stringify({ success: false, error: "Unauthorized" }) };
-  }
+  if (appToken !== "ekedp-blob-2026") return { statusCode: 401, headers: CORS, body: JSON.stringify({ success: false, error: "Unauthorized" }) };
 
-  // Parse body
   let tickets;
   try {
     tickets = JSON.parse(event.body);
@@ -36,38 +24,49 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ success: false, error: "Invalid JSON body" }) };
   }
 
-  if (!Array.isArray(tickets)) {
-    return { statusCode: 400, headers: CORS, body: JSON.stringify({ success: false, error: "Body must be a JSON array" }) };
+  if (!Array.isArray(tickets)) return { statusCode: 400, headers: CORS, body: JSON.stringify({ success: false, error: "Body must be a JSON array" }) };
+
+  // Build month key e.g. "2026-06" in WAT (UTC+1)
+  const now = new Date(Date.now() + 60 * 60 * 1000);
+  const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+
+  const siteId = process.env.NETLIFY_SITE_ID;
+  const token  = process.env.NETLIFY_API_TOKEN;
+
+  if (!siteId || !token) {
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ success: false, error: "Missing NETLIFY_SITE_ID or NETLIFY_API_TOKEN env vars" }) };
   }
 
+  const payload = { updatedAt: new Date().toISOString(), count: tickets.length, tickets };
+
   try {
-    const store = getStore("ekedp-mobile-tickets");
+    // Write main blob under month key
+    const res = await fetch(
+      `https://api.netlify.com/api/v1/blobs/${siteId}/ekedp-mobile-tickets/${monthKey}`,
+      {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
-    // Build month key from current WAT date e.g. "2026-06"
-    const now = new Date();
-    // WAT = UTC+1
-    const watOffset = 60 * 60 * 1000;
-    const watDate = new Date(now.getTime() + watOffset);
-    const year = watDate.getUTCFullYear();
-    const month = String(watDate.getUTCMonth() + 1).padStart(2, "0");
-    const monthKey = `${year}-${month}`; // e.g. "2026-06"
+    if (!res.ok) {
+      const errText = await res.text();
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ success: false, error: `Netlify API error: ${res.status} ${errText}` }) };
+    }
 
-    const payload = {
-      updatedAt: new Date().toISOString(),
-      count: tickets.length,
-      tickets,
-    };
-
-    // Save under month key — this is what the frontend reads
-    await store.setJSON(monthKey, payload);
-
-    // Also save meta for quick freshness check
-    await store.setJSON(`${monthKey}-meta`, {
-      updatedAt: payload.updatedAt,
-      count: tickets.length,
-    });
-
-    console.log(`[blob-write] Wrote ${tickets.length} tickets under key "${monthKey}" at ${payload.updatedAt}`);
+    // Write meta blob
+    await fetch(
+      `https://api.netlify.com/api/v1/blobs/${siteId}/ekedp-mobile-tickets/${monthKey}-meta`,
+      {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ updatedAt: payload.updatedAt, count: tickets.length }),
+      }
+    );
 
     return {
       statusCode: 200,
@@ -75,11 +74,6 @@ exports.handler = async (event) => {
       body: JSON.stringify({ success: true, written: tickets.length, key: monthKey, updatedAt: payload.updatedAt }),
     };
   } catch (e) {
-    console.error("[blob-write] Error:", e.message);
-    return {
-      statusCode: 500,
-      headers: CORS,
-      body: JSON.stringify({ success: false, error: e.message }),
-    };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ success: false, error: e.message }) };
   }
 };
