@@ -23,8 +23,9 @@ exports.handler = async function (event) {
 
   var qs = event.queryStringParameters || {};
   var token = (event.headers && (event.headers['x-app-token'] || event.headers['X-App-Token'])) || qs.token || qs['x-app-token'] || '';
-  if (!process.env.EK_BLOB_TOKEN || token !== process.env.EK_BLOB_TOKEN) {
-    return { statusCode: 401, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Unauthorized' }) };
+  var expected = (process.env.EK_BLOB_TOKEN || '').trim().toLowerCase();
+  if (!expected || token.trim().toLowerCase() !== expected) {
+    return { statusCode: 401, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Unauthorized', received: token.slice(0,8) + '...', expected_length: expected.length }) };
   }
 
   var netlifyToken = process.env.NETLIFY_API_TOKEN || '';
