@@ -29,7 +29,7 @@ function netlifyPut(siteId, netlifyToken, payload) {
     var buf = Buffer.from(payload, 'utf8');
     var opts = {
       hostname: 'api.netlify.com',
-      path: '/api/v1/sites/' + siteId + '/blobs/monthly-tickets?store=ek-monthly',
+      path: '/api/v1/sites/' + siteId + '/blobs/monthly-tickets',
       method: 'PUT',
       headers: { 'Authorization': 'Bearer ' + netlifyToken, 'Content-Type': 'application/json', 'Content-Length': buf.length }
     };
