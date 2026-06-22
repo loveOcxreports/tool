@@ -1,6 +1,6 @@
 // netlify/functions/blob-read.js
-// Reads monthly tickets from Netlify Blob default store.
-// GET /.netlify/functions/blob-read
+// Reads tickets from Netlify Blob — merges daily + monthly stores.
+// GET /.netlify/functions/blob-read?store=daily|monthly|all (default: all)
 
 const https = require('https');
 
@@ -10,11 +10,25 @@ function httpsGet(urlStr, hdrs) {
     var opts = { hostname: url.hostname, path: url.pathname + url.search, method: 'GET', headers: hdrs || {} };
     https.request(opts, function (res) {
       if ([301,302,307,308].indexOf(res.statusCode) > -1 && res.headers.location) {
-        return httpsGet(res.headers.location, hdrs).then(resolve).catch(reject);
+        return httpsGet(res.headers.location, {}).then(resolve).catch(reject);
       }
       var data = ''; res.on('data', function (c) { data += c; }); res.on('end', function () { resolve({ status: res.statusCode, body: data }); });
     }).on('error', reject).end();
   });
+}
+
+async function readBlob(siteId, token, key) {
+  try {
+    var r1 = await httpsGet('https://api.netlify.com/api/v1/sites/' + siteId + '/blobs/' + key, { 'Authorization': 'Bearer ' + token });
+    if (r1.status === 404) return null;
+    if (r1.status !== 200) return null;
+    var meta = JSON.parse(r1.body);
+    if (meta && meta.url) {
+      var r2 = await httpsGet(meta.url, {});
+      return JSON.parse(r2.body);
+    }
+    return meta;
+  } catch(e) { return null; }
 }
 
 exports.handler = async function (event) {
@@ -25,44 +39,57 @@ exports.handler = async function (event) {
   var siteId = '295cb737-81ef-436d-91e5-0def385f4b88';
 
   if (!netlifyToken) {
-    return { statusCode: 500, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'NETLIFY_API_TOKEN not set in env vars' }) };
+    return { statusCode: 500, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'NETLIFY_API_TOKEN not set' }) };
   }
 
+  var qs = event.queryStringParameters || {};
+  var store = (qs.store || 'all').toLowerCase();
+
   try {
-    // Step 1: Get signed S3 URL from Netlify Blob API
-    var res1 = await httpsGet(
-      'https://api.netlify.com/api/v1/sites/' + siteId + '/blobs/monthly-tickets',
-      { 'Authorization': 'Bearer ' + netlifyToken }
-    );
+    var monthly = null, daily = null;
 
-    if (res1.status === 404) {
-      return { statusCode: 404, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'No blob yet — run PA flow first' }) };
-    }
-    if (res1.status !== 200) {
-      return { statusCode: 502, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Netlify API error: ' + res1.status, detail: res1.body }) };
-    }
-
-    var meta;
-    try { meta = JSON.parse(res1.body); } catch(e) { meta = null; }
-
-    // Step 2: Follow S3 URL if needed
-    var data;
-    if (meta && meta.url) {
-      var res2 = await httpsGet(meta.url, {});
-      if (!res2.ok && res2.status !== 200) {
-        return { statusCode: 502, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'S3 fetch failed: ' + res2.status }) };
-      }
-      try { data = JSON.parse(res2.body); } catch(e) { data = res2.body; }
+    if (store === 'monthly') {
+      monthly = await readBlob(siteId, netlifyToken, 'monthly-tickets');
+    } else if (store === 'daily') {
+      daily = await readBlob(siteId, netlifyToken, 'daily-tickets');
     } else {
-      data = meta;
+      // Read both and merge — monthly is the base, daily updates on top
+      monthly = await readBlob(siteId, netlifyToken, 'monthly-tickets');
+      daily = await readBlob(siteId, netlifyToken, 'daily-tickets');
     }
 
-    // Normalise: array → wrap in {tickets, cachedAt, count}
-    var normalized = Array.isArray(data)
-      ? { tickets: data, cachedAt: new Date().toISOString(), count: data.length, source: 'blob' }
-      : (data && data.tickets ? data : { tickets: [], cachedAt: new Date().toISOString(), count: 0, source: 'blob-empty' });
+    // Get ticket arrays
+    var monthlyTickets = (monthly && (Array.isArray(monthly) ? monthly : monthly.tickets)) || [];
+    var dailyTickets = (daily && (Array.isArray(daily) ? daily : daily.tickets)) || [];
 
-    return { statusCode: 200, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify(normalized) };
+    // Merge: start with monthly, overlay daily (by ticket id)
+    var merged = monthlyTickets.slice();
+    var idMap = {};
+    merged.forEach(function(t, i) { if (t.id) idMap[t.id] = i; });
+    dailyTickets.forEach(function(t) {
+      if (t.id && idMap[t.id] !== undefined) {
+        merged[idMap[t.id]] = t; // update existing
+      } else {
+        merged.push(t); // add new daily ticket not in monthly
+      }
+    });
+
+    if (!merged.length) {
+      return { statusCode: 404, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'No blob data yet — run PA flow first' }) };
+    }
+
+    return {
+      statusCode: 200,
+      headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        tickets: merged,
+        count: merged.length,
+        cachedAt: new Date().toISOString(),
+        source: store,
+        monthlyCount: monthlyTickets.length,
+        dailyCount: dailyTickets.length
+      })
+    };
 
   } catch (e) {
     return { statusCode: 500, headers: Object.assign({}, CORS, { 'Content-Type': 'application/json' }), body: JSON.stringify({ error: 'Function error: ' + e.message }) };
