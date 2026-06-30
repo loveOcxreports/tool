@@ -30,6 +30,40 @@
 </div>
   <div id="__bundler_loading">Unpacking...</div>
 
+  <!-- EKEDP Hub Sync: broadcasts localStorage changes to other open hub tabs -->
+  <script>
+    ;(function(){
+      if(!window.BroadcastChannel) return;
+      var ch = new BroadcastChannel('ekedp_hub_sync');
+      var _set = Storage.prototype.setItem;
+      var _del = Storage.prototype.removeItem;
+      var relaying = false;
+      Storage.prototype.setItem = function(k, v) {
+        _set.call(this, k, v);
+        if (!relaying && this === window.localStorage)
+          ch.postMessage({ t: 's', k: k, v: v });
+      };
+      Storage.prototype.removeItem = function(k) {
+        _del.call(this, k);
+        if (!relaying && this === window.localStorage)
+          ch.postMessage({ t: 'd', k: k });
+      };
+      ch.onmessage = function(e) {
+        var d = e.data;
+        relaying = true;
+        try {
+          if (d.t === 's') _set.call(localStorage, d.k, d.v);
+          else if (d.t === 'd') _del.call(localStorage, d.k);
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: d.k,
+            newValue: d.t === 's' ? d.v : null,
+            storageArea: localStorage
+          }));
+        } finally { relaying = false; }
+      };
+    })();
+  </script>
+
   <script>
     
 document.addEventListener('DOMContentLoaded', async function() {
