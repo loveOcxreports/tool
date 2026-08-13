@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="_ds/ekedp-managers-hub-v2-c355d00f-df3f-4271-84cc-1f9dbda5aa2e/colors_and_type.css">
+  <script src="./image-slot.js"></script>
+  <style>
+    body{margin:0;}
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:var(--ek-navy-deep);}
+    ::-webkit-scrollbar-thumb{background:var(--ek-sub);border-radius:3px;}
+    select.rr-cell option{background:#111D4A;color:#F0F4FF;}
+  </style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--ek-navy-deep);background-image:radial-gradient(circle at 85% 0%, rgba(227,6,19,.10) 0%, transparent 55%);font-family:'Sora',sans-serif;color:#F0F4FF;padding:28px 32px 48px;">
+
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
+    <div style="background:#fff;border-radius:8px;padding:4px 8px;flex:none;display:flex;align-items:center;"><img src="assets/ekedp-logo-user.png" alt="EKEDP" style="height:34px;display:block;"/></div>
+    <div style="flex:1;">
+      <div style="font:700 9px/1 'Sora',sans-serif;text-transform:uppercase;letter-spacing:.12em;color:#6B85C0;margin-bottom:5px;">EKEDP Customer Experience &middot; Marina HQ</div>
+      <h1 style="font:800 24px/1.15 'Sora',sans-serif;font-style:italic;margin:0;letter-spacing:-.005em;color:#F0F4FF;">CX Team Roster</h1>
+    </div>
+  </div>
+
+  <p style="font:500 13px/1.5 'Sora',sans-serif;color:#6B85C0;margin:0 0 20px;">Zoho Desk (Email &middot; Live Chat &middot; Social Media &mdash; round robin) &middot; Mobile App (shared) &mdash; 13 August&ndash;31 December 2026</p>
+
+  <div style="display:flex;gap:8px;margin-bottom:18px;background:#111D4A;border:1px solid #1E3070;border-radius:10px;padding:4px;width:fit-content;">
+    <button onClick="{{ setGridView }}" style="{{ gridTabStyle }}">Grid View</button>
+    <button onClick="{{ setCalendarView }}" style="{{ calTabStyle }}">Calendar View</button>
+  </div>
+
+  <sc-if value="{{ viewIsGrid }}" hint-placeholder-val="{{ true }}">
+  <div>
+  <div style="display:flex;flex-wrap:wrap;gap:16px;background:#111D4A;border:1px solid #1E3070;border-radius:12px;padding:14px 18px;margin-bottom:18px;">
+    <sc-for list="{{ legend }}" as="item" hint-placeholder-count="7">
+      <span style="display:flex;align-items:center;gap:7px;font:500 11px/1 'Sora',sans-serif;color:#6B85C0;">
+        <span style="width:9px;height:9px;border-radius:3px;flex:none;background:{{ item.dot }};"></span>{{ item.label }}
+      </span>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+    <button onClick="{{ save }}" style="background:linear-gradient(135deg,#E30613,#B0050F);border:none;color:#fff;font:700 13px/1 'Sora',sans-serif;padding:10px 18px;border-radius:8px;cursor:pointer;box-shadow:0 4px 14px rgba(227,6,19,.35);">Save changes</button>
+    <button onClick="{{ reset }}" style="background:#111D4A;border:1px solid #1E3070;color:#F0F4FF;font:600 13px/1 'Sora',sans-serif;padding:10px 16px;border-radius:8px;cursor:pointer;" style-hover="background:#0D1B45;">Reset to default roster</button>
+    <button onClick="{{ exportCsv }}" style="background:#111D4A;border:1px solid #1E3070;color:#F0F4FF;font:600 13px/1 'Sora',sans-serif;padding:10px 16px;border-radius:8px;cursor:pointer;">&#8681; Export as CSV</button>
+    <span style="font:500 12px/1 'JetBrains Mono',monospace;color:#4ADE80;min-height:14px;">{{ statusMsg }}</span>
+  </div>
+
+  <div style="border:1px solid #1E3070;border-radius:12px;overflow:auto;max-height:70vh;">
+    <table style="border-collapse:collapse;width:100%;min-width:1500px;">
+      <thead>
+        <tr>
+          <th style="border-bottom:1px solid #1E3070;border-right:1px solid #1E3070;padding:10px 12px;text-align:left;position:sticky;top:0;left:0;background:#111D4A;z-index:3;font:700 10px/1.3 'Sora',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#6B85C0;min-width:160px;">Agent</th>
+          <sc-for list="{{ days }}" as="day" hint-placeholder-count="18">
+            <th style="border-bottom:1px solid #1E3070;border-right:1px solid #1E3070;padding:8px 6px;text-align:center;position:sticky;top:0;background:#111D4A;z-index:2;min-width:62px;">
+              <div style="font:700 10px/1.3 'Sora',sans-serif;text-transform:uppercase;letter-spacing:.04em;color:#F0F4FF;">{{ day.label }}</div>
+              <div style="font:600 9px/1.3 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;color:#6B85C0;margin-top:2px;">{{ day.sub }}</div>
+            </th>
+          </sc-for>
+        </tr>
+      </thead>
+      <tbody>
+        <sc-for list="{{ agentRows }}" as="row" hint-placeholder-count="6">
+          <tr>
+            <td style="border-bottom:1px solid #1E3070;border-right:1px solid #1E3070;padding:8px 12px;position:sticky;left:0;background:{{ row.rowBg }};z-index:1;font:600 12px/1.3 'Sora',sans-serif;color:#F0F4FF;">
+              <div style="display:flex;align-items:center;gap:9px;">
+                <image-slot id="{{ row.photoId }}" shape="rounded" radius="6" placeholder="DP" style="width:32px;height:32px;flex:none;border:2px solid #FFC72C;"></image-slot>
+                <span>{{ row.name }}</span>
+              </div>
+            </td>
+            <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="18">
+              <td style="border-bottom:1px solid #1E3070;border-right:1px solid #1E3070;padding:4px;background:{{ row.rowBg }};text-align:center;">
+                <select class="rr-cell" onChange="{{ cell.onChange }}" style="{{ cell.style }}">
+                  <sc-for list="{{ cell.options }}" as="opt" hint-placeholder-count="7">
+                    <option value="{{ opt.value }}" selected="{{ opt.selected }}">{{ opt.label }}</option>
+                  </sc-for>
+                </select>
+              </td>
+            </sc-for>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ viewIsCalendar }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#F4F6FB;border-radius:16px;padding:20px 22px;color:#0F172A;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
+      <div style="font:800 17px/1.2 'Sora',sans-serif;color:#0F172A;">&#128197; {{ monthLabel }} &mdash; Shift Calendar</div>
+      <div style="font:500 12px/1 'Sora',sans-serif;color:#64748B;">click a day, then an agent's shift to change it</div>
+      <div style="flex:1;"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <sc-for list="{{ calLegend }}" as="li" hint-placeholder-count="7">
+          <span style="display:flex;align-items:center;gap:5px;font:600 11px/1 'Sora',sans-serif;color:{{ li.color }};">{{ li.icon }} {{ li.label }}</span>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button onClick="{{ prevMonth }}" style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 12px;cursor:pointer;font:700 13px/1 'Sora',sans-serif;color:#0F172A;">&#8592;</button>
+        <button onClick="{{ goToday }}" style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 14px;cursor:pointer;font:700 13px/1 'Sora',sans-serif;color:#0F172A;">Today</button>
+        <button onClick="{{ nextMonth }}" style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:8px 12px;cursor:pointer;font:700 13px/1 'Sora',sans-serif;color:#0F172A;">&#8594;</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px;">
+      <sc-for list="{{ weekdayHeaders }}" as="wd" hint-placeholder-count="7">
+        <div style="text-align:center;font:700 11px/1 'Sora',sans-serif;letter-spacing:.06em;color:#3A5299;padding:4px;">{{ wd }}</div>
+      </sc-for>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;">
+      <sc-for list="{{ weeks }}" as="cell" hint-placeholder-count="42">
+        <div onClick="{{ cell.onSelect }}" style="{{ cell.style }}">
+          <sc-if value="{{ cell.exists }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ cell.dateStyle }}">{{ cell.dateLabel }}</div>
+          </sc-if>
+          <sc-if value="{{ cell.inRange }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+                <sc-for list="{{ cell.dots }}" as="dot" hint-placeholder-count="6">
+                  <sc-if value="{{ dot.photo }}" hint-placeholder-val="{{ false }}">
+                    <img src="{{ dot.photo }}" style="{{ dot.style }}"/>
+                  </sc-if>
+                  <sc-if value="{{ dot.noPhoto }}" hint-placeholder-val="{{ true }}">
+                    <span style="{{ dot.phStyle }}">{{ dot.initial }}</span>
+                  </sc-if>
+                </sc-for>
+              </div>
+              <div style="font:600 11px/1 'JetBrains Mono',monospace;color:#64748B;">{{ cell.countLabel }}</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid #E2E8F0;">
+      <div style="font:800 14px/1.2 'Sora',sans-serif;color:#0F172A;margin-bottom:14px;">{{ selectedLabel }}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;">
+        <sc-for list="{{ agentCards }}" as="card" hint-placeholder-count="6">
+          <div style="background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:18px;width:320px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+              <sc-if value="{{ card.photo }}" hint-placeholder-val="{{ false }}">
+                <img src="{{ card.photo }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none;border:2.5px solid {{ card.color }};"/>
+              </sc-if>
+              <sc-if value="{{ card.noPhoto }}" hint-placeholder-val="{{ true }}">
+                <image-slot id="{{ card.photoId }}" shape="circle" placeholder="Photo" style="width:48px;height:48px;flex:none;border:2.5px solid {{ card.color }};"></image-slot>
+              </sc-if>
+              <div style="font:800 16px/1.2 'Sora',sans-serif;color:#0F172A;">{{ card.first }} <span style="color:{{ card.color }};">{{ card.last }}</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+              <sc-for list="{{ card.buttons }}" as="btn" hint-placeholder-count="7">
+                <button onClick="{{ btn.onClick }}" style="{{ btn.style }}">{{ btn.icon }} {{ btn.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SHIFT_META = {
+  Off:         { label: "Off",                  color: "#6B85C0", bg: "transparent",              solid: "#94A3B8", icon: "\u2298" },
+  EmailDay:    { label: "Zoho Desk day",         color: "#FCD34D", bg: "rgba(245,158,11,.18)",     solid: "#F59E0B", icon: "\u2600\uFE0F" },
+  EmailNight:  { label: "Zoho Desk night",       color: "#C4B5FD", bg: "rgba(124,58,237,.18)",     solid: "#7C3AED", icon: "\uD83C\uDF19" },
+  MobileLC:    { label: "Mobile + LC",           color: "#93C5FD", bg: "rgba(59,130,246,.18)",     solid: "#3B82F6", icon: "\uD83D\uDCF1" },
+  SocialMedia: { label: "Social media",          color: "#FFC72C", bg: "rgba(255,199,44,.18)",     solid: "#F59E0B", icon: "\uD83D\uDCAC" },
+  Solo:        { label: "Solo - all channels",   color: "#F87171", bg: "rgba(220,38,38,.18)",      solid: "#DC2626", icon: "\u26A1" },
+  Leave:       { label: "On leave",              color: "#4ADE80", bg: "rgba(22,163,74,.18)",      solid: "#16A34A", icon: "\uD83C\uDF3F" }
+};
+const SHIFT_ORDER = ["Off","EmailDay","EmailNight","MobileLC","SocialMedia","Solo","Leave"];
+
+const AGENTS = ["Matthew Akhigbe","Racheal Ogunleke","Tomina Egbokwu","Okafor Esther Ifunnaya","Okpara Loveth Ifeoma","Dagbo Oyebola"];
+
+const AGENT_COLORS = {
+  "Matthew Akhigbe": "#16A34A",
+  "Racheal Ogunleke": "#EC4899",
+  "Tomina Egbokwu": "#8B5CF6",
+  "Okafor Esther Ifunnaya": "#DC2626",
+  "Okpara Loveth Ifeoma": "#F59E0B",
+  "Dagbo Oyebola": "#14B8A6"
+};
+const DISPLAY_NAME = {
+  "Matthew Akhigbe": { first: "Matthew", last: "Akhigbe" },
+  "Racheal Ogunleke": { first: "Racheal", last: "Ogunleke" },
+  "Tomina Egbokwu": { first: "Tomina", last: "Egbokwu" },
+  "Okafor Esther Ifunnaya": { first: "Esther", last: "Okafor" },
+  "Okpara Loveth Ifeoma": { first: "Loveth", last: "Okpara" },
+  "Dagbo Oyebola": { first: "Oyebola", last: "Dagbo" }
+};
+
+const WD_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MO_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const START_DATE = new Date(2026, 7, 13); // 13 Aug 2026
+const END_DATE = new Date(2026, 11, 31);  // 31 Dec 2026
+
+function buildDays() {
+  const out = [];
+  const cur = new Date(START_DATE);
+  while (cur <= END_DATE) {
+    out.push({ d: cur.getDate(), m: cur.getMonth(), y: cur.getFullYear(), mo: MO_NAMES[cur.getMonth()], wd: WD_NAMES[cur.getDay()] });
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+}
+const DAYS = buildDays();
+const TODAY = new Date(2026, 7, 13);
+
+function dayIndexFor(year, month, date) {
+  const t = new Date(year, month, date);
+  if (t < START_DATE || t > END_DATE) return -1;
+  return Math.round((t - START_DATE) / 86400000);
+}
+
+// Base 18-day rotation (13-30 Aug 2026), repeated cyclically through December.
+const BASE_CYCLE = {
+  "Matthew Akhigbe":       ["Off","EmailDay","Solo","Off","Off","EmailDay","EmailNight","MobileLC","SocialMedia","Off","Off","MobileLC","SocialMedia","Off","EmailDay","EmailNight","Off","Off"],
+  "Racheal Ogunleke":      ["EmailDay","EmailNight","Off","Off","EmailDay","EmailNight","MobileLC","SocialMedia","Off","Solo","Off","SocialMedia","Off","EmailDay","EmailNight","MobileLC","Off","Off"],
+  "Tomina Egbokwu":        ["EmailNight","MobileLC","Off","Off","EmailNight","MobileLC","SocialMedia","Off","EmailDay","Off","Solo","Off","Off","Off","Off","Off","Off","Off"],
+  "Okafor Esther Ifunnaya":["Leave","Leave","Leave","Leave","Leave","Leave","Leave","Leave","Leave","Off","Off","EmailDay","EmailNight","MobileLC","SocialMedia","Off","Solo","Off"],
+  "Okpara Loveth Ifeoma":  ["MobileLC","SocialMedia","Off","Off","MobileLC","SocialMedia","Off","EmailDay","EmailNight","Off","Off","Off","EmailDay","EmailNight","MobileLC","SocialMedia","Off","Off"],
+  "Dagbo Oyebola":         ["SocialMedia","Off","Solo","Off","SocialMedia","Off","EmailDay","EmailNight","MobileLC","Off","Off","EmailNight","MobileLC","SocialMedia","Off","EmailDay","Off","Solo"]
+};
+
+function buildDefaultRoster() {
+  const roster = {};
+  AGENTS.forEach(name => {
+    const cycle = BASE_CYCLE[name];
+    roster[name] = DAYS.map((_, i) => cycle[i % cycle.length]);
+  });
+  return roster;
+}
+const DEFAULT_ROSTER = buildDefaultRoster();
+
+const STORAGE_KEY = "cx_roster_aug_dec_2026_v3";
+
+const SLOT_TO_AGENT = {};
+AGENTS.forEach(name => { SLOT_TO_AGENT["grid-photo-" + name.replace(/\s+/g, "-")] = name; });
+
+class Component extends DCLogic {
+  state = { roster: this.loadRoster(), statusMsg: "", view: "grid", calYear: 2026, calMonth: 7, selectedIndex: dayIndexFor(2026, 7, 13), agentPhotos: {} };
+
+  componentDidMount() {
+    fetch(".image-slots.state.json").then(r => r.ok ? r.json() : {}).then(data => {
+      const photos = {};
+      Object.keys(data || {}).forEach(slotId => {
+        const name = SLOT_TO_AGENT[slotId];
+        if (name && data[slotId] && data[slotId].u) photos[name] = data[slotId].u;
+      });
+      this.setState({ agentPhotos: photos });
+    }).catch(() => {});
+  }
+
+  loadRoster() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+  }
+
+  setStatus(msg, autoClear) {
+    this.setState({ statusMsg: msg });
+    if (autoClear) {
+      setTimeout(() => { if (this.state.statusMsg === msg) this.setState({ statusMsg: "" }); }, 2000);
+    }
+  }
+
+  cellStyle(value) {
+    const m = SHIFT_META[value] || SHIFT_META.Off;
+    return {
+      width: "100%", background: m.bg, color: m.color, border: "none",
+      font: "600 11px/1.3 'Sora',sans-serif", padding: "6px 2px", borderRadius: "6px",
+      textAlign: "center", cursor: "pointer", appearance: "none", textAlignLast: "center"
+    };
+  }
+
+  buildWeeks(year, month) {
+    const roster = this.state.roster;
+    const first = new Date(year, month, 1);
+    const startOffset = first.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < startOffset; i++) cells.push({ exists: false, style: { minHeight: "132px" } });
+    for (let d = 1; d <= daysInMonth; d++) {
+      const idx = dayIndexFor(year, month, d);
+      const inRange = idx >= 0;
+      const isToday = year === TODAY.getFullYear() && month === TODAY.getMonth() && d === TODAY.getDate();
+      const isSelected = inRange && idx === this.state.selectedIndex;
+      let dots = [], onCount = 0, offCount = 0;
+      if (inRange) {
+        AGENTS.forEach(name => {
+          const v = (roster[name] && roster[name][idx]) || "Off";
+          if (v === "Off") offCount++; else onCount++;
+          const photo = this.state.agentPhotos[name];
+          const dim = v === "Off" ? 0.3 : 1;
+          dots.push({
+            photo, noPhoto: !photo,
+            initial: name.charAt(0),
+            style: { width: "30px", height: "30px", borderRadius: "50%", flex: "none", objectFit: "cover", border: "2px solid " + AGENT_COLORS[name], opacity: dim },
+            phStyle: { width: "30px", height: "30px", borderRadius: "50%", flex: "none", border: "2px solid " + AGENT_COLORS[name], background: AGENT_COLORS[name] + "22", color: AGENT_COLORS[name], font: "800 13px/30px 'Sora',sans-serif", textAlign: "center", opacity: dim }
+          });
+        });
+      }
+      cells.push({
+        exists: true, inRange,
+        style: {
+          minHeight: "132px", borderRadius: "12px", padding: "12px", cursor: inRange ? "pointer" : "default",
+          background: !inRange ? "transparent" : (isSelected ? "#EFF6FF" : "#fff"),
+          border: isSelected ? "2px solid #1D4ED8" : (isToday ? "1.5px solid #F59E0B" : "1px solid " + (inRange ? "#E2E8F0" : "transparent"))
+        },
+        dateStyle: { font: (isToday ? "800" : "700") + " 16px/1 'Sora',sans-serif", color: isToday ? "#B45309" : "#0F172A", marginBottom: "10px" },
+        dateLabel: String(d),
+        dots,
+        countLabel: inRange ? (onCount + " on \u00b7 " + offCount + " off") : "",
+        onSelect: inRange ? () => this.setState({ selectedIndex: idx }) : undefined
+      });
+    }
+    while (cells.length % 7 !== 0) cells.push({ exists: false, style: { minHeight: "132px" } });
+    return cells;
+  }
+
+  navTabStyle(active) {
+    return {
+      padding: "8px 16px", borderRadius: "7px", border: "none", cursor: "pointer",
+      font: "700 12px/1 'Sora',sans-serif",
+      background: active ? "#E30613" : "transparent",
+      color: active ? "#fff" : "#6B85C0"
+    };
+  }
+
+  shiftButtonStyle(active, m) {
+    return {
+      display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+      padding: "18px 16px", borderRadius: "12px", cursor: "pointer",
+      font: "800 16px/1.2 'Sora',sans-serif", whiteSpace: "nowrap",
+      background: active ? m.solid : "#fff",
+      color: active ? "#fff" : "#4338CA",
+      border: active ? "2px solid " + m.solid : "2px solid #E2E8F0"
+    };
+  }
+
+  renderVals() {
+    const roster = this.state.roster;
+    const agentRows = AGENTS.map((name, ai) => ({
+      name,
+      photoId: "grid-photo-" + name.replace(/\s+/g, "-"),
+      rowBg: ai % 2 === 0 ? "#151b2e" : "#111726",
+      cells: DAYS.map((day, i) => {
+        const value = (roster[name] && roster[name][i]) || "Off";
+        return {
+          value,
+          options: SHIFT_ORDER.map(v => ({ value: v, label: SHIFT_META[v].label, selected: v === value })),
+          style: this.cellStyle(value),
+          onChange: (e) => {
+            const v = e.target.value;
+            const next = { ...this.state.roster, [name]: [...this.state.roster[name]] };
+            next[name][i] = v;
+            this.setState({ roster: next });
+            this.setStatus("Unsaved changes");
+          }
+        };
+      })
+    }));
+
+    const MO_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const selIdx = this.state.selectedIndex;
+    const selDay = selIdx >= 0 ? DAYS[selIdx] : null;
+
+    const agentCards = AGENTS.map(name => {
+      const dn = DISPLAY_NAME[name];
+      const value = selIdx >= 0 ? ((roster[name] && roster[name][selIdx]) || "Off") : "Off";
+      const photo = this.state.agentPhotos[name];
+      return {
+        name, first: dn.first, last: dn.last, color: AGENT_COLORS[name], photoId: "cal-photo-" + name.replace(/\s+/g, "-"),
+        photo, noPhoto: !photo,
+        buttons: SHIFT_ORDER.map(v => {
+          const m = SHIFT_META[v];
+          return {
+            value: v, label: v === "Off" ? "Off" : m.label, icon: m.icon,
+            active: v === value, style: this.shiftButtonStyle(v === value, m),
+            onClick: () => {
+              if (selIdx < 0) return;
+              const next = { ...this.state.roster, [name]: [...this.state.roster[name]] };
+              next[name][selIdx] = v;
+              this.setState({ roster: next });
+              this.setStatus("Unsaved changes");
+            }
+          };
+        })
+      };
+    });
+
+    return {
+      agentRows,
+      days: DAYS.map(d => ({ label: d.d + " " + d.mo, sub: d.wd })),
+      shiftOptions: SHIFT_ORDER.map(v => ({ value: v, label: SHIFT_META[v].label })),
+      legend: SHIFT_ORDER.filter(v => v !== "Off").concat(["Off"]).map(v => ({ dot: SHIFT_META[v].bg === "transparent" ? "#3a4360" : SHIFT_META[v].color, label: SHIFT_META[v].label })),
+      statusMsg: this.state.statusMsg,
+      viewIsGrid: this.state.view === "grid",
+      viewIsCalendar: this.state.view === "calendar",
+      gridTabStyle: this.navTabStyle(this.state.view === "grid"),
+      calTabStyle: this.navTabStyle(this.state.view === "calendar"),
+      setGridView: () => this.setState({ view: "grid" }),
+      setCalendarView: () => this.setState({ view: "calendar" }),
+      calLegend: SHIFT_ORDER.map(v => ({ label: v === "Off" ? "Off" : SHIFT_META[v].label, icon: SHIFT_META[v].icon, color: SHIFT_META[v].solid })),
+      monthLabel: MO_FULL[this.state.calMonth] + " " + this.state.calYear,
+      weekdayHeaders: ["SUN","MON","TUE","WED","THU","FRI","SAT"],
+      weeks: this.buildWeeks(this.state.calYear, this.state.calMonth),
+      prevMonth: () => {
+        let m = this.state.calMonth - 1, y = this.state.calYear;
+        if (m < 0) { m = 11; y--; }
+        this.setState({ calMonth: m, calYear: y });
+      },
+      nextMonth: () => {
+        let m = this.state.calMonth + 1, y = this.state.calYear;
+        if (m > 11) { m = 0; y++; }
+        this.setState({ calMonth: m, calYear: y });
+      },
+      goToday: () => this.setState({ calMonth: TODAY.getMonth(), calYear: TODAY.getFullYear(), selectedIndex: dayIndexFor(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate()) }),
+      selectedLabel: selDay ? (selDay.d + " " + selDay.mo + " " + selDay.y + " \u00b7 " + selDay.wd) : "Pick a day in range",
+      agentCards,
+      save: () => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state.roster));
+          this.setStatus("Saved", true);
+        } catch (e) {
+          this.setStatus("Could not save - storage unavailable");
+        }
+      },
+      reset: () => {
+        if (!window.confirm("Reset to the default roster? Unsaved changes will be lost.")) return;
+        const fresh = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+        this.setState({ roster: fresh });
+        this.setStatus("Reset to default", true);
+      },
+      exportCsv: () => {
+        let csv = "Agent," + DAYS.map(d => d.d + " " + d.mo + " (" + d.wd + ")").join(",") + "\n";
+        AGENTS.forEach(name => {
+          const labels = roster[name].map(v => (SHIFT_META[v] ? SHIFT_META[v].label : v));
+          csv += '"' + name + '",' + labels.map(l => '"' + l + '"').join(",") + "\n";
+        });
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "CX_Roster_Aug-Dec_2026.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
