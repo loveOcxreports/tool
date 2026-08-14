@@ -36,7 +36,11 @@ let state = {
   liveChatData: null,
   ambassadorData: null,
   activeTab: 'overview',
-  settings: { syncUrl: '', ref: '', from: 'Manager Email/ Mobile APP/Live Chat helpdesk CX', prepBy: '', prepTitle: 'Email Helpdesk CX' },
+  team: null,
+  currentUser: null,
+  showTeam: false,
+  refSeq: 9,
+  settings: { syncUrl: '', ref: '', from: 'Manager Email/ Mobile APP/Live Chat helpdesk CX', prepBy: '', prepTitle: 'MarinaHelp CX' },
   showSettings: false,
   syncing: false,
   toastMsg: '',
@@ -62,7 +66,10 @@ function loadPersisted() {
     const amb = localStorage.getItem('ehd_ambassadorData');
     if (amb) state.ambassadorData = JSON.parse(amb);
     if (s) state.settings = { ...state.settings, ...JSON.parse(s) };
-  } catch (e) {}
+    const tm = localStorage.getItem('ehd_team'); state.team = tm ? JSON.parse(tm) : defaultTeam();
+    const cu = localStorage.getItem('ehd_currentUser'); if (cu) state.currentUser = JSON.parse(cu);
+    const rs = localStorage.getItem('ehd_refSeq'); state.refSeq = rs ? parseInt(rs, 10) : 9;
+  } catch (e) { if (!state.team) state.team = defaultTeam(); }
 }
 
 function toast(msg, ms) {
@@ -497,11 +504,83 @@ function drawTriageFlowchart() {
 }
 
 // ============================================================
-// CSV PROCESSING — Email Helpdesk / Issue Tracker
+// CSV PROCESSING — MarinaHelp (Zoho export) / District list
 // ============================================================
+
+// ============================================================
+// ZOHO DESK EXPORT SUPPORT (MarinaHelp email + social)
+// ============================================================
+function isZohoFormat(rows) {
+  return rows.slice(0, 6).some(function (r) {
+    return r.some(function (c) { return /TICKET ID/i.test(c); }) &&
+           r.some(function (c) { return /CHANNEL/i.test(c); });
+  });
+}
+function processZohoEmail(rows) {
+  var hi = rows.findIndex(function (r) {
+    return r.some(function (c) { return /TICKET ID/i.test(c); }) && r.some(function (c) { return /CHANNEL/i.test(c); });
+  });
+  var H = rows[hi].map(function (h) { return h.trim(); });
+  function col(name) { return H.findIndex(function (h) { return h.toLowerCase() === name.toLowerCase(); }); }
+  var cID = col('TICKET ID'), cSub = col('SUBJECT'), cFrom = col('FROM'), cRecv = col('RECEIVED TIME'),
+      cResp = col('RESPONSE STATUS'), cBy = col('RESPONDED BY'), cStat = col('STATUS'), cChan = col('CHANNEL');
+  var tk = {};
+  for (var i = hi + 1; i < rows.length; i++) {
+    var r = rows[i]; var id = (r[cID] || '').trim(); if (!/^\d+$/.test(id)) continue;
+    var recv = new Date((r[cRecv] || '').trim());
+    if (!tk[id]) tk[id] = { id: id, recv: recv, from: (r[cFrom] || '').trim(), sub: (r[cSub] || '').trim(), chan: (r[cChan] || '').trim(), status: (r[cStat] || '').trim(), responded: false };
+    var t = tk[id];
+    if (recv < t.recv) { t.recv = recv; t.from = (r[cFrom] || '').trim(); t.sub = (r[cSub] || '').trim(); }
+    var rs = (r[cResp] || '').trim(); var by = (r[cBy] || '').trim();
+    if (/responded/i.test(rs) || (by && by !== '-')) t.responded = true;
+    var st = (r[cStat] || '').trim(); if (/closed|resolved/i.test(st)) t.status = st;
+  }
+  var tickets = Object.keys(tk).map(function (k) { return tk[k]; });
+  var email = tickets.filter(function (t) { return /email/i.test(t.chan); });
+  var social = tickets.filter(function (t) { return /twitter|social|instagram|facebook|\bx\b|meta/i.test(t.chan); });
+
+  function quality(list) {
+    var norm = function (x) { return String(x).toLowerCase().replace(/\[##\s*\d+\s*##\]/g, '').replace(/^(re:|fwd:|fw:|\s)+/, '').trim().replace(/\s+/g, ' '); };
+    var dom = function (x) { var m = /@([\w.\-]+)/.exec(x); return m ? m[1].toLowerCase() : ''; };
+    var jk = ['freight', 'cargo', 'flight schedule', 'open house', 'webinar', 'newsletter', 'unsubscribe', 'consolidation', 'partnership', 'shipping', 'solar inverter', 'manufacturer'];
+    list.forEach(function (t) {
+      t._internal = /ekedp|ekedc|zohodesk/.test(dom(t.from));
+      t._junk = jk.some(function (k) { return (t.sub + ' ' + t.from).toLowerCase().indexOf(k) >= 0; });
+      t._ns = norm(t.sub); t._dup = false;
+    });
+    var groups = {};
+    list.forEach(function (t) { var k = t.from + '|' + t._ns; (groups[k] = groups[k] || []).push(t); });
+    Object.keys(groups).forEach(function (k) { var g = groups[k]; if (g.length > 1) { g.sort(function (a, b) { return a.recv - b.recv; }); g.slice(1).forEach(function (t) { t._dup = true; }); } });
+    var ni = 0, nj = 0, nd = 0, gen = 0;
+    list.forEach(function (t) { if (t._internal) ni++; if (t._junk) nj++; if (t._dup) nd++; if (!(t._internal || t._junk || t._dup)) gen++; });
+    return { total: list.length, internal: ni, junk: nj, dup: nd, genuine: gen };
+  }
+  var eq = quality(email), sq = quality(social);
+  var closed = email.filter(function (t) { return /closed|resolved/i.test(t.status); }).length;
+  var pending = email.length - closed;
+  var socClosed = social.filter(function (t) { return /closed|resolved/i.test(t.status); }).length;
+
+  var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var fmt = function (d) { return d.getDate() + ' ' + mo[d.getMonth()] + ' ' + d.getFullYear(); };
+  var dates = email.map(function (t) { return t.recv; }).filter(function (d) { return !isNaN(d); }).sort(function (a, b) { return a - b; });
+  var period = dates.length ? fmt(dates[0]) + ' \u2013 ' + fmt(dates[dates.length - 1]) : '\u2014';
+  var today = new Date(); var reportDate = today.getDate() + ' ' + mo[today.getMonth()] + ' ' + today.getFullYear();
+
+  var existing = state.liveData || {};
+  saveData(Object.assign({}, existing, {
+    period: period, reportDate: reportDate,
+    total: email.length, resolved: closed, pending: pending,
+    categories: [], escalatedDistricts: existing.escalatedDistricts || [], totalEscalated: existing.totalEscalated || 0,
+    dataQuality: eq, social: { total: social.length, closed: socClosed, quality: sq }
+  }));
+  toast('\u2705 Zoho \u00b7 Email ' + email.length + ' tickets (' + eq.genuine + ' genuine \u00b7 ' + eq.internal + ' internal \u00b7 ' + eq.dup + ' dup \u00b7 ' + eq.junk + ' junk) \u00b7 ' + closed + ' closed \u00b7 Social ' + social.length);
+}
+
+
 function processCSV(text) {
   const rows = parseCSV(text);
   if (rows.length < 2) { toast('⚠️ CSV appears empty'); return; }
+  if (isZohoFormat(rows)) { processZohoEmail(rows); return; }
   const headers = rows[0].map(h => h.trim());
   const data = rows.slice(1).map(r => {
     const obj = {}; headers.forEach((h, i) => { obj[h] = (r[i] || '').trim(); }); return obj;
@@ -551,7 +630,7 @@ function processCSV(text) {
     const escalatedDistricts = Object.values(distMap).sort((a, b) => a.name.localeCompare(b.name));
     const totalEscalated = escalatedDistricts.reduce((a, d) => a + d.count, 0);
     saveData({ ...existing, escalatedDistricts, totalEscalated });
-    toast('✅ Issue Tracker · ' + data.length + ' rows · ' + escalatedDistricts.length + ' districts · total=' + totalEscalated);
+    toast('✅ District data · ' + data.length + ' rows · ' + escalatedDistricts.length + ' districts · total=' + totalEscalated);
     return;
   }
 
@@ -759,7 +838,7 @@ function wordExport(opts) {
     'The sustained backlog in' + (topCat ? ' ' + topCat.name + '-related and other' : '') + ' overdue complaints directly exposes the company to service delivery lapses and customer dissatisfaction.',
     'Non-adherence to prescribed complaint resolution timelines constitutes a compliance risk and may attract increased scrutiny and reputational consequences.',
     'Unresolved complaints \u2014 particularly those exceeding the SLA timeline \u2014 increase the risk of repeat escalations, negative customer feedback, and attrition.',
-    'A growing backlog of overdue complaints may undermine customer confidence and erode trust in the Email Helpdesk as a reliable resolution channel.'
+    'A growing backlog of overdue complaints may undermine customer confidence and erode trust in the MarinaHelp as a reliable resolution channel.'
   ];
   const recs = [
     'Immediate prioritisation of pending' + (topCat ? ' ' + topCat.name : '') + ' requests in collaboration with the relevant team to accelerate resolution.',
@@ -767,7 +846,7 @@ function wordExport(opts) {
     'Proactive customer communication for cases where resolution cannot be achieved within the current reporting week.',
     'Weekly review of SLA performance by category to identify and address recurring operational bottlenecks.'
   ];
-  const conclusion = 'While overall resolution performance for the week stands at <strong>' + resRate + '%</strong>, continued focus is required to clear the pending backlog' + (topCat ? ', particularly ' + topCat.name + '-driven cases,' : '') + ' to sustain service delivery standards, improve customer satisfaction, and avoid repeat escalations. Continued monitoring of SLA compliance across all complaint categories is recommended.';
+  const conclusion = 'The migration to Zoho Desk has consolidated the digital complaint channels under MarinaHelp. Following this week\u2019s ticket-quality review and the subsequent system purge, the accuracy of recorded complaint volumes has improved, with duplicate detection re-enabled to address the residual duplicates. Email continues to function as an intake-and-route channel, with genuine complaints routed to the relevant district for resolution once the customer completes the details form. Resolution effort is concentrated on Social, Mobile App and Live Chat, which remain the focus of week-on-week performance reporting. The onboarding of Instagram and Facebook onto MarinaHelp will introduce additional digital volume that should be resourced accordingly.';
 
   const css = 'body{font-family:Calibri,Arial,sans-serif;font-size:10pt;color:#000;}h2{font-size:10.5pt;font-weight:bold;margin:10pt 0 4pt 0;}table{border-collapse:collapse;width:100%;margin:5pt 0;}th{background:#1E3070;color:white;padding:4pt 6pt;font-size:9pt;text-align:center;border:1px solid #ccc;}td{padding:3pt 6pt;font-size:9.5pt;border:1px solid #ccc;}.kv{border-collapse:collapse;}.kv td{border:none;padding:2pt 5pt;vertical-align:top;}.kv td:first-child{font-weight:bold;width:70pt;white-space:nowrap;}.kpi-val{font-size:13pt;font-weight:bold;text-align:center;}.gtot td{font-weight:bold;background:#f0f0f0;}ul{margin:3pt 0;padding-left:16pt;}li{margin:2pt 0;line-height:1.4;}p{margin:4pt 0;line-height:1.4;}hr{border:0;border-top:1px solid #ccc;margin:6pt 0;}';
 
@@ -803,17 +882,17 @@ function wordExport(opts) {
         ? '<tr><td style="padding:6pt 8pt;border:1px solid #ccc;">Live Chat</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + lcTotal + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + lcResolved + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + lcRate + '%</td></tr>'
         : '<tr><td style="padding:6pt 8pt;border:1px solid #ccc;">Live Chat</td><td colspan="3" style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">Not yet reporting</td></tr>';
       return '<h2>Introduction</h2>' +
-        '<p>This report presents a week-to-date review of CX unit performance for the period <strong>' + period + '</strong> across all active complaint channels <strong>' + (lcTotal ? 'Email Helpdesk, Mobile App (EKEDP Power App), and Live Chat' : 'Email Helpdesk and Mobile App (EKEDP Power App)') + '</strong>. It covers ticket volume and resolution status. The objective of this report is to support executive oversight and informed decision-making, strengthen service delivery standards across all channels, drive timely resolution of complaints, and ensure all complaints are properly documented and monitored.</p>' +
+        '<p>This report presents a week-to-date review of CX unit performance for the period <strong>' + period + '</strong> across all active complaint channels <strong>' + (lcTotal ? 'MarinaHelp, Mobile App (EKEDP Power App), and Live Chat' : 'MarinaHelp and Mobile App (EKEDP Power App)') + '</strong>. It covers ticket volume and resolution status. The objective of this report is to support executive oversight and informed decision-making, strengthen service delivery standards across all channels, drive timely resolution of complaints, and ensure all complaints are properly documented and monitored.</p>' +
         '<h2>Executive Summary</h2>' +
-        '<p>Across the unit, <strong>' + unitTotal + '</strong> tickets were received this period, of which <strong>' + unitResolved + '</strong> (<strong>' + unitRate + '%</strong>) were treated and resolved. Email Helpdesk received <strong>' + total + '</strong> complaints and resolved <strong>' + resRate + '%</strong>, with <strong>' + pending + '</strong> awaiting a response from the customer to proceed. Mobile App received <strong>' + mTotal + '</strong> tickets at a <strong>' + mRate + '%</strong> resolution rate' + (mTotal ? ', the stronger-performing channel this period' : '') + '. ' + lcSentence + '</p>' +
+        '<p>Across the unit, <strong>' + unitTotal + '</strong> tickets were received this period, of which <strong>' + unitResolved + '</strong> (<strong>' + unitRate + '%</strong>) were treated and resolved. MarinaHelp received <strong>' + total + '</strong> complaints and resolved <strong>' + resRate + '%</strong>, with <strong>' + pending + '</strong> awaiting a response from the customer to proceed. Mobile App received <strong>' + mTotal + '</strong> tickets at a <strong>' + mRate + '%</strong> resolution rate' + (mTotal ? ', the stronger-performing channel this period' : '') + '. ' + lcSentence + '</p>' +
         '<table><thead><tr><th>CHANNEL</th><th>TOTAL</th><th>RESOLVED</th><th>RATE</th></tr></thead><tbody>' +
-        '<tr><td style="padding:6pt 8pt;border:1px solid #ccc;">Email Helpdesk</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + total + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + resolved + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + resRate + '%</td></tr>' +
+        '<tr><td style="padding:6pt 8pt;border:1px solid #ccc;">MarinaHelp</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + total + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + resolved + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + resRate + '%</td></tr>' +
         '<tr><td style="padding:6pt 8pt;border:1px solid #ccc;">Mobile App</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + mTotal + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + mResolved + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + mRate + '%</td></tr>' +
         lcTableRow +
         '<tr class="gtot"><td style="padding:6pt 8pt;border:1px solid #ccc;">Unit Total</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + unitTotal + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + unitResolved + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;">' + unitRate + '%</td></tr>' +
         '</tbody></table>' +
         '<h2>Channel Performance</h2>' +
-        '<h3 style="font-size:10pt;font-weight:bold;margin:8pt 0 4pt 0;">1.0&nbsp;&nbsp;Email Helpdesk</h3>';
+        '<h3 style="font-size:10pt;font-weight:bold;margin:8pt 0 4pt 0;">1.0&nbsp;&nbsp;MarinaHelp</h3>';
     })() +
     '<p><strong>EMAIL HELPDESK COMPLAINTS FOR THE WEEK ' + period.toUpperCase() + '</strong></p>' +
     '<table><thead><tr><th>TOTAL RECEIVED</th><th>TOTAL RESOLVED</th><th>TOTAL PENDING</th><th>% RESOLVED</th></tr></thead>' +
@@ -1176,11 +1255,7 @@ function buildBodyXml(o) {
 
   // ---- Introduction ----
   x += H2('Introduction');
-  x += PARA('This report presents a week-to-date review of CX unit performance for the period **' + period +
-    '** across all active complaint channels **Email Helpdesk, Mobile App (EKEDP Power App), and Live Chat**. ' +
-    'It covers ticket volume and resolution status. The objective of this report is to support executive oversight ' +
-    'and informed decision-making, strengthen service delivery standards across all channels, drive timely resolution ' +
-    'of complaints, and ensure all complaints are properly documented and monitored.');
+  x += PARA('This report reviews CX Digital unit performance for the period **' + period + '**. Following the migration to Zoho Desk, the digital complaint channels Email and X (Twitter), with Instagram and Facebook being onboarded this week, are now consolidated under Marina Helpdesk (Zoho Desk).');
   var introHourly = lc.hourly;
   if (introHourly && introHourly.total) {
     x += PARA('On the Live Chat channel, a total of **' + introHourly.total + '** conversations were recorded across the period, ' +
@@ -1189,85 +1264,47 @@ function buildBodyXml(o) {
   }
 
   // ---- Executive Summary ----
+  var dq = h.dataQuality, soc = o.social;
+  var socT = (soc && soc.quality) ? (soc.quality.total || 0) : 0;
+  var socG = (soc && soc.quality) ? (soc.quality.genuine || 0) : 0;
+  var marinaRecv = (dq ? (dq.total || 0) : total) + socT;
+  var marinaGen = (dq ? (dq.genuine || 0) : resolved) + socG;
   x += H2('Executive Summary');
-  x += PARA('Across the unit, **' + unitTotal + '** tickets were received this period, of which **' + unitResolved +
-    '** (**' + unitRate + '%**) were treated and resolved. Email Helpdesk received **' + total +
-    '** complaints and resolved **' + resRate + '%**, with **' + pending +
-    '** awaiting a response from the customer to proceed. Mobile App received **' + mTotal +
-    '** tickets at a **' + mRate + '%** resolution rate.' +
-    (lcTotal ? ' Live Chat handled **' + lcTotal + '** chats at a **' + lcRate + '%** resolution rate.' : ''));
+  x += PARA('MarinaHelp (Zoho Desk) received **' + marinaRecv + '** tickets this period, of which **' + marinaGen +
+    '** were genuine customer complaints' + (dq ? ' (Email ' + (dq.genuine || 0) + ', X ' + socG + ')' : '') + '. ' +
+    'Email operates as an intake-and-route channel, with genuine complaints routed to the relevant district for resolution once the customer completes the details form. Mobile App received **' + mTotal +
+    '** tickets at a **' + mRate + '%** resolution rate' +
+    (lcTotal ? ', and Live Chat handled **' + lcTotal + '** chats at **' + lcRate + '%**' : '') + '.');
 
-  var chRows = [
-    ['Email Helpdesk', String(total), String(resolved), resRate + '%'],
-    ['Mobile App', String(mTotal), String(mResolved), mRate + '%']
-  ];
+  var xClosed = (soc && (soc.closed != null)) ? soc.closed : socG;
+  var xRate = socG ? Math.round(xClosed / socG * 100) : 0;
+  var chRows = [];
+  if (dq) {
+    chRows.push(['Marina Helpdesk Email (Zoho Desk)', String(dq.total || 0), String(dq.genuine || 0), 'Intake & route']);
+    if (soc && soc.quality) chRows.push(['Marina Helpdesk X / Twitter (Zoho Desk)', String(socT), String(socG) + ' genuine; ' + xClosed + ' resolved', xRate + '%']);
+  } else {
+    chRows.push(['Marina Helpdesk', String(total), String(resolved), resRate + '%']);
+  }
+  chRows.push(['Mobile App', String(mTotal), String(mResolved), mRate + '%']);
   if (lcTotal) chRows.push(['Live Chat', String(lcTotal), String(lcResolved), lcRate + '%']);
-  chRows.push(['Unit Total', String(unitTotal), String(unitResolved), unitRate + '%']);
-  x += TABLE(['CHANNEL', 'TOTAL', 'RESOLVED', 'RATE'], chRows, [4200, 2200, 2200, 2200], { totalRow: true });
+  x += TABLE(['CHANNEL', 'VOLUME RECEIVED', 'RESOLVED', 'RATE'], chRows, [3200, 2000, 2600, 1600], { totalRow: false });
+  x += PARA('Post-purge non-genuine entries: internal @ekedp.com **' + (dq ? (dq.internal || 0) : 0) + '**, junk **' + (dq ? (dq.junk || 0) : 0) + '**, duplicates **' + (dq ? (dq.dup || 0) : 0) + '** (now addressed by re-enabled duplicate detection). Email operates as an intake-and-route channel (form \u2192 district).' + (lc.hourly && lc.hourly.total ? ' Live Chat: **' + lc.hourly.outsidePct + '%** of conversations occurred outside working hours.' : ''));
 
   // ---- Channel Performance ----
   x += H2('Channel Performance');
-  x += H3('1.0  Email Helpdesk');
-  x += PARA('**EMAIL HELPDESK COMPLAINTS FOR THE WEEK ' + period.toUpperCase() + '**');
-  x += TABLE(['TOTAL RECEIVED', 'TOTAL RESOLVED', 'TOTAL PENDING', '% RESOLVED'],
-    [[String(total), String(resolved), String(pending), resRate + '%']],
-    [2700, 2700, 2700, 2700], { bigNums: true });
-
-  var cats = h.categories || [];
-  var tw = cats.reduce(function (a, c) { return a + (c.pendingWithin || 0); }, 0);
-  var te = cats.reduce(function (a, c) { return a + (c.pendingBreach || 0); }, 0);
-  var topCat = cats.slice().sort(function (a, b) { return (b.pendingTotal || 0) - (a.pendingTotal || 0); })[0];
-  var topPct = (topCat && pending) ? Math.round((topCat.pendingTotal || 0) / pending * 100) : 0;
-  var excPct = pending ? Math.round(te / pending * 100) : 0;
-  var topBrPct = (topCat && te) ? Math.round((topCat.pendingBreach || 0) / te * 100) : 0;
-
-  if (topCat) {
-    x += PARA('**' + topCat.name + '** is the dominant driver of this week\u2019s pending backlog, accounting for **' +
-      topPct + '%** of all pending cases.');
-  }
-  if (te > 0) {
-    x += PARA('Most pending ' + (topCat ? topCat.name : '') + ' cases are currently **Awaiting Customer Response**, ' +
-      'held pending supporting documentation from the customer before work can proceed. **' + te +
-      '** complaints have exceeded the SLA timeline representing **' + excPct + '%** of all pending cases. **' +
-      (topCat ? topCat.pendingBreach || 0 : 0) + ' (' + topBrPct + '%)** are ' + (topCat ? topCat.name : '') +
-      ' cases alone, making this the single largest contributor to SLA risk this week and the clearest priority ' +
-      'for immediate follow-up. The remaining **' + tw + ' cases** across other categories are within timeline ' +
-      'but should continue to be monitored closely to prevent further breaches.');
-  }
-
-  x += PARA('**AGE ANALYSIS OF PENDING EMAIL HELPDESK COMPLAINTS**');
-  var ageRows = cats.map(function (c) {
-    return [c.name.toUpperCase(), String(c.pendingWithin || 0), String(c.pendingBreach || 0), String(c.pendingTotal || 0)];
-  });
-  ageRows.push(['Grand Total', String(tw), String(te), String(pending)]);
-  x += TABLE(['REQUEST STATUS', 'WITHIN TIMELINE', 'EXCEEDED TIMELINE', 'TOTAL PENDING'],
-    ageRows, [3400, 2500, 2500, 2400], { totalRow: true });
-
-  // ---- 1.1 flow ----
-  x += H3('1.1  How a Complaint moved through the system this week.');
-  x += PARA('Every complaint that reached us by email was sorted and routed automatically before any agent received it. ' +
-    'The system instantly auto-created a ticket, acknowledged receipt to the customer, sorted the issue into a category, ' +
-    'judged its urgency, and routed it straight to the right agent: new complaints go to the next agent in rotation, ' +
-    'replies return to whoever already owns that ticket, and anything needing on-site action was escalated directly ' +
-    'to the District team.');
-  ['Complaint received by email', 'Ticket auto-created & receipt acknowledged',
-   'Category and urgency assigned automatically', 'Routed to agent, ticket owner, or District team']
-  .forEach(function (step, i) {
-    if (i) x += PARA('\u2193', { jc: 'center', b: true, before: 0, after: 0 });
-    x += PARA('**' + step + '**', { jc: 'center', before: 0, after: 0 });
-  });
-
-  // ---- 1.2 district ----
-  x += H3('1.2  Escalated to District');
-  x += PARA('Of the **' + total + '** total complaints received, **' + (h.totalEscalated || 0) +
-    '** required on-site intervention and were escalated to district teams by business unit. These are counted ' +
-    'among the resolved complaints above, as responsibility for on-ground action has been formally handed off; ' +
-    'district-level closure is tracked separately below.');
-  var dists = (h.escalatedDistricts || []).slice().sort(function (a, b) { return b.count - a.count; });
-  if (dists.length) {
-    x += PARA('**Complaints Escalated to District Teams \u2014 By District**');
-    x += CHART('rId6', 7096760, 2700997, 'District Escalation Chart', 500000001);
-  }
+  // ---- 1.0 Marina Helpdesk (Zoho Desk) — Issue table ----
+  x += H3('1.0  Marina Helpdesk \u2014 Zoho Desk (Digital Complaint Channels)');
+  x += PARA('This period covers Email and X (Twitter); Instagram and Facebook are being onboarded this week and will be reported from next period. A ticket-quality review found recorded volumes were inflated by entries that are not genuine customer complaints; these were quantified, documented, and escalated to the project team, who actioned the following:');
+  var iN = dq ? (dq.internal || 0) : 0, iD = dq ? (dq.dup || 0) : 0, iJ = dq ? (dq.junk || 0) : 0;
+  var iRows = [
+    ['Internal @ekedp.com mail', 'Internal / system emails logged as customer tickets', 'Internal-address ticket cleanup completed', 'Fell to ' + iN],
+    ['Duplicate tickets', 'Same complaint recorded as multiple tickets', 'Duplicate-detection workflow re-enabled (found switched off); same-contact + same-subject matching added on our recommendation', iD + ' residual, now auto-merging'],
+    ['Junk / marketing', 'Spam / marketing logged as complaints', 'Cleaned and filters applied', 'Fell to ' + iJ],
+    ['Spam-view routing', 'Valid complaints mis-directed to the Spam view', 'Workflow implemented to route them correctly to the queue', 'Implemented']
+  ];
+  x += TABLE(['ISSUE', 'WHAT WE FOUND', 'ACTION TAKEN (PROJECT TEAM)', 'OUTCOME'], iRows, [1900, 2500, 3100, 1800], {});
+  var xResolved = (soc && (soc.closed != null)) ? soc.closed : socG;
+  x += PARA('**On X (Twitter), ' + xResolved + ' complaints were resolved during the period. Email remains an intake-and-route channel: open email tickets are those awaiting the customer\u2019s completed form, with resolution carried out at district level once routed.**');
 
   // ---- 2.0 mobile ----
   x += H3('2.0  Mobile App Channel (EKEDP Power App)');
@@ -1339,46 +1376,23 @@ function buildBodyXml(o) {
   var amb = o.ambassador;
   if (amb && amb.count) {
     x += H3('4.0  Ambassador Referral Programme');
-    var signGrowth = amb.signPrev ? Math.round((amb.signNow - amb.signPrev) / amb.signPrev * 100) : 0;
     var txnGrowth = amb.txnPrev ? Math.round((amb.txnNow - amb.txnPrev) / amb.txnPrev * 100) : 0;
-    x += PARA('The ambassador referral programme has **' + amb.count + '** registered ambassadors, of whom **' +
-      amb.active + '** (**' + (amb.count ? Math.round(amb.active / amb.count * 100) : 0) +
-      '%**) recorded sign-ups this period. Total sign-ups stand at **' + amb.signNow + '**' +
-      (amb.signPrev ? ' (up from ' + amb.signPrev + ', a ' + signGrowth + '% increase)' : '') +
-      ', with cumulative referral transaction value of **\u20a6' + Math.round(amb.txnNow).toLocaleString() + '**' +
-      (amb.txnPrev ? ' (up from \u20a6' + Math.round(amb.txnPrev).toLocaleString() + ', a ' + txnGrowth + '% increase)' : '') +
-      '.');
+    var growthPhrase = amb.txnPrev ? ' (former: \u20a6' + Math.round(amb.txnPrev).toLocaleString() + ', a ' + txnGrowth + '% change)' : '';
+    x += PARA('The ambassador referral programme is presented below as a period-on-period comparison of the previous period (former) against the current reporting week (recent). Recent referral transaction value stands at **\u20a6' + Math.round(amb.txnNow).toLocaleString() + '**' + growthPhrase + ', with total downloads of **' + amb.signNow + '** (former: ' + amb.signPrev + '). The programme has **' + amb.count + '** registered ambassadors, of whom **' + amb.active + '** recorded activity this period.');
     if (amb.zeroTxn) {
       x += PARA('**' + amb.zeroTxn + '** ambassadors have yet to generate any referral transaction value and may benefit from re-engagement or support.');
     }
-    x += PARA('**TOP 10 AMBASSADORS BY REFERRAL TRANSACTION VALUE**');
-    x += BARTABLE(amb.top10.map(function(a){
-      return { label: a.name, value: a.txnNow, display: '\u20a6' + Math.round(a.txnNow).toLocaleString() };
-    }), 4200, 4400, 2200);
-
-    x += PARA('**FULL AMBASSADOR LIST**');
-    var rowsFull = amb.list.slice().sort(function(a,b){return b.txnNow - a.txnNow;}).map(function(a, i){
-      return [String(i + 1), a.name, a.code || '\u2014', String(a.signNow), '\u20a6' + Math.round(a.txnNow).toLocaleString()];
+    x += PARA('**AMBASSADOR PERFORMANCE \u2014 FORMER vs RECENT**');
+    var ambRows = amb.list.slice().sort(function(a,b){return b.txnNow - a.txnNow;}).map(function(a){
+      return [a.name, String(a.signPrev || 0), '\u20a6' + Math.round(a.txnPrev || 0).toLocaleString(), String(a.signNow || 0), '\u20a6' + Math.round(a.txnNow || 0).toLocaleString()];
     });
-    rowsFull.push(['', 'TOTAL', '', String(amb.signNow), '\u20a6' + Math.round(amb.txnNow).toLocaleString()]);
-    x += TABLE(['S/N', 'AMBASSADOR', 'REFERRAL CODE', 'SIGN-UPS', 'TRANSACTION VALUE'],
-      rowsFull, [900, 3800, 2300, 1600, 2200], { totalRow: true, sz: 17 });
+    ambRows.push(['TOTAL', String(amb.signPrev), '\u20a6' + Math.round(amb.txnPrev).toLocaleString(), String(amb.signNow), '\u20a6' + Math.round(amb.txnNow).toLocaleString()]);
+    x += TABLE(['AMBASSADOR', 'DOWNLOADS (FORMER)', 'SALES / \u20a6 (FORMER)', 'DOWNLOADS (RECENT)', 'SALES / \u20a6 (RECENT)'],
+      ambRows, [2760, 1650, 1650, 1650, 1650], { totalRow: true, sz: 17 });
   }
 
   // ---- tail ----
-  if (o.observations && o.observations.length) {
-    x += H2('Key Observations');
-    o.observations.forEach(function (t) { x += BULLET(t); });
-  }
-  var hasAmb = !!(o.ambassador && o.ambassador.count);
-  var nRisk = hasAmb ? '5.0' : '4.0';
-  var nRec = hasAmb ? '6.0' : '5.0';
-  var nConc = hasAmb ? '7.0' : '6.0';
-  x += H2(nRisk + '  Key Risks');
-  (o.risks || []).forEach(function (t) { x += BULLET(t); });
-  x += H2(nRec + '  Recommendations');
-  (o.recs || []).forEach(function (t) { x += BULLET(t); });
-  x += H2(nConc + '  Conclusion');
+  x += H2('Conclusion');
   x += PARA(o.conclusion || '');
   x += PARA('');
   x += PARA('Prepared by: **' + (o.prepBy || '') + '**');
@@ -1402,19 +1416,24 @@ function nativeWordExport(o) {
       header = header
         .replace('001/EHD/005/2026', xesc(o.ref || '\u2014'))
         .replace('17th July 2026', xesc(o.date || ''))
-        .replace('Manager Email/ Mobile APP/Live Chat helpdesk CX', xesc(o.from || ''));
+        .replace('Manager Email/ Mobile APP/Live Chat helpdesk CX', xesc(o.from || ''))
+        ;
 
       var head = doc.substring(0, bodyStart);
       z.file('word/document.xml', head + header + buildBodyXml(o) + sect);
 
-      // Chart 1 — district escalations (3D bar)
-      var dists = ((o.helpdesk && o.helpdesk.escalatedDistricts) || [])
-        .slice().sort(function (a, b) { return b.count - a.count; });
-      var p1 = dists.length
+      // Chart 1 — MarinaHelp ticket composition (genuine vs noise)
+      var dqc = o.helpdesk && o.helpdesk.dataQuality;
+      var socq = o.social && o.social.quality;
+      var compVals = dqc ? [
+        (dqc.genuine || 0) + ((socq && socq.genuine) || 0),
+        (dqc.dup || 0) + ((socq && socq.dup) || 0),
+        (dqc.internal || 0) + ((socq && socq.internal) || 0),
+        (dqc.junk || 0) + ((socq && socq.junk) || 0)
+      ] : null;
+      var p1 = compVals
         ? z.file('word/charts/chart1.xml').async('string').then(function (c) {
-            z.file('word/charts/chart1.xml', patchChart(c,
-              dists.map(function (d) { return String(d.name).toUpperCase(); }),
-              dists.map(function (d) { return d.count; })));
+            z.file('word/charts/chart1.xml', patchChart(c, ['GENUINE', 'DUPLICATES', 'INTERNAL', 'JUNK'], compVals));
           })
         : Promise.resolve();
 
@@ -1468,9 +1487,9 @@ function doExportWord(vals) {
   const p = window.prompt('Report period:', currentPeriod); if (p === null) return;
   const d = window.prompt('Report date:', currentDate); if (d === null) return;
   const r = window.prompt('Ref number:', state.settings.ref || '001/EHD/001/2026'); if (r === null) return;
-  const f = window.prompt('From:', state.settings.from || 'Manager, Email Helpdesk CX'); if (f === null) return;
+  const f = window.prompt('From:', state.settings.from || 'Manager, MarinaHelp CX'); if (f === null) return;
   const b = window.prompt('Prepared by (name):', state.settings.prepBy || ''); if (b === null) return;
-  const t = window.prompt('Prepared by (title):', state.settings.prepTitle || 'Email Helpdesk CX'); if (t === null) return;
+  const t = window.prompt('Prepared by (title):', state.settings.prepTitle || 'MarinaHelp CX'); if (t === null) return;
   const cats = vals._cats || [];
   const pendingTotal = cats.reduce((a, c) => a + (c.pendingTotal || 0), 0);
   const topCat = cats.slice().sort((x, y) => (y.pendingTotal || 0) - (x.pendingTotal || 0))[0];
@@ -1480,7 +1499,7 @@ function doExportWord(vals) {
     'The sustained backlog in' + (topCat ? ' ' + topCat.name + '-related and other' : '') + ' overdue complaints directly exposes the company to service delivery lapses and customer dissatisfaction.',
     'Non-adherence to prescribed complaint resolution timelines constitutes a compliance risk and may attract increased scrutiny and reputational consequences.',
     'Unresolved complaints particularly those exceeding the SLA timeline increase the risk of repeat escalations, negative customer feedback, and attrition.',
-    'A growing backlog of overdue complaints may undermine customer confidence and erode trust in the Email Helpdesk as a reliable resolution channel.'
+    'A growing backlog of overdue complaints may undermine customer confidence and erode trust in the MarinaHelp as a reliable resolution channel.'
   ];
   const recs = [
     'Immediate prioritisation of pending' + (topCat ? ' ' + topCat.name : '') + ' requests in collaboration with the relevant team to accelerate resolution.',
@@ -1494,8 +1513,10 @@ function doExportWord(vals) {
     period: p || currentPeriod, date: d || currentDate, ref: r, from: f, prepBy: b || f, prepTitle: t,
     helpdesk: {
       total: vals.total, resolved: vals.resolved, pending: pendingTotal,
-      categories: cats, escalatedDistricts: vals._escalatedDistricts, totalEscalated: vals.totalEscalated
+      categories: cats, escalatedDistricts: vals._escalatedDistricts, totalEscalated: vals.totalEscalated,
+      dataQuality: (liveData && liveData.dataQuality) || null
     },
+    social: (liveData && liveData.social) || null,
     mobile: state.mobileData ? Object.assign({}, state.mobileData, { responsibleParties: vals.mobileRPRows }) : null,
     liveChat: vals._liveChatData,
     ambassador: state.ambassadorData || null,
@@ -1565,7 +1586,7 @@ function computeVals() {
       { text: 'The sustained backlog in' + (cats[0] ? ' ' + cats[0].name + '-related and other' : '') + ' overdue complaints directly exposes the company to service delivery lapses and customer dissatisfaction.' },
       { text: 'Non-adherence to prescribed complaint resolution timelines constitutes a compliance risk and may attract increased scrutiny and reputational consequences.' },
       { text: 'Unresolved complaints — particularly those exceeding the SLA timeline — increase the risk of repeat escalations, negative customer feedback, and attrition.' },
-      { text: 'A growing backlog of overdue complaints may undermine customer confidence and erode trust in the Email Helpdesk as a reliable resolution channel.' }
+      { text: 'A growing backlog of overdue complaints may undermine customer confidence and erode trust in the MarinaHelp as a reliable resolution channel.' }
     ],
     reportPeriod: (liveData && liveData.period) || 'No data — open Settings to import',
     reportDate: (liveData && liveData.reportDate) || '\u2014',
@@ -1588,6 +1609,8 @@ function computeVals() {
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
 function render() {
+  if (!state.currentUser) { const r = document.getElementById('root'); if (r) r.innerHTML = renderSignIn(); return; }
+  if (state.showTeam) { const r = document.getElementById('root'); if (r) r.innerHTML = renderTeam(); return; }
   const v = computeVals();
   const activeColor = '#fff', activeBorder = '#E30613', inactiveColor = 'rgba(255,255,255,0.5)', inactiveBorder = 'transparent';
   const tabStyle = (active) => 'padding:12px 4px; font-size:12.5px; font-weight:700; cursor:pointer; border-bottom:2.5px solid ' + (active ? activeBorder : inactiveBorder) + '; color:' + (active ? activeColor : inactiveColor) + ';';
@@ -1609,13 +1632,15 @@ function render() {
             <div style="width:6px; height:6px; border-radius:50%; background:#4ADE80; animation:pulse-dot 2s infinite;"></div>
             Live · WAT
           </div>
+          <div style="display:flex; align-items:center; gap:7px; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.2); padding:6px 10px; border-radius:7px;"><span style="font-size:15px;">${esc((state.currentUser&&state.currentUser.emoji)||'\uD83D\uDC64')}</span><span style="font-size:12px; font-weight:600; color:#fff; white-space:nowrap;">${esc((state.currentUser&&state.currentUser.name)||'')}</span><span onclick="app.signOut()" title="Sign out" style="cursor:pointer; color:rgba(255,255,255,0.65); font-size:13px; margin-left:2px; font-weight:700;">\u23FB</span></div>
+          <div onclick="app.manageTeam()" title="Manage team" style="background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:9px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;">\uD83D\uDC65 Team</div>
           <div onclick="app.openSettings()" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:9px 16px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;">⚙ Settings</div>
           <div onclick="app.exportWord()" style="background:#E30613; color:#fff; padding:9px 20px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.3px; white-space:nowrap; flex-shrink:0;">⬇ Export Word</div>
         </div>
       </div>
       <div style="display:flex; gap:24px;">
         <div onclick="app.goTab('overview')" style="${tabStyle(v.tabOverview)}">Overview</div>
-        <div onclick="app.goTab('email')" style="${tabStyle(v.tabEmail)}">📧 Email Helpdesk</div>
+        <div onclick="app.goTab('email')" style="${tabStyle(v.tabEmail)}">📧 MarinaHelp</div>
         <div onclick="app.goTab('mobile')" style="${tabStyle(v.tabMobile)}">📱 Mobile App</div>
         <div onclick="app.goTab('livechat')" style="${tabStyle(v.tabLiveChat)}">💬 Live Chat</div>
         <div onclick="app.goTab('ambassador')" style="${tabStyle(v.tabAmbassador)}">🤝 Ambassadors</div>
@@ -1627,7 +1652,7 @@ function render() {
     ${v.tabOverview ? `
     <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;">
       <div onclick="app.goTab('email')" style="background:#fff; border:1px solid #D1D9F0; border-radius:12px; padding:18px; cursor:pointer; box-shadow:0 2px 8px rgba(30,48,112,0.07);">
-        <div style="font-size:12px; font-weight:700; color:#1E3070; margin-bottom:8px;">📧 Email Helpdesk</div>
+        <div style="font-size:12px; font-weight:700; color:#1E3070; margin-bottom:8px;">📧 MarinaHelp</div>
         <div style="font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:700; color:#1D4ED8;">${v.total}</div>
         <div style="font-size:10px; color:#9AA5C4; margin-top:4px;">${v.resRate}% resolved · ${v.pending} pending</div>
       </div>
@@ -1721,7 +1746,7 @@ function render() {
         <div style="font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; color:#D97706;">${v.totalEscalated}</div>
       </div>
       <div style="padding:16px 20px 8px 20px;">
-        ${v.noDistRows ? '<div style="font-size:11px; color:#9AA5C4; text-align:center; padding:12px 0;">Import Issue Tracker CSV to populate district data</div>' : ''}
+        ${v.noDistRows ? '<div style="font-size:11px; color:#9AA5C4; text-align:center; padding:12px 0;">Import district list to populate district data</div>' : ''}
         <div style="display:flex; align-items:flex-end; gap:10px; height:140px; padding-bottom:4px;">
           ${v.distRows.map(row => `
           <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end;">
@@ -1993,7 +2018,7 @@ function render() {
           <div style="font-size:10px; color:#9AA5C4; margin-bottom:12px; line-height:1.6;">Upload the <strong>EKEDP Power App Dashboard</strong> Excel file (.xlsx). It reads the ambassador names, sign-ups and referral transaction values, builds a top-10 chart and the full table, and adds the section to the Word export.</div>
           <label style="display:block; background:#F5F7FF; border:1px dashed #B9C6E8; color:#1D4ED8; text-align:center; padding:14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">
             \u2b06 Import Dashboard (.xlsx)
-            <input type="file" accept=".xlsx,.xls" onchange="app.importAmbassadorXlsx(event)" style="display:none;">
+            <input type="file" accept=".xlsx,.xls,.csv" onchange="app.importAmbassadorXlsx(event)" style="display:none;">
           </label>
           ${v.hasAmb ? `<div style="font-size:10px; color:#16A34A; margin-top:10px; font-weight:700;">\u2713 ${v.amb.count} ambassadors loaded \u00b7 \u20a6${Math.round(v.amb.txnNow).toLocaleString()} total transactions</div>` : ''}
         </div>
@@ -2066,10 +2091,10 @@ function render() {
         </div>
 
         <div style="margin-bottom:20px;">
-          <div style="font-size:10px; color:#6B7CAF; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:7px;">📂 Import CSV — Email Helpdesk</div>
+          <div style="font-size:10px; color:#6B7CAF; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:7px;">📂 Import CSV — MarinaHelp</div>
           <label style="display:block; background:#F5F7FF; border:1.5px dashed #A5B4D0; border-radius:7px; padding:16px; text-align:center; cursor:pointer; font-size:12px; color:#6B7CAF;">
             <input type="file" accept=".csv" onchange="app.importCsv(event)" style="display:none;">
-            📋 Click to upload Email Helpdesk or Issue Tracker CSV
+            📋 Click to upload Zoho export (Email / Social) or district list
           </label>
         </div>
 
@@ -2082,7 +2107,7 @@ function render() {
             </div>
             <div>
               <div style="font-size:10px; color:#9AA5C4; margin-bottom:4px;">From</div>
-              <input id="fromInput" type="text" placeholder="Manager, Email Helpdesk CX" value="${esc(v.fromVal)}" oninput="app.onFrom(event)" style="width:100%; background:#F5F7FF; border:1px solid #D1D9F0; color:#1E3070; padding:9px 10px; border-radius:7px; font-size:12px; font-family:'Sora',sans-serif; outline:none;">
+              <input id="fromInput" type="text" placeholder="Manager, MarinaHelp CX" value="${esc(v.fromVal)}" oninput="app.onFrom(event)" style="width:100%; background:#F5F7FF; border:1px solid #D1D9F0; color:#1E3070; padding:9px 10px; border-radius:7px; font-size:12px; font-family:'Sora',sans-serif; outline:none;">
             </div>
             <div>
               <div style="font-size:10px; color:#9AA5C4; margin-bottom:4px;">Prepared By — Name</div>
@@ -2090,7 +2115,7 @@ function render() {
             </div>
             <div>
               <div style="font-size:10px; color:#9AA5C4; margin-bottom:4px;">Prepared By — Title</div>
-              <input id="prepTitleInput" type="text" placeholder="Manager, Email Helpdesk CX" value="${esc(v.prepTitle)}" oninput="app.onPrepTitle(event)" style="width:100%; background:#F5F7FF; border:1px solid #D1D9F0; color:#1E3070; padding:9px 10px; border-radius:7px; font-size:12px; font-family:'Sora',sans-serif; outline:none;">
+              <input id="prepTitleInput" type="text" placeholder="Manager, MarinaHelp CX" value="${esc(v.prepTitle)}" oninput="app.onPrepTitle(event)" style="width:100%; background:#F5F7FF; border:1px solid #D1D9F0; color:#1E3070; padding:9px 10px; border-radius:7px; font-size:12px; font-family:'Sora',sans-serif; outline:none;">
             </div>
           </div>
         </div>
@@ -2125,6 +2150,165 @@ function render() {
 // ============================================================
 // APP (event handlers exposed globally, matches template onclick="app.x()")
 // ============================================================
+// ============================================================
+// TEAM SIGN-IN / PROFILES / AUTO REF  (added for team roster feature)
+// ============================================================
+function defaultTeam() {
+  return [
+    { id: 'love',    name: 'Love Offei',      title: 'Manager, Customer Experience',   emoji: '\u2B50' },
+    { id: 'matthew', name: 'Matthew Akhigbe', title: 'Customer Experience Officer',     emoji: '\uD83D\uDFE2' },
+    { id: 'racheal', name: 'Racheal Ogunleke', title: 'Customer Experience Officer',    emoji: '\uD83D\uDC97' },
+    { id: 'tomina',  name: 'Tomina Egbokwu',  title: 'Customer Experience Officer',     emoji: '\uD83D\uDFE3' },
+    { id: 'esther',  name: 'Esther Okafor',   title: 'Customer Experience Officer',     emoji: '\uD83D\uDD34' },
+    { id: 'loveth',  name: 'Loveth Okpara',   title: 'Customer Experience Officer',     emoji: '\uD83D\uDFE1' },
+    { id: 'dagbo',   name: 'Dagbo Oyebola',   title: 'Customer Experience Officer',     emoji: '\uD83D\uDC8E' }
+  ];
+}
+
+function genRef(seq) {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const s = String(seq || 1).padStart(3, '0');
+  return s + '/EMLHD/' + mm + '/' + yyyy;
+}
+
+function saveTeam(team) {
+  state.team = team;
+  try { localStorage.setItem('ehd_team', JSON.stringify(team)); } catch (e) {}
+}
+function saveCurrentUser(u) {
+  state.currentUser = u;
+  try {
+    if (u) localStorage.setItem('ehd_currentUser', JSON.stringify(u));
+    else localStorage.removeItem('ehd_currentUser');
+  } catch (e) {}
+}
+function saveRefSeq(n) {
+  state.refSeq = n;
+  try { localStorage.setItem('ehd_refSeq', String(n)); } catch (e) {}
+}
+
+function doSignIn(id) {
+  const m = (state.team || []).find(x => x.id === id);
+  if (!m) return;
+  saveCurrentUser(m);
+  const ref = genRef(state.refSeq);
+  const settings = { ...state.settings, prepBy: m.name, prepTitle: m.title, ref: ref };
+  state.settings = settings;
+  try { localStorage.setItem('ehd_settings', JSON.stringify(settings)); } catch (e) {}
+  state.showTeam = false;
+  render();
+}
+function doSignOut() {
+  saveCurrentUser(null);
+  render();
+}
+function newReport() {
+  const n = (state.refSeq || 1) + 1;
+  saveRefSeq(n);
+  const ref = genRef(n);
+  saveSetting({ ref: ref });
+  toast('New report started \u00b7 Ref ' + ref);
+}
+
+function _slugId(name) {
+  return (name || 'user').toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 12) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function addMember() {
+  const name = window.prompt('Full name (as it should read on the report):', '');
+  if (!name) return;
+  const title = window.prompt('Title / role:', 'Customer Experience Officer');
+  if (title === null) return;
+  const emoji = window.prompt('Emoji (their colour / badge):', '\uD83D\uDD35') || '\uD83D\uDC64';
+  const team = (state.team || []).slice();
+  team.push({ id: _slugId(name), name: name.trim(), title: (title || '').trim(), emoji: emoji.trim() });
+  saveTeam(team);
+  render();
+}
+function editMember(id) {
+  const team = (state.team || []).slice();
+  const m = team.find(x => x.id === id);
+  if (!m) return;
+  const name = window.prompt('Full name:', m.name);
+  if (name === null) return;
+  const title = window.prompt('Title / role:', m.title);
+  if (title === null) return;
+  const emoji = window.prompt('Emoji:', m.emoji);
+  if (emoji === null) return;
+  m.name = name.trim(); m.title = (title || '').trim(); m.emoji = (emoji || '\uD83D\uDC64').trim();
+  saveTeam(team);
+  if (state.currentUser && state.currentUser.id === id) {
+    saveCurrentUser(m);
+    saveSetting({ prepBy: m.name, prepTitle: m.title });
+  }
+  render();
+}
+function removeMember(id) {
+  if (!window.confirm('Remove this teammate?')) return;
+  const team = (state.team || []).filter(x => x.id !== id);
+  saveTeam(team);
+  if (state.currentUser && state.currentUser.id === id) saveCurrentUser(null);
+  render();
+}
+
+function renderSignIn() {
+  const team = state.team || defaultTeam();
+  const cards = team.map(m => `
+    <div onclick="app.signIn('${m.id}')" style="background:#fff; border:1px solid #D1D9F0; border-radius:14px; padding:20px 14px; cursor:pointer; text-align:center; box-shadow:0 2px 10px rgba(30,48,112,0.10);">
+      <div style="font-size:34px; line-height:1; margin-bottom:10px;">${esc(m.emoji || '\uD83D\uDC64')}</div>
+      <div style="font-size:14px; font-weight:700; color:#1E3070;">${esc(m.name)}</div>
+      <div style="font-size:11px; color:#9AA5C4; margin-top:3px;">${esc(m.title || '')}</div>
+    </div>`).join('');
+  return `
+  <div style="min-height:100vh; background:#1E3070; display:flex; align-items:center; justify-content:center; padding:40px 20px;">
+    <div style="width:100%; max-width:780px;">
+      <div style="text-align:center; margin-bottom:28px;">
+        <div style="display:inline-flex; align-items:center; gap:12px; background:#fff; border-radius:10px; padding:8px 14px; margin-bottom:18px;">
+          <img src="${_logoB64}" style="height:34px; width:auto; display:block;">
+        </div>
+        <div style="font-size:22px; font-weight:800; color:#fff; font-style:italic;">CX Weekly Report Hub</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.6); margin-top:6px;">Sign in to prepare this week's report</div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px;">
+        ${cards}
+      </div>
+      <div style="text-align:center; margin-top:26px;">
+        <span onclick="app.manageTeam()" style="color:rgba(255,255,255,0.75); font-size:12px; cursor:pointer; text-decoration:underline;">\uFF0B Manage team</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderTeam() {
+  const team = state.team || defaultTeam();
+  const rows = team.map(m => `
+    <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid #D1D9F0; border-radius:10px; margin-bottom:8px; background:#fff;">
+      <span style="font-size:22px;">${esc(m.emoji || '\uD83D\uDC64')}</span>
+      <div style="flex:1;">
+        <div style="font-size:13px; font-weight:700; color:#1E3070;">${esc(m.name)}</div>
+        <div style="font-size:11px; color:#9AA5C4;">${esc(m.title || '')}</div>
+      </div>
+      <span onclick="app.editMember('${m.id}')" style="cursor:pointer; color:#1D4ED8; font-size:12px; font-weight:600;">Edit</span>
+      <span onclick="app.removeMember('${m.id}')" style="cursor:pointer; color:#DC2626; font-size:12px; font-weight:600;">Remove</span>
+    </div>`).join('');
+  return `
+  <div style="min-height:100vh; background:#F0F4FA; padding:32px 20px;">
+    <div style="max-width:660px; margin:0 auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <div style="font-size:18px; font-weight:800; color:#1E3070;">\uD83D\uDC65 Manage Team</div>
+        <span onclick="app.closeTeam()" style="cursor:pointer; color:#1D4ED8; font-size:13px; font-weight:600;">${state.currentUser ? '\u2190 Back to report' : '\u2190 Back to sign in'}</span>
+      </div>
+      <div style="background:#fff; border:1px solid #D1D9F0; border-radius:12px; padding:18px;">
+        ${rows}
+        <div onclick="app.addMember()" style="text-align:center; padding:12px; border:1px dashed #B9C4E6; border-radius:10px; color:#1D4ED8; font-size:13px; font-weight:600; cursor:pointer; margin-top:6px;">\uFF0B Add teammate</div>
+      </div>
+      <div style="font-size:11px; color:#9AA5C4; margin-top:12px; text-align:center; line-height:1.6;">Each teammate's name and title auto-fill the report's \u201CPrepared by\u201D line when they sign in.<br>The ref number generates automatically as <strong>NNN/EMLHD/MM/YYYY</strong>.</div>
+    </div>
+  </div>`;
+}
+
+
 window.app = {
   goTab: (tab) => setState({ activeTab: tab }),
   openSettings: () => setState({ showSettings: true }),
@@ -2179,7 +2363,15 @@ window.app = {
     setState({ liveData: null, mobileData: null, liveChatData: null, ambassadorData: null });
     toast('Data cleared');
   },
-  exportWord: () => doExportWord(window._lastVals)
+  exportWord: () => doExportWord(window._lastVals),
+  signIn: (id) => doSignIn(id),
+  signOut: () => doSignOut(),
+  manageTeam: () => { state.showTeam = true; render(); },
+  closeTeam: () => { state.showTeam = false; render(); },
+  addMember: () => addMember(),
+  editMember: (id) => editMember(id),
+  removeMember: (id) => removeMember(id),
+  newReport: () => newReport()
 };
 
 // ============================================================
