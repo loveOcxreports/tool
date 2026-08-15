@@ -1,151 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="icon" type="image/png" href="data:image/png;base64,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">
-<title>EKEDP CX — Success Criteria v3</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial,sans-serif;font-size:13px;background:#f0f4f8;color:#1a1a1a;padding:20px}
-  .page{max-width:900px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.12)}
-
-  /* HEADER */
-  .header{background:#0D2B55;padding:18px 24px;text-align:center}
-  .header .sub{font-size:10px;color:#a8c8e8;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
-  .header h1{font-size:20px;color:#fff;font-weight:700;margin-bottom:4px}
-  .header .meta{font-size:10px;color:#7aadd4}
-
-  /* BODY */
-  .body{padding:18px 24px}
-
-  /* SECTION HEADING */
-  h2{font-size:12px;font-weight:700;color:#0D2B55;text-transform:uppercase;letter-spacing:.8px;margin:14px 0 6px;padding-bottom:4px;border-bottom:2px solid #0D2B55}
-
-  /* PURPOSE */
-  .purpose{font-size:12.5px;line-height:1.6;color:#333;margin-bottom:4px}
-
-  /* USERS TABLE */
-  .users-table{width:100%;border-collapse:collapse;margin-bottom:4px}
-  .users-table th{background:#0D2B55;color:#fff;font-size:11px;font-weight:700;padding:7px 10px;text-align:center;letter-spacing:.5px}
-  .users-table td{padding:8px 10px;border:1px solid #ccc;font-size:12px;vertical-align:top}
-  .users-table td:nth-child(odd){background:#D6E4F0}
-  .users-table td strong{display:block;margin-bottom:2px;font-size:12.5px}
-  .users-table td span{color:#555;font-size:11.5px;line-height:1.4}
-
-  /* CHECKLIST */
-  .checks{list-style:none;columns:2;column-gap:20px;margin-bottom:4px}
-  .checks li{font-size:12px;line-height:1.5;margin-bottom:5px;break-inside:avoid;padding-left:18px;position:relative}
-  .checks li::before{content:"✓";position:absolute;left:0;color:#1E7145;font-weight:700}
-
-  /* METRICS */
-  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
-  .metric{border-radius:6px;padding:10px 8px;text-align:center}
-  .metric.dark{background:#0D2B55}
-  .metric.light{background:#D6E4F0}
-  .metric .val{font-size:22px;font-weight:700;line-height:1}
-  .metric.dark .val{color:#fff}
-  .metric.light .val{color:#0D2B55}
-  .metric .lbl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-  .metric.dark .lbl{color:#a8c8e8}
-  .metric.light .lbl{color:#555}
-
-  /* OUT OF SCOPE */
-  .scope{font-size:12px;color:#555;line-height:1.6}
-
-  /* FOOTER */
-  .footer{background:#f5f7fa;border-top:1px solid #ddd;padding:8px 24px;text-align:center;font-size:10px;color:#888}
-
-  @media(max-width:600px){
-    .checks{columns:1}
-    .metrics{grid-template-columns:repeat(2,1fr)}
-    .users-table th,.users-table td{font-size:11px;padding:6px 8px}
-  }
-  @media print{
-    body{background:#fff;padding:0}
-    .page{box-shadow:none;border-radius:0}
-  }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
 </head>
 <body>
-<div class="page">
+<x-dc>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="sub">EKEDP Power App &nbsp;·&nbsp; Customer Experience &nbsp;·&nbsp; Marina HQ</div>
-    <h1>Success Criteria — Version 3</h1>
-    <div class="meta">What "good" looks like &nbsp;·&nbsp; How we measure it &nbsp;·&nbsp; Owners &nbsp;&nbsp;|&nbsp;&nbsp; June 2026 &nbsp;&nbsp;|&nbsp;&nbsp; Owner: Love Offei</div>
+<div style="font-family:{{t.bodyFont}};font-size:13px;background:{{t.pageBg}};color:#1a1a1a;padding:{{t.outerPad}};display:flex;justify-content:center">
+<div style="width:100%;max-width:900px;background:#fff;border-radius:{{t.cardRadius}};overflow:hidden;box-shadow:{{t.cardShadow}}">
+
+  <div style="background:{{t.headerBg}};padding:{{t.headerPad}};text-align:{{t.headerAlign}}">
+    <img src="ekedp-power-app-lockup.png" alt="EKEDP Power App" style="height:28px;margin-bottom:8px"/>
+    <div style="font-size:11px;color:{{t.headerSubColor}};letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">EKEDP Power App &nbsp;·&nbsp; Customer Experience &nbsp;·&nbsp; Marina HQ</div>
+    <h1 style="font-family:{{t.headFont}};font-size:{{t.h1Size}};color:{{t.headerTextColor}};font-weight:{{t.h1Weight}};font-style:{{t.h1Style}};margin-bottom:4px;letter-spacing:{{t.h1Tracking}}">Success Criteria — Version 3.1</h1>
+    <div style="font-size:11px;color:{{t.headerMetaColor}}">What "good" looks like &nbsp;·&nbsp; How we measure it &nbsp;·&nbsp; Owners &nbsp;&nbsp;|&nbsp;&nbsp; August 2026 &nbsp;&nbsp;|&nbsp;&nbsp; Owner: Love Offei</div>
   </div>
 
-  <div class="body">
+  <div style="padding:{{t.bodyPad}}">
 
-    <!-- 1. PURPOSE -->
-    <h2>1 &nbsp;Purpose</h2>
-    <p class="purpose">A single shared tool that lets the Customer Experience team log every customer complaint, route it to the right Responsible Party, and report up to Management four times a day (9 AM &middot; 12 PM &middot; 4 PM &middot; 5 PM COB) &mdash; replacing scattered WhatsApp messages, Excel sheets and email threads with one synced source of truth. Extended with team roster management, agent performance tracking, and coverage gap detection.</p>
+    <h2 style="font-family:{{t.headFont}};font-size:13px;font-weight:700;color:{{t.accent}};text-transform:uppercase;letter-spacing:.8px;margin:{{t.h2Margin}};padding-bottom:4px;border-bottom:{{t.h2Border}}">1 &nbsp;Purpose</h2>
+    <p style="font-size:13px;line-height:{{t.bodyLineHeight}};color:#333;margin-bottom:{{t.pMargin}}">A single shared tool that lets the Customer Experience team log every customer complaint, route it to the right Responsible Party, and report up to Management four times a day (9 AM &middot; 12 PM &middot; 4 PM &middot; 5 PM COB) &mdash; replacing scattered WhatsApp messages, Excel sheets and email threads with one synced source of truth. Extended with team roster management, agent performance tracking, and coverage gap detection.</p>
 
-    <!-- 2. USERS -->
-    <h2>2 &nbsp;Users</h2>
-    <table class="users-table">
-      <thead><tr><th>Manager</th><th>CX Agents (5)</th><th>Recipients</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>Love Offei</strong><span>Oversees team, sets shifts, runs daily reports, holds master sync key.</span></td>
-          <td><strong>Matthew &middot; Racheal &middot; Tomina &middot; Esther &middot; Loveth</strong><span>Log complaints, update tickets, send Midday / COB WhatsApp slot reports. View team roster &amp; shift calendar (read-only).</span></td>
-          <td><strong>Management / Leadership</strong><span>Receives the 9 AM, 12 PM, 4 PM and 5 PM COB Daily Email Reports via Outlook.</span></td>
-        </tr>
-      </tbody>
+    <h2 style="font-family:{{t.headFont}};font-size:13px;font-weight:700;color:{{t.accent}};text-transform:uppercase;letter-spacing:.8px;margin:{{t.h2Margin}};padding-bottom:4px;border-bottom:{{t.h2Border}}">2 &nbsp;Users</h2>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:{{t.pMargin}}">
+      <thead><tr>
+        <th style="background:{{t.accent}};color:#fff;font-size:13px;font-weight:700;padding:7px 10px;text-align:center;letter-spacing:.5px">Manager</th>
+        <th style="background:{{t.accent}};color:#fff;font-size:13px;font-weight:700;padding:7px 10px;text-align:center;letter-spacing:.5px">CX Agents (5)</th>
+        <th style="background:{{t.accent}};color:#fff;font-size:13px;font-weight:700;padding:7px 10px;text-align:center;letter-spacing:.5px">Recipients</th>
+        <th style="background:{{t.accent}};color:#fff;font-size:13px;font-weight:700;padding:7px 10px;text-align:center;letter-spacing:.5px">Customers</th>
+      </tr></thead>
+      <tbody><tr>
+        <td style="padding:8px 10px;border:1px solid #ccc;font-size:13px;vertical-align:top;background:{{t.tableStripe}}"><strong style="display:block;margin-bottom:2px;font-size:13px">Love Offei</strong><span style="color:#555;font-size:13px;line-height:1.4">Oversees team, sets shifts, runs daily reports, holds master sync key.</span></td>
+        <td style="padding:8px 10px;border:1px solid #ccc;font-size:13px;vertical-align:top"><strong style="display:block;margin-bottom:2px;font-size:13px">Matthew &middot; Racheal &middot; Tomina &middot; Esther &middot; Loveth</strong><span style="color:#555;font-size:13px;line-height:1.4">Log complaints, update tickets, send Midday / COB WhatsApp slot reports. View team roster &amp; shift calendar (read-only).</span></td>
+        <td style="padding:8px 10px;border:1px solid #ccc;font-size:13px;vertical-align:top;background:{{t.tableStripe}}"><strong style="display:block;margin-bottom:2px;font-size:13px">Management / Leadership</strong><span style="color:#555;font-size:13px;line-height:1.4">Receives the 9 AM, 12 PM, 4 PM and 5 PM COB Daily Email Reports via Outlook.</span></td>
+        <td style="padding:8px 10px;border:1px solid #ccc;font-size:13px;vertical-align:top"><strong style="display:block;margin-bottom:2px;font-size:13px">Complainants</strong><span style="color:#555;font-size:13px;line-height:1.4">Receive direct email correspondence from agents (Agents Hub) and can rate resolved tickets 1&ndash;5 stars via a tap-to-rate link &mdash; no login required.</span></td>
+      </tr></tbody>
     </table>
 
-    <!-- 3. CORE SUCCESS CRITERIA -->
-    <h2>3 &nbsp;Core Success Criteria</h2>
-    <ul class="checks">
-      <li>Every complaint logged within 5 minutes &mdash; no more Excel side-files.</li>
-      <li>One source of truth &mdash; Manager, all 5 Agents and Daily Email Reports read from the same SharePoint list via Power Automate.</li>
-      <li>Every ticket has a Responsible Party assigned &mdash; zero unassigned at COB.</li>
-      <li>&ge; 80% same-day resolution rate (rolling 7-day average) tracked live on Manager Dashboard and Agent Leaderboard.</li>
-      <li>9 AM, 12 PM, 4 PM and 5 PM COB reports sent to Management on time &mdash; generated and copied to Outlook within 10 minutes of each slot.</li>
-      <li>Agent slot reports posted to WhatsApp at every Weekday 2 PM / 5 PM and Weekend 1 PM / 4 PM checkpoint.</li>
-      <li>GM Email report auto-sent at 9 AM · 12 PM · 4 PM · 5 PM COB via Power Automate — fully formatted HTML direct to Outlook from shared mailbox.</li>
-      <li>No data loss &mdash; tickets survive browser refresh, device swap, and offline pockets (local cache + cloud sync). All files are fully standalone HTML.</li>
-      <li>No credentials in source code &mdash; all data stays within the company&rsquo;s Microsoft 365 environment.</li>
-    </ul>
+    <h2 style="font-family:{{t.headFont}};font-size:13px;font-weight:700;color:{{t.accent}};text-transform:uppercase;letter-spacing:.8px;margin:{{t.h2Margin}};padding-bottom:4px;border-bottom:{{t.h2Border}}">3 &nbsp;Core Success Criteria</h2>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:{{t.pMargin}}"><tbody>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Every complaint logged within 5 minutes &mdash; no more Excel side-files.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">One source of truth &mdash; Manager, all 5 Agents and Daily Email Reports read from the same SharePoint list via Power Automate.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Every ticket has a Responsible Party assigned &mdash; zero unassigned at COB.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">&ge; 80% same-day resolution rate (rolling 7-day average) tracked live on Manager Dashboard and Agent Leaderboard.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">9 AM, 12 PM, 4 PM and 5 PM COB reports sent to Management on time &mdash; generated and copied to Outlook within 10 minutes of each slot.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">Agent slot reports posted to WhatsApp at every Weekday 2 PM / 5 PM and Weekend 1 PM / 4 PM checkpoint.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Leadership Email report auto-sent at 9 AM · 12 PM · 4 PM · 5 PM COB via Power Automate — fully formatted HTML direct to Outlook from shared mailbox.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">No data loss &mdash; tickets survive browser refresh, device swap, and offline pockets (local cache + cloud sync). All files are fully standalone HTML.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">No credentials in source code &mdash; all data stays within the company&rsquo;s Microsoft 365 environment.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">Agents can email customers directly from a ticket (Agents Hub) &mdash; sent via customercare@ekedp.com, logged to SharePoint, and visible on both hubs as a Response status and full email history.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Customers can rate resolved tickets 1&ndash;5 stars via a tap-to-rate link in the resolution email &mdash; no login required &mdash; visible on a dedicated CSAT screen and per-ticket in the drawer.</td></tr>
+    </tbody></table>
 
-    <!-- 4. FUNCTIONAL & OPERATIONAL CHECKS -->
-    <h2>4 &nbsp;Functional &amp; Operational Checks</h2>
-    <ul class="checks">
-      <li>Managers Hub: log, edit, bulk-update, sort, filter, search every complaint; export JSON, CSV and Excel.</li>
-      <li>Team Roster &amp; Shift Calendar &mdash; Manager sets shifts on a monthly Sun&ndash;Sat calendar; agents see read-only copy with CSV import fallback.</li>
-      <li>Daily Email Report: Grand Total column on all 4 slots; Outlook copy uses bgcolor headers that never turn black on paste.</li>
-      <li>Works on Android, iOS and desktop browsers &mdash; no app install, no backend, no IT ticket.</li>
-      <li>Failure is visible &mdash; sync errors show a banner; no silent data drops. Coverage gaps flagged 14 days in advance.</li>
-      <li>Performance Leaderboard on Agent Hub &mdash; ranked MTD resolution rates with bars, medals, and live ON/OFF shift badge.</li>
-      <li>Cumulative report rolls up tickets by Responsible Party with % resolution; party list is editable in-app.</li>
-      <li>Slot Reports produce a one-click WhatsApp message, styled PDF and 4-sheet Excel export.</li>
-      <li>Zero extra cost &mdash; runs entirely on Microsoft 365 (Power Automate + SharePoint) already licensed by the company.</li>
-      <li>MTD Performance Leaderboard &mdash; ranked agent resolution rates with bars, medals, shift status badge; synced across hubs.</li>
-      <li>Monthly Shift Calendar &mdash; manager sets shifts; calendar synced to Agent Hub in real time; coverage gaps flagged 14 days ahead.</li>
-      <li>Cumulative Tracker &mdash; running totals by Responsible Party across all months with % resolution rate.</li>
-    </ul>
+    <h2 style="font-family:{{t.headFont}};font-size:13px;font-weight:700;color:{{t.accent}};text-transform:uppercase;letter-spacing:.8px;margin:{{t.h2Margin}};padding-bottom:4px;border-bottom:{{t.h2Border}}">4 &nbsp;Functional &amp; Operational Checks</h2>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:{{t.pMargin}}"><tbody>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Managers Hub: log, edit, bulk-update, sort, filter, search every complaint; export JSON, CSV and Excel.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">Team Roster &amp; Shift Calendar &mdash; Manager sets shifts on a monthly Sun&ndash;Sat calendar; agents see read-only copy with CSV import fallback.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Daily Email Report: Grand Total column on all 4 slots; Outlook copy uses bgcolor headers that never turn black on paste.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">Works on Android, iOS and desktop browsers &mdash; no app install, no backend, no IT ticket.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Failure is visible &mdash; sync errors show a banner; no silent data drops. Coverage gaps flagged 14 days in advance.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Cumulative report rolls up tickets by Responsible Party with % resolution; party list is editable in-app.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">Slot Reports produce a one-click WhatsApp message, styled PDF and 4-sheet Excel export.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}"><strong style="color:{{t.accent}}">Absolutely zero extra cost &mdash; runs entirely on Microsoft 365 (Power Automate + SharePoint) already licensed by the company.</strong></td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">All Complaints table shows Response status (sent / not sent), Issue Title, and Agent columns &mdash; templated, editable emails with subject auto-set from Issue Title or category.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;border-bottom:1px solid #e5e7eb;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;border-bottom:1px solid #e5e7eb;font-size:13px;line-height:{{t.bodyLineHeight}}">Monthly Shift Calendar &mdash; manager sets shifts; calendar synced to Agent Hub in real time; coverage gaps flagged 14 days ahead.</td></tr>
+      <tr><td style="width:26px;padding:6px 4px;color:{{t.checkColor}};font-weight:700;vertical-align:top">✓</td><td style="padding:6px 4px;font-size:13px;line-height:{{t.bodyLineHeight}};background:{{t.tableStripe2}}">Cumulative Tracker &mdash; running totals by Responsible Party across all months with % resolution rate.</td></tr>
+    </tbody></table>
 
-    <!-- 5. WHAT WE MEASURE -->
-    <h2>5 &nbsp;What We Measure (Monthly)</h2>
-    <div class="metrics">
-      <div class="metric dark"><div class="val">&ge; 80%</div><div class="lbl">Same-Day Resolution</div></div>
-      <div class="metric light"><div class="val">100%</div><div class="lbl">Tickets Logged</div></div>
-      <div class="metric dark"><div class="val">4 / 4</div><div class="lbl">Daily Reports Sent</div></div>
-      <div class="metric light"><div class="val">&ge; 3</div><div class="lbl">Agents on Shift Daily</div></div>
+    <h2 style="font-family:{{t.headFont}};font-size:13px;font-weight:700;color:{{t.accent}};text-transform:uppercase;letter-spacing:.8px;margin:{{t.h2Margin}};padding-bottom:4px;border-bottom:{{t.h2Border}}">5 &nbsp;What We Measure (Monthly)</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:{{t.pMargin}}">
+      <div style="border-radius:6px;padding:10px 8px;text-align:center;background:{{t.accent}}"><div style="font-size:22px;font-weight:700;line-height:1;color:#fff">&ge; 80%</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;color:{{t.headerMetaColor}}">Same-Day Resolution</div></div>
+      <div style="border-radius:6px;padding:10px 8px;text-align:center;background:{{t.tableStripe}}"><div style="font-size:22px;font-weight:700;line-height:1;color:{{t.accent}}">100%</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;color:#555">Tickets Logged</div></div>
+      <div style="border-radius:6px;padding:10px 8px;text-align:center;background:{{t.accent}}"><div style="font-size:22px;font-weight:700;line-height:1;color:#fff">4 / 4</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;color:{{t.headerMetaColor}}">Daily Reports Sent</div></div>
+      <div style="border-radius:6px;padding:10px 8px;text-align:center;background:{{t.tableStripe}}"><div style="font-size:22px;font-weight:700;line-height:1;color:{{t.accent}}">&ge; 3</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;color:#555">Agents on Shift Daily</div></div>
     </div>
-
-    <!-- 6. OUT OF SCOPE -->
-    <h2>6 &nbsp;Out of Scope (Version 3)</h2>
-    <p class="scope">No customer-facing portal &nbsp;&middot;&nbsp; No SMS/email automation to customers &nbsp;&middot;&nbsp; No SLA-timer engine &nbsp;&middot;&nbsp; No multi-team / multi-BU role permissions &nbsp;&middot;&nbsp; No native mobile app &nbsp;&middot;&nbsp; These are candidates for Version 4.</p>
-    <p class="scope" style="margin-top:8px;color:#16A34A;background:#F0FDF4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 12px"><strong>Version 3 Complete &mdash; June 2026.</strong> All core criteria met and deployed. Email reports live via Power Automate. Shift calendar synced. Leaderboard active.</p>
 
   </div>
 
-  <!-- FOOTER -->
-  <div class="footer">EKEDP Power App &nbsp;·&nbsp; Customer Experience &nbsp;·&nbsp; Marina HQ &nbsp;&nbsp;|&nbsp;&nbsp; v3.0 · June 2026 &nbsp;&nbsp;|&nbsp;&nbsp; Owner: Love Offei</div>
+  <div style="background:#f5f7fa;border-top:1px solid #ddd;padding:8px 24px;text-align:center;font-size:11px;color:#888">EKEDP Power App &nbsp;·&nbsp; Customer Experience &nbsp;·&nbsp; Marina HQ &nbsp;&nbsp;|&nbsp;&nbsp; v3.1 · August 2026 &nbsp;&nbsp;|&nbsp;&nbsp; Owner: Love Offei</div>
 
 </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900},&quot;format&quot;:{&quot;editor&quot;:&quot;segmented&quot;,&quot;default&quot;:&quot;console&quot;,&quot;options&quot;:[&quot;console&quot;,&quot;brief&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Feel&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0D2B55&quot;,&quot;options&quot;:[&quot;#0D2B55&quot;,&quot;#7A1220&quot;,&quot;#1B4332&quot;,&quot;#1D4ED8&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Feel&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;segmented&quot;,&quot;default&quot;:&quot;compact&quot;,&quot;options&quot;:[&quot;compact&quot;,&quot;relaxed&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Feel&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const format = this.props.format ?? 'console';
+    const accent = this.props.accent ?? '#0D2B55';
+    const density = this.props.density ?? 'compact';
+    const isBrief = format === 'brief';
+    const isRelaxed = density === 'relaxed';
+    const t = {
+      accent,
+      bodyFont: isBrief ? "Georgia,'Times New Roman',serif" : "'Century Gothic','Futura',Arial,sans-serif",
+      headFont: isBrief ? "Georgia,'Times New Roman',serif" : "'Century Gothic','Futura',Arial,sans-serif",
+      pageBg: isBrief ? '#eef1f6' : '#f0f4f8',
+      cardRadius: isBrief ? '2px' : '8px',
+      cardShadow: isBrief ? '0 1px 3px rgba(0,0,0,.08)' : '0 2px 12px rgba(0,0,0,.12)',
+      outerPad: isRelaxed ? '32px 20px' : '20px',
+      headerBg: isBrief ? '#ffffff' : accent,
+      headerAlign: isBrief ? 'left' : 'center',
+      headerPad: isRelaxed ? '28px 32px' : '18px 24px',
+      headerSubColor: isBrief ? accent : 'rgba(255,255,255,.55)',
+      headerTextColor: isBrief ? '#111' : '#fff',
+      headerMetaColor: isBrief ? '#666' : 'rgba(255,255,255,.55)',
+      h1Size: isBrief ? '30px' : '26px',
+      h1Weight: isBrief ? '400' : '700',
+      h1Style: isBrief ? 'italic' : 'normal',
+      h1Tracking: isBrief ? '0' : '.2px',
+      bodyPad: isRelaxed ? '28px 32px' : '18px 24px',
+      h2Margin: isRelaxed ? '22px 0 10px' : '14px 0 6px',
+      h2Border: isBrief ? `1px solid ${accent}` : `2px solid ${accent}`,
+      pMargin: isRelaxed ? '14px' : '4px',
+      bodyLineHeight: isRelaxed ? '1.8' : '1.5',
+      checksCols: isBrief ? 1 : 2,
+      checkColor: isBrief ? accent : '#1E7145',
+      tableStripe: isBrief ? '#f3f4f6' : shade(accent),
+      tableStripe2: '#f8fafc',
+    };
+    function shade(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      const r = Math.min(255, ((n >> 16) & 255) + 190);
+      const g = Math.min(255, ((n >> 8) & 255) + 190);
+      const b = Math.min(255, (n & 255) + 190);
+      return `rgb(${r},${g},${b})`;
+    }
+    return { t, format, accent, density };
+  }
+}
+</script>
 </body>
 </html>
