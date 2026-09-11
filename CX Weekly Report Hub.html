@@ -40,7 +40,7 @@ let state = {
   currentUser: null,
   showTeam: false,
   refSeq: 9,
-  settings: { syncUrl: '', ref: '', from: 'Manager Email/ Mobile APP/Live Chat helpdesk CX', prepBy: '', prepTitle: 'MarinaHelp CX', weeklyNotes: '' },
+  settings: { syncUrl: '', ref: '', from: 'Manager Email/ Mobile APP/Live Chat helpdesk CX', prepBy: '', prepTitle: 'MarinaHelp CX', weeklyNotes: '', showEmailTransitionNote: true },
   showSettings: false,
   syncing: false,
   toastMsg: '',
@@ -101,17 +101,26 @@ function getPreviousReportSnapshot(currentPeriod) {
 // Recomputes the same headline totals buildBodyXml uses, from the same export payload,
 // so what gets recorded always matches what was actually reported that week.
 function computeReportSnapshot(o) {
-  var h = o.helpdesk || {}, m = o.mobile || {}, lc = o.liveChat || {};
-  var total = h.total || 0, resolved = h.resolved || 0, pending = h.pending || 0;
+  var m = o.mobile || {}, lc = o.liveChat || {}, soc = o.social || {};
   var mTotal = m.total || 0, mResolved = m.resolved || 0;
+  var mPending = (m.inProgress || 0) + (m.unresolved || 0);
   var lcTotal = lc.total || 0, lcResolved = lc.resolved || 0;
-  var unitTotal = total + mTotal + lcTotal;
-  var unitResolved = resolved + mResolved + lcResolved;
+  var lcPending = lc.pending || 0;
+  var socQ = soc.quality || {};
+  var socTotal = socQ.total || 0;
+  var socResolved = (soc.closed != null) ? soc.closed : (socQ.genuine || 0);
+  var socPending = Math.max(0, socTotal - socResolved);
+  // Unit totals now cover Social Media + Mobile App + Live Chat only. Email intake-and-route
+  // was transferred out of the CX Digital unit and no longer contributes to these figures —
+  // see STEP 5 note in buildBodyXml about the resulting one-time drop versus older snapshots.
+  var unitTotal = socTotal + mTotal + lcTotal;
+  var unitResolved = socResolved + mResolved + lcResolved;
+  var unitPending = socPending + mPending + lcPending;
   return {
-    total: total, resolved: resolved, pending: pending,
+    socTotal: socTotal, socResolved: socResolved,
     mTotal: mTotal, mResolved: mResolved,
     lcTotal: lcTotal, lcResolved: lcResolved,
-    unitTotal: unitTotal, unitResolved: unitResolved,
+    unitTotal: unitTotal, unitResolved: unitResolved, unitPending: unitPending,
     unitRate: unitTotal ? Math.min(100, Math.round(unitResolved / unitTotal * 100)) : 0,
     weeklyNotes: o.weeklyNotes || ''
   };
@@ -1025,7 +1034,11 @@ function computeSlaAggregates(tickets, bucket) {
   if (bucket.lifecycle) filesUsed.push('lifecycle');
   if (bucket.resolution) filesUsed.push('resolution');
   if (bucket.response) filesUsed.push('response');
-  var combined = bucketStats(list);
+  // Email intake-and-route was transferred out of the CX Digital unit — the SLA figures this
+  // returns (and everything the report's SLA SUMMARY table reads) are Social-channel tickets
+  // only. email/social breakdowns are kept below in case they're needed again later; nothing
+  // currently reads sla.email or sla.social.
+  var combined = bucketStats(socialList);
   return Object.assign({}, combined, {
     filesUsed: filesUsed,
     email: bucketStats(emailList),
@@ -1752,23 +1765,43 @@ function validLcPeriod(p) {
   return !!p && REAL_MONTH_RE.test(p);
 }
 
+// A period string is "D Mon YYYY – D Mon YYYY"; the transition note needs just the end date.
+function periodEndDate(periodStr) {
+  var parts = String(periodStr || '').split('–');
+  return parts.length > 1 ? parts[parts.length - 1].trim() : String(periodStr || '').trim();
+}
+
 function buildBodyXml(o) {
   var x = '';
-  var h = o.helpdesk || {}, m = o.mobile || {}, lc = o.liveChat || {};
-  var total = h.total || 0, resolved = h.resolved || 0, pending = h.pending || 0;
-  var resRate = pctClamped(resolved, total);
+  var h = o.helpdesk || {}, m = o.mobile || {}, lc = o.liveChat || {}, soc = o.social || {};
   var mTotal = m.total || 0, mResolved = m.resolved || 0;
   var mRate = pctClamped(mResolved, mTotal);
   var lcTotal = lc.total || 0, lcResolved = lc.resolved || 0;
   var lcRate = pctClamped(lcResolved, lcTotal);
-  var unitTotal = total + mTotal + lcTotal;
-  var unitResolved = resolved + mResolved + lcResolved;
+  var socQ = soc.quality || {};
+  var socT = socQ.total || 0, socG = socQ.genuine || 0;
+  var xClosed = (soc.closed != null) ? soc.closed : socG;
+  var xRate = pctClamped(xClosed, socT);
+  // Unit totals now cover Social Media (X/Twitter + Facebook) + Mobile App + Live Chat only —
+  // Email intake-and-route has been transferred out of the CX Digital unit (see STEP 5 of the
+  // Email-removal change: this makes the very first week-over-week trend after this change look
+  // like a big drop against the previous saved snapshot, which still included Email. That's
+  // expected, not a bug — older snapshots are intentionally left as they were).
+  var unitTotal = socT + mTotal + lcTotal;
+  var unitResolved = xClosed + mResolved + lcResolved;
   var unitRate = pctClamped(unitResolved, unitTotal);
+  var mPending = (m.inProgress || 0) + (m.unresolved || 0);
+  var lcPending = lc.pending || 0;
+  var socPending = Math.max(0, socT - xClosed);
+  var unitPending = socPending + mPending + lcPending;
   var period = o.period || '';
 
   // ---- Introduction ----
   x += H2('Introduction');
-  x += PARA('This report reviews CX Digital unit performance for the period **' + period + '**, covering the Marina Helpdesk (Zoho Desk), Mobile App (EKEDP Power App), and Live Chat complaint channels.');
+  x += PARA('This report reviews CX Digital unit performance for the period **' + period + '**, covering the Social Media (X/Twitter + Facebook), Mobile App (EKEDP Power App), and Live Chat complaint channels.');
+  if (o.showEmailTransitionNote !== false) {
+    x += PARA('As of **' + periodEndDate(period) + '**, Email intake-and-route has been transferred out of the CX Digital unit and is no longer included in this report.');
+  }
   var introHourly = lc.hourly;
   if (introHourly && introHourly.total) {
     x += PARA('On the Live Chat channel, a total of **' + introHourly.total + '** platform conversations were recorded across the period, ' +
@@ -1784,39 +1817,31 @@ function buildBodyXml(o) {
   }
 
   // ---- Executive Summary ----
-  var dq = h.dataQuality, soc = o.social;
-  var socT = (soc && soc.quality) ? (soc.quality.total || 0) : 0;
-  var socG = (soc && soc.quality) ? (soc.quality.genuine || 0) : 0;
-  var marinaRecv = (dq ? (dq.total || 0) : total) + socT;
-  var marinaGen = (dq ? (dq.genuine || 0) : resolved) + socG;
+  var platformBreakdown = (soc.byPlatform && soc.byPlatform.length > 1)
+    ? ' (' + soc.byPlatform.map(function (p) { return (p.name === 'Twitter' ? 'X' : p.name) + ' ' + (p.quality.genuine || 0); }).join(', ') + ')'
+    : '';
   x += H2('Executive Summary');
-  x += PARA('MarinaHelp (Zoho Desk) received **' + marinaRecv + '** tickets this period, of which **' + marinaGen +
-    '** were genuine customer complaints' + (dq ? ' (Email ' + (dq.genuine || 0) + ', X ' + socG + ')' : '') + '. ' +
-    'Email operates as an intake-and-route channel, with genuine complaints routed to the relevant district for resolution once the customer completes the details form. Mobile App received **' + mTotal +
+  x += PARA('Social Media (X/Twitter + Facebook) received **' + socT + '** tickets this period, of which **' + socG +
+    '** were genuine customer complaints' + platformBreakdown + '. Mobile App received **' + mTotal +
     '** tickets at a **' + mRate + '%** resolution rate' +
     (lcTotal ? ', and Live Chat handled **' + lcTotal + '** chats for resolution at **' + lcRate + '%**' : '') + '.');
 
-  var xClosed = (soc && (soc.closed != null)) ? soc.closed : socG;
-  var xRate = pctClamped(xClosed, socT);
   var chRows = [];
-  if (dq) {
-    chRows.push(['Marina Helpdesk Email (Zoho Desk)', String(dq.total || 0), String(dq.genuine || 0), 'Intake & route']);
-    if (soc && soc.byPlatform && soc.byPlatform.length) {
-      soc.byPlatform.forEach(function (p) {
-        var pRate = pctClamped(p.closed, p.quality.total);
-        var label = p.name === 'Twitter' ? 'Marina Helpdesk X / Twitter (Zoho Desk)' : 'Marina Helpdesk ' + p.name + ' (Zoho Desk)';
-        chRows.push([label, String(p.quality.total), String(p.closed), pRate + '%']);
-      });
-    } else if (soc && soc.quality) {
-      chRows.push(['Marina Helpdesk X / Twitter (Zoho Desk)', String(socT), String(xClosed), xRate + '%']);
-    }
-  } else {
-    chRows.push(['Marina Helpdesk', String(total), String(resolved), resRate + '%']);
+  if (soc.byPlatform && soc.byPlatform.length) {
+    soc.byPlatform.forEach(function (p) {
+      var pRate = pctClamped(p.closed, p.quality.total);
+      var label = p.name === 'Twitter' ? 'Marina Helpdesk X / Twitter (Zoho Desk)' : 'Marina Helpdesk ' + p.name + ' (Zoho Desk)';
+      chRows.push([label, String(p.quality.total), String(p.closed), pRate + '%']);
+    });
+  } else if (soc.quality) {
+    chRows.push(['Marina Helpdesk X / Twitter (Zoho Desk)', String(socT), String(xClosed), xRate + '%']);
   }
   chRows.push(['Mobile App', String(mTotal), String(mResolved), mRate + '%']);
   if (lcTotal) chRows.push(['Live Chat', String(lcTotal), String(lcResolved), lcRate + '%']);
   x += TABLE(['CHANNEL', 'VOLUME RECEIVED', 'RESOLVED', 'RATE'], chRows, [3200, 2000, 2600, 1600], { totalRow: false });
-  x += PARA('Post-purge non-genuine entries: internal @ekedp.com **' + (dq ? (dq.internal || 0) : 0) + '**, junk **' + (dq ? (dq.junk || 0) : 0) + '**, duplicates **' + (dq ? (dq.dup || 0) : 0) + '** (now addressed by re-enabled duplicate detection). Email operates as an intake-and-route channel (form \u2192 district).' + (lc.hourly && lc.hourly.total ? ' Live Chat: **' + lc.hourly.outsidePct + '%** of conversations occurred outside working hours.' : ''));
+  if (lc.hourly && lc.hourly.total) {
+    x += PARA('Live Chat: **' + lc.hourly.outsidePct + '%** of conversations occurred outside working hours.');
+  }
 
   // ---- Week-over-week trend (only appears once a prior week's report has been exported) ----
   var prevSnap = getPreviousReportSnapshot(period);
@@ -1830,40 +1855,46 @@ function buildBodyXml(o) {
     var ratePhrase = dRate > 0 ? 'improved from **' + prevSnap.unitRate + '%** to **' + unitRate + '%**'
       : dRate < 0 ? 'declined from **' + prevSnap.unitRate + '%** to **' + unitRate + '%**'
       : 'held steady at **' + unitRate + '%**';
-    var dPending = pending - (prevSnap.pending || 0);
-    var pendingPhrase = dPending > 0 ? ', and the MarinaHelp pending count increased by **' + dPending + '**'
-      : dPending < 0 ? ', and the MarinaHelp pending count fell by **' + Math.abs(dPending) + '**'
-      : ', with the MarinaHelp pending count unchanged';
+    // Overall pending across the three channels (Social + Mobile App + Live Chat) \u2014 replaces the
+    // old MarinaHelp-Email-specific pending trend, which no longer applies now that Email is out
+    // of scope. Older snapshots saved before this change won't carry unitPending, so the
+    // comparison is simply omitted for the one week where that's the case.
+    var pendingPhrase = '';
+    if (prevSnap.unitPending != null) {
+      var dPending = unitPending - prevSnap.unitPending;
+      pendingPhrase = dPending > 0 ? ', and the overall pending count across Social, Mobile App, and Live Chat increased by **' + dPending + '**'
+        : dPending < 0 ? ', and the overall pending count across Social, Mobile App, and Live Chat fell by **' + Math.abs(dPending) + '**'
+        : ', with the overall pending count across Social, Mobile App, and Live Chat unchanged';
+    }
     x += PARA('**Compared with the previous reporting period (' + (prevSnap.period || '') + '):** total unit ticket volume ' + volDir + volPhrase + ', overall resolution rate ' + ratePhrase + pendingPhrase + '.');
   }
 
   // ---- Channel Performance ----
   x += H2('Channel Performance');
-  // ---- 1.0 Marina Helpdesk (Zoho Desk) — Issue table ----
-  x += H3('1.0  Marina Helpdesk \u2014 Zoho Desk (Digital Complaint Channels)');
-  var socialPlatformNames = (soc && soc.byPlatform && soc.byPlatform.length) ? soc.byPlatform.map(function (p) { return p.name === 'Twitter' ? 'X (Twitter)' : p.name; }) : ['X (Twitter)'];
+  // ---- 1.0 Social Media — Issue table ----
+  x += H3('1.0  Social Media (X/Twitter + Facebook)');
+  var socialPlatformNames = (soc.byPlatform && soc.byPlatform.length) ? soc.byPlatform.map(function (p) { return p.name === 'Twitter' ? 'X (Twitter)' : p.name; }) : ['X (Twitter)'];
   function oxfordJoin(arr) {
     if (arr.length <= 1) return arr[0] || '';
     if (arr.length === 2) return arr[0] + ' and ' + arr[1];
     return arr.slice(0, -1).join(', ') + ', and ' + arr[arr.length - 1];
   }
-  x += PARA('This period covers ' + oxfordJoin(['Email'].concat(socialPlatformNames)) + '.');
-  var iN = dq ? (dq.internal || 0) : 0, iD = dq ? (dq.dup || 0) : 0, iJ = dq ? (dq.junk || 0) : 0;
+  x += PARA('This period covers ' + oxfordJoin(socialPlatformNames) + '.');
+  var iN = socQ.internal || 0, iD = socQ.dup || 0, iJ = socQ.junk || 0;
   var noiseTotal = iN + iD + iJ;
   if (noiseTotal > 0) {
     x += PARA('Ongoing data-quality filtering removed ' + noiseTotal + ' non-genuine entries from this period\u2019s raw volume before reporting: internal @ekedp.com mail (' + iN + '), residual duplicates (' + iD + '), and junk/marketing items (' + iJ + '). Genuine customer complaint counts throughout this report reflect the figures after this filtering.');
   } else {
     x += PARA('No internal, duplicate, or junk entries were filtered out of this period\u2019s recorded volume.');
   }
-  if (soc && soc.byPlatform && soc.byPlatform.length) {
+  if (soc.byPlatform && soc.byPlatform.length) {
     var platformResolvedSentence = soc.byPlatform.map(function (p) {
       var label = p.name === 'Twitter' ? 'X (Twitter)' : p.name;
       return 'on ' + label + ', ' + p.closed + ' complaint' + (p.closed === 1 ? '' : 's') + ' ' + (p.closed === 1 ? 'was' : 'were') + ' resolved';
     }).join('; ');
-    x += PARA('**Across social channels this period, ' + platformResolvedSentence + '. Email remains an intake-and-route channel: open email tickets are those awaiting the customer\u2019s completed form, with resolution carried out at district level once routed.**');
+    x += PARA('**Across social channels this period, ' + platformResolvedSentence + '.**');
   } else {
-    var xResolved = (soc && (soc.closed != null)) ? soc.closed : socG;
-    x += PARA('**On X (Twitter), ' + xResolved + ' complaints were resolved during the period. Email remains an intake-and-route channel: open email tickets are those awaiting the customer\u2019s completed form, with resolution carried out at district level once routed.**');
+    x += PARA('**On X (Twitter), ' + xClosed + ' complaints were resolved during the period.**');
   }
 
   // ---- SLA SUMMARY (additive \u2014 only when the Lifecycle/Resolution/Response Zoho exports were merged in) ----
@@ -2036,14 +2067,14 @@ function nativeWordExport(o) {
       var head = doc.substring(0, bodyStart);
       z.file('word/document.xml', head + header + buildBodyXml(o) + sect);
 
-      // Chart 1 — MarinaHelp ticket composition (genuine vs noise)
-      var dqc = o.helpdesk && o.helpdesk.dataQuality;
+      // Chart 1 — Social Media ticket composition (genuine vs noise). Email is no longer part
+      // of this unit's reporting scope, so this chart reflects Social-channel tickets only.
       var socq = o.social && o.social.quality;
-      var compVals = dqc ? [
-        (dqc.genuine || 0) + ((socq && socq.genuine) || 0),
-        (dqc.dup || 0) + ((socq && socq.dup) || 0),
-        (dqc.internal || 0) + ((socq && socq.internal) || 0),
-        (dqc.junk || 0) + ((socq && socq.junk) || 0)
+      var compVals = socq ? [
+        socq.genuine || 0,
+        socq.dup || 0,
+        socq.internal || 0,
+        socq.junk || 0
       ] : null;
       var p1 = compVals
         ? z.file('word/charts/chart1.xml').async('string').then(function (c) {
@@ -2137,6 +2168,7 @@ function doExportWord(vals) {
     liveChat: vals._liveChatData,
     ambassador: state.ambassadorData || null,
     weeklyNotes: state.settings.weeklyNotes || '',
+    showEmailTransitionNote: state.settings.showEmailTransitionNote !== false,
     observations: obs, risks: risks, recs: recs, conclusion: conclusion
   });
 }
@@ -2217,6 +2249,7 @@ function computeVals() {
     showSettings,
     syncUrl: settings.syncUrl || '', refNum: settings.ref || '', fromVal: settings.from || '', prepBy: settings.prepBy || '', prepTitle: settings.prepTitle || '',
     weeklyNotes: settings.weeklyNotes || '',
+    showEmailTransitionNote: settings.showEmailTransitionNote !== false,
     syncLabel: syncing ? '\u29d7 Syncing...' : '\u27f3 Sync',
     statusMsg: total > 0 ? 'Data loaded \u00b7 ' + total + ' tickets' : 'No data loaded',
     showToast, toastMsg: toastMsg || '',
@@ -2706,6 +2739,13 @@ function render() {
           <textarea id="weeklyNotesInput" rows="4" placeholder="e.g.&#10;Zoho Desk had a 40-minute outage on Wednesday afternoon&#10;New agent onboarded to the X/Twitter queue" oninput="app.onWeeklyNotes(event)" style="width:100%; background:#F5F7FF; border:1px solid #D1D9F0; color:#1E3070; padding:10px 12px; border-radius:7px; font-size:12px; font-family:'Sora',sans-serif; outline:none; resize:vertical;">${esc(v.weeklyNotes)}</textarea>
         </div>
 
+        <div style="margin-bottom:20px;">
+          <label style="display:flex; align-items:flex-start; gap:9px; cursor:pointer;">
+            <input type="checkbox" ${v.showEmailTransitionNote ? 'checked' : ''} onchange="app.onToggleEmailNote(event)" style="margin-top:2px; cursor:pointer;">
+            <span style="font-size:11.5px; color:#4C5C8C; line-height:1.4;">Include the one-off "Email transferred out of the CX Digital unit" note in the report's Introduction. Turn this off once it's no longer needed.</span>
+          </label>
+        </div>
+
         <div style="border-top:1px solid #E8EDF5; padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
           <div style="font-size:11px; color:#9AA5C4;">${esc(v.statusMsg)}</div>
           <div onclick="app.resetData()" style="background:rgba(220,50,50,0.1); color:#DC2626; font-size:11px; font-weight:700; padding:8px 14px; border-radius:7px; cursor:pointer; border:1px solid rgba(220,50,50,0.25);">🗑 Reset Data</div>
@@ -2930,6 +2970,7 @@ window.app = {
   onPrepBy: (e) => saveSetting({ prepBy: e.target.value }),
   onPrepTitle: (e) => saveSetting({ prepTitle: e.target.value }),
   onWeeklyNotes: (e) => saveSetting({ weeklyNotes: e.target.value }),
+  onToggleEmailNote: (e) => saveSetting({ showEmailTransitionNote: e.target.checked }),
   importLiveChatHourlyCsv: (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
