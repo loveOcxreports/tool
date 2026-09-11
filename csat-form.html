@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate your experience — EKEDC</title>
+<style>
+  :root{
+    --paper:#EDF1F5;
+    --card:#FFFFFF;
+    --ink:#12233D;
+    --ink-soft:#5C6B7A;
+    --line:#D8E0E8;
+    --glow:#F2A93B;
+    --glow-deep:#C9871C;
+    --bad:#C0492F;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 16px;
+    line-height:1.45;
+  }
+  @media (max-width:480px){ body{ padding:24px 12px; align-items:flex-start; } }
+
+  .stub{
+    width:100%;
+    max-width:400px;
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 1px 2px rgba(18,35,61,0.06), 0 12px 28px rgba(18,35,61,0.10);
+    overflow:hidden;
+  }
+
+  .stub-head{
+    padding:22px 24px 20px;
+    background:var(--ink);
+    color:#fff;
+  }
+  .mark{
+    font-size:12.5px;
+    letter-spacing:0.02em;
+    color:#9FB0C6;
+    margin:0 0 14px;
+  }
+  .ticket-no{
+    font-size:28px;
+    font-weight:600;
+    margin:0 0 6px;
+    font-variant-numeric:tabular-nums;
+  }
+  .issue{
+    font-size:14.5px;
+    color:#C7D3E2;
+    margin:0;
+  }
+  .who{
+    font-size:13px;
+    color:#8FA1B8;
+    margin:10px 0 0;
+  }
+
+  .perforation{
+    position:relative;
+    height:0;
+    border-top:2px dashed var(--line);
+    margin:0 24px;
+  }
+  .perforation::before,
+  .perforation::after{
+    content:"";
+    position:absolute;
+    top:-11px;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:var(--paper);
+  }
+  .perforation::before{ left:-34px; }
+  .perforation::after{ right:-34px; }
+
+  .stub-body{ padding:26px 24px 24px; }
+  .prompt{
+    font-size:17px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .prompt-sub{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0 0 18px;
+  }
+
+  .stars{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    margin-bottom:10px;
+  }
+  .stars input{
+    position:absolute;
+    opacity:0;
+    width:1px;
+    height:1px;
+  }
+  .stars label{
+    cursor:pointer;
+    width:46px;
+    height:46px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#D9E0E8;
+    transition:color .15s ease, transform .15s ease;
+  }
+  .stars svg{ width:32px; height:32px; }
+  .stars input:checked ~ label{ color:#D9E0E8; }
+  .stars label:hover,
+  .stars label:hover ~ label{ color:var(--glow); }
+  .stars:hover label{ color:#D9E0E8; }
+  .stars input:focus-visible + label{ outline:2px solid var(--ink); outline-offset:2px; border-radius:8px; }
+
+  /* fill stars up to the checked one, reading right-to-left in source order */
+  .stars input:checked ~ label ~ label{ color:var(--glow); }
+  .stars label.on{ color:var(--glow); }
+
+  .rating-word{
+    text-align:center;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    min-height:18px;
+    margin-bottom:20px;
+  }
+
+  textarea{
+    width:100%;
+    resize:vertical;
+    min-height:78px;
+    padding:12px 14px;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    font:inherit;
+    font-size:14.5px;
+    color:var(--ink);
+    margin-bottom:16px;
+  }
+  textarea:focus{ outline:none; border-color:var(--ink); }
+  textarea::placeholder{ color:#9AA7B6; }
+
+  button.send{
+    width:100%;
+    padding:13px 16px;
+    border:none;
+    border-radius:12px;
+    background:var(--ink);
+    color:#fff;
+    font:inherit;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s ease, transform .05s ease;
+  }
+  button.send:hover:not(:disabled){ background:#1B3352; }
+  button.send:active:not(:disabled){ transform:scale(0.99); }
+  button.send:disabled{ background:#B8C2CE; cursor:not-allowed; }
+
+  .status{
+    margin-top:12px;
+    font-size:13.5px;
+    text-align:center;
+  }
+  .status.error{ color:var(--bad); }
+
+  .thanks{ padding:40px 28px 36px; text-align:center; }
+  .thanks svg{ width:52px; height:52px; color:var(--glow-deep); margin-bottom:14px; }
+  .thanks h2{ font-size:19px; margin:0 0 8px; }
+  .thanks p{ font-size:14px; color:var(--ink-soft); margin:0; }
+
+  .missing{ padding:40px 28px; text-align:center; }
+  .missing h2{ font-size:17px; margin:0 0 8px; }
+  .missing p{ font-size:14px; color:var(--ink-soft); margin:0; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stub" id="app"></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="star" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M12 2.5l2.9 6.3 6.8.7-5.1 4.7 1.5 6.8L12 17.7 5.9 21l1.5-6.8-5.1-4.7 6.8-.7z"/>
+  </symbol>
+  <symbol id="check" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<script>
+(function(){
+  var FLOW_URL = "https://defaultb841de22e0c340c5b3fec287594b46.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/05/workflows/7b8bd670e665432a948fa7fe100e9036/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=SsW3cJyu5K9tNmlvUEKC8QghuX344AH7sq1gAkHbyzM";
+
+  var qs = new URLSearchParams(location.search);
+  var ticketNumber = qs.get('ticket') || qs.get('ticketNumber') || '';
+  var customer     = qs.get('customer') || '';
+  var issueTitle   = qs.get('issue') || qs.get('issueTitle') || '';
+  var district     = qs.get('district') || '';
+
+  var app = document.getElementById('app');
+
+  if(!ticketNumber){
+    app.innerHTML =
+      '<div class="missing">' +
+      '<h2>This link looks incomplete</h2>' +
+      '<p>We couldn\'t find a ticket number in this link. Please use the feedback link from your text message or email.</p>' +
+      '</div>';
+    return;
+  }
+
+  var words = {1:'Poor experience',2:'Below expectations',3:'Okay',4:'Good',5:'Excellent'};
+
+  function esc(s){
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  app.innerHTML =
+    '<div class="stub-head">' +
+      '<p class="mark">EKEDC customer feedback</p>' +
+      '<p class="ticket-no">#' + esc(ticketNumber) + '</p>' +
+      (issueTitle ? '<p class="issue">' + esc(issueTitle) + '</p>' : '') +
+      (customer ? '<p class="who">Resolved for ' + esc(customer) + '</p>' : '') +
+    '</div>' +
+    '<div class="perforation"></div>' +
+    '<div class="stub-body">' +
+      '<p class="prompt">How did we do?</p>' +
+      '<p class="prompt-sub">Rate your recent experience with this issue.</p>' +
+      '<form id="csatForm">' +
+        '<div class="stars" id="stars">' +
+          [5,4,3,2,1].map(function(n){
+            return '<input type="radio" name="stars" id="s'+n+'" value="'+n+'">' +
+                   '<label for="s'+n+'" data-n="'+n+'"><svg><use href="#star"/></svg></label>';
+          }).join('') +
+        '</div>' +
+        '<p class="rating-word" id="ratingWord">&nbsp;</p>' +
+        '<textarea id="comment" placeholder="Anything you\'d like to add? (optional)"></textarea>' +
+        '<button type="submit" class="send" id="sendBtn" disabled>Send feedback</button>' +
+        '<p class="status" id="status"></p>' +
+      '</form>' +
+    '</div>';
+
+  var starsWrap = document.getElementById('stars');
+  var labels = Array.prototype.slice.call(starsWrap.querySelectorAll('label'));
+  var ratingWord = document.getElementById('ratingWord');
+  var sendBtn = document.getElementById('sendBtn');
+  var selected = 0;
+
+  function paint(n){
+    labels.forEach(function(l){
+      var v = parseInt(l.getAttribute('data-n'),10);
+      l.classList.toggle('on', v <= n);
+    });
+  }
+
+  labels.forEach(function(l){
+    var n = parseInt(l.getAttribute('data-n'),10);
+    l.addEventListener('mouseenter', function(){ paint(n); ratingWord.textContent = words[n]; });
+    l.addEventListener('mouseleave', function(){ paint(selected); ratingWord.textContent = selected ? words[selected] : ''; });
+    l.addEventListener('click', function(){
+      selected = n;
+      document.getElementById('s'+n).checked = true;
+      paint(n);
+      ratingWord.textContent = words[n];
+      sendBtn.disabled = false;
+    });
+  });
+
+  document.getElementById('csatForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!selected || sendBtn.disabled) return;
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Sending…';
+    var statusEl = document.getElementById('status');
+    statusEl.textContent = '';
+    statusEl.className = 'status';
+
+    var payload = {
+      ticketNumber: ticketNumber,
+      stars: selected,
+      comment: document.getElementById('comment').value.trim(),
+      customer: customer,
+      issueTitle: issueTitle,
+      district: district
+    };
+
+    fetch(FLOW_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(res){
+      if(!res.ok) throw new Error('bad status');
+      app.innerHTML =
+        '<div class="thanks">' +
+          '<svg><use href="#check"/></svg>' +
+          '<h2>Feedback received</h2>' +
+          '<p>Thank you' + (customer ? ', ' + esc(customer.split(' ')[0]) : '') + '. This helps us do better.</p>' +
+        '</div>';
+    }).catch(function(){
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Send feedback';
+      statusEl.textContent = 'Something went wrong sending your feedback. Please try again.';
+      statusEl.className = 'status error';
+    });
+  });
+})();
+</script>
+</body>
+</html>
