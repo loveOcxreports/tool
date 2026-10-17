@@ -40,7 +40,7 @@ let state = {
   currentUser: null,
   showTeam: false,
   refSeq: 9,
-  settings: { syncUrl: '', ref: '', from: 'Manager Email/ Mobile APP/Live Chat helpdesk CX', prepBy: '', prepTitle: 'MarinaHelp CX', weeklyNotes: '', showEmailTransitionNote: true },
+  settings: { syncUrl: '', ref: '', from: 'Manager HQ Helpdesk', prepBy: '', prepTitle: 'HQ Helpdesk CX', weeklyNotes: '', showEmailTransitionNote: true },
   showSettings: false,
   syncing: false,
   toastMsg: '',
@@ -104,7 +104,7 @@ function computeReportSnapshot(o) {
   var m = o.mobile || {}, lc = o.liveChat || {}, soc = o.social || {};
   var mTotal = m.total || 0, mResolved = m.resolved || 0;
   var mPending = (m.inProgress || 0) + (m.unresolved || 0);
-  var lcTotal = lc.total || 0, lcResolved = lc.resolved || 0;
+  var lcTotal = lc.total || 0, lcResolved = Math.min(lc.resolved || 0, lc.total || (lc.resolved || 0));
   var lcPending = lc.pending || 0;
   var socQ = soc.quality || {};
   var socTotal = socQ.total || 0;
@@ -367,8 +367,9 @@ function processLiveChatXlsx(arrayBuffer) {
   var topicRows = lcDataRows(rows('Chat topics and performance')).filter(function (r) { return String(r[0] || '').trim() && !/no data found/i.test(String(r[0])); });
   var categories = topicRows.map(function (r) { return { name: String(r[0]).trim(), count: lcNum(r[1]) }; });
 
-  var total = totalFromHourly || kpiMap['Picked up chats'] || 0;
+  var total = (initialResponse && initialResponse.totalChats) || totalFromHourly || kpiMap['Picked up chats'] || 0; // prefer unique 'Total chats' from Initial Response Time
   var closed = kpiMap['Closed chats'] || 0;
+  if (total && closed > total) closed = total; // cap resolved at chats handled (no carry-over beyond the period)
   var missed = kpiMap['Missed chats'] || 0;
   var pending = Math.max(0, total - closed - missed);
 
@@ -1405,9 +1406,9 @@ function wordExport(opts) {
   const period = opts.reportPeriod || '\u2014';
   const date = opts.reportDate || new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const ref = opts.ref || '\u2014';
-  const from = opts.from || 'Manager Email/ Mobile APP/Live Chat helpdesk CX';
+  const from = opts.from || 'Manager HQ Helpdesk';
   const prepBy = opts.prepBy || from;
-  const prepTitle = opts.prepTitle || 'Manager Email/ Mobile APP/Live Chat helpdesk CX';
+  const prepTitle = opts.prepTitle || 'HQ Helpdesk CX';
   const topCatNames = cats.slice(0, 3).map(c => c.name).join(', ');
   const topCat = cats[0];
   const excPct = pending ? Math.round(te / pending * 100) : 0;
@@ -1453,7 +1454,7 @@ function wordExport(opts) {
     '<table style="width:100%;border-collapse:collapse;margin-bottom:6pt;"><tbody>' +
     '<tr><td style="border:none;padding:3pt 0;width:50%;vertical-align:top;"><strong>Ref:</strong>&nbsp;&nbsp;' + ref + '</td><td style="border:none;padding:3pt 0;"><strong>Date:</strong>&nbsp;&nbsp;' + date + '</td></tr>' +
     '<tr><td style="border:none;padding:3pt 0;vertical-align:top;"><strong>From:</strong>&nbsp;&nbsp;' + from + '</td><td style="border:none;padding:3pt 0;"><strong>To:</strong>&nbsp;&nbsp;GM CX &amp; Ombudsman</td></tr>' +
-    '<tr><td colspan="2" style="border:none;padding:3pt 0;"><strong>Subject:</strong>&nbsp;&nbsp;Email/Mobile APP/Live Chat helpdesk weekly report.</td></tr>' +
+    '<tr><td colspan="2" style="border:none;padding:3pt 0;"><strong>Subject:</strong>&nbsp;&nbsp;Weekly Report \u2013 HQ Helpdesk</td></tr>' +
     '</tbody></table>' +
     '<hr style="border:0;border-top:1.5px solid #000;margin:8pt 0;">' +
     (function () {
@@ -1463,7 +1464,7 @@ function wordExport(opts) {
       const mResolved = (m && m.resolved) || 0;
       const mRate = mTotal ? Math.round(mResolved / mTotal * 100) : 0;
       const lcTotal = (lc && lc.total) || 0;
-      const lcResolved = (lc && lc.resolved) || 0;
+      const lcResolved = Math.min((lc && lc.resolved) || 0, (lc && lc.total) || ((lc && lc.resolved) || 0));
       const lcRate = lcTotal ? Math.round(lcResolved / lcTotal * 100) : 0;
       const unitTotal = total + mTotal + lcTotal;
       const unitResolved = resolved + mResolved + lcResolved;
@@ -1553,13 +1554,14 @@ function wordExport(opts) {
       if (!lc.total && !hasHourly) {
         return '<h3 style="font-size:10pt;font-weight:bold;margin:10pt 0 4pt 0;">3.0&nbsp;&nbsp;Live Chat Channel</h3><p>Live Chat is transitioning onto the platform and is not yet reporting weekly data. This section will be populated once the channel goes live.</p>';
       }
-      const lcRate = lc.total ? Math.round((lc.resolved || 0) / lc.total * 100) : 0;
+      const lcResolvedCapped = Math.min((lc.resolved || 0), lc.total || (lc.resolved || 0));
+      const lcRate = lc.total ? Math.round(lcResolvedCapped / lc.total * 100) : 0;
       const lcRows = (lc.categories || []).map(c => '<tr><td style="padding:6pt 8pt;border:1px solid #ccc;font-size:9.5pt;">' + c.name + '</td><td style="padding:6pt 8pt;border:1px solid #ccc;text-align:center;font-size:9.5pt;font-weight:bold;">' + c.count + '</td></tr>').join('');
       return '<h3 style="font-size:10pt;font-weight:bold;margin:10pt 0 4pt 0;">3.0&nbsp;&nbsp;Live Chat Channel</h3>' +
         (lc.total
           ? '<p><strong>LIVE CHAT FOR THE PERIOD ' + (lc.period || '').toUpperCase() + '</strong></p>' +
             '<table><thead><tr><th>TOTAL CHATS</th><th>RESOLVED</th><th>FWD TO EKEDC</th><th>PENDING</th><th>RATE</th></tr></thead>' +
-            '<tbody><tr><td class="kpi-val">' + lc.total + '</td><td class="kpi-val" style="color:#16A34A;">' + (lc.resolved || 0) + '</td><td class="kpi-val" style="color:#D97706;">' + (lc.fwd || 0) + '</td><td class="kpi-val" style="color:#C2410C;">' + (lc.pending || 0) + '</td><td class="kpi-val" style="color:#1D4ED8;">' + lcRate + '%</td></tr></tbody></table>' +
+            '<tbody><tr><td class="kpi-val">' + lc.total + '</td><td class="kpi-val" style="color:#16A34A;">' + lcResolvedCapped + '</td><td class="kpi-val" style="color:#D97706;">' + (lc.fwd || 0) + '</td><td class="kpi-val" style="color:#C2410C;">' + (lc.pending || 0) + '</td><td class="kpi-val" style="color:#1D4ED8;">' + lcRate + '%</td></tr></tbody></table>' +
             (lcRows ? '<p><strong>BY CATEGORY</strong></p><table><thead><tr><th>CATEGORY</th><th>COUNT</th></tr></thead><tbody>' + lcRows + '</tbody></table>' : '')
           : '<p>Resolution figures for this period have not yet been entered. The conversation volume analysis below is drawn from the Live Chat platform export.</p>') +
         (function () {
@@ -1855,7 +1857,7 @@ function buildBodyXml(o) {
   var h = o.helpdesk || {}, m = o.mobile || {}, lc = o.liveChat || {}, soc = o.social || {};
   var mTotal = m.total || 0, mResolved = m.resolved || 0;
   var mRate = pctClamped(mResolved, mTotal);
-  var lcTotal = lc.total || 0, lcResolved = lc.resolved || 0;
+  var lcTotal = lc.total || 0, lcResolved = Math.min(lc.resolved || 0, lc.total || (lc.resolved || 0));
   var lcRate = pctClamped(lcResolved, lcTotal);
   var socQ = soc.quality || {};
   var socT = socQ.total || 0, socG = socQ.genuine || 0;
@@ -1909,11 +1911,11 @@ function buildBodyXml(o) {
   if (soc.byPlatform && soc.byPlatform.length) {
     soc.byPlatform.forEach(function (p) {
       var pRate = pctClamped(p.closed, p.quality.total);
-      var label = p.name === 'Twitter' ? 'Marina Helpdesk X / Twitter (Zoho Desk)' : 'Marina Helpdesk ' + p.name + ' (Zoho Desk)';
+      var label = p.name === 'Twitter' ? 'HQ Helpdesk X / Twitter' : 'HQ Helpdesk ' + p.name;
       chRows.push([label, String(p.quality.total), String(p.closed), pRate + '%']);
     });
   } else if (soc.quality) {
-    chRows.push(['Marina Helpdesk X / Twitter (Zoho Desk)', String(socT), String(xClosed), xRate + '%']);
+    chRows.push(['HQ Helpdesk X / Twitter', String(socT), String(xClosed), xRate + '%']);
   }
   chRows.push(['Mobile App', String(mTotal), String(mResolved), mRate + '%']);
   if (lcTotal) chRows.push(['Live Chat', String(lcTotal), String(lcResolved), lcRate + '%']);
@@ -1985,9 +1987,10 @@ function buildBodyXml(o) {
     var slaTotal = sla.total || 0, slaWithin = sla.withinSLA || 0, slaBreached = sla.breached || 0;
     var slaPending = Math.max(0, slaTotal - (slaWithin + slaBreached));
     x += PARA('**RESOLUTION & RESPONSE (SOCIAL CHANNELS)**');
-    x += TABLE(['FIRST RESPONSE (AVG)', 'FIRST RESPONSE (MEDIAN)', 'RESOLUTION (AVG)', 'RESOLUTION (MEDIAN)', 'SLA COMPLIANCE'],
+    x += TABLE(['FIRST RESPONSE (AVERAGE)', 'FIRST RESPONSE (TYPICAL)', 'RESOLUTION (AVERAGE)', 'RESOLUTION (TYPICAL)', 'SLA COMPLIANCE'],
       [[secondsToHuman(sla.avgFirstResponseSecs), secondsToHuman(sla.medianFirstResponseSecs), secondsToHuman(sla.avgResolutionSecs), secondsToHuman(sla.medianResolutionSecs), (sla.slaCompliancePct != null ? Math.round(sla.slaCompliancePct) + '%' : '\u2014')]],
       [2100, 2100, 1900, 1900, 1400], { bigNums: false });
+    x += PARA('“Average” is the mean across all tickets; “typical” is the median (the middle value — half faster, half slower). The typical figure best reflects day-to-day performance.', { sz: 16 });
     x += PARA('**ESCALATION & LIFECYCLE** \u2014 ' + (sla.escalated || 0) + ' ticket' + ((sla.escalated === 1) ? '' : 's') + ' escalated (' + (slaTotal ? Math.round((sla.escalated || 0) / slaTotal * 100) : 0) + '%), ' + (sla.reopened || 0) + ' reopened. ' + slaBreached + ' breached SLA; ' + slaWithin + ' of ' + slaTotal + ' within target.');
   }
 
@@ -2177,10 +2180,12 @@ function nativeWordExport(o) {
       var sectAt = doc.lastIndexOf('<w:sectPr');
       var sect = doc.substring(sectAt);
 
+      var fromClean = (o.from && !/email\s*helpdesk|email\/\s*mobile|mobile app\/live/i.test(o.from)) ? o.from : 'Manager HQ Helpdesk';
       header = header
         .replace('001/EHD/005/2026', xesc(o.ref || '\u2014'))
         .replace('17th July 2026', xesc(o.date || ''))
-        .replace('Manager Email/ Mobile APP/Live Chat helpdesk CX', xesc(o.from || ''))
+        .replace('Manager Email/ Mobile APP/Live Chat helpdesk CX', xesc(fromClean))
+        .replace('Email/Mobile APP/Live Chat helpdesk weekly report.', 'Weekly Report \u2013 HQ Helpdesk')
         ;
 
       var head = doc.substring(0, bodyStart);
