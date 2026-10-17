@@ -2955,7 +2955,8 @@ function renderSignIn() {
       <div style="font-size:11px; color:#9AA5C4; margin-top:3px;">${esc(m.title || '')}</div>
     </div>`).join('');
   return `
-  <div style="min-height:100vh; background:#1E3070; display:flex; align-items:center; justify-content:center; padding:40px 20px;">
+  <div style="min-height:100vh; background:#1E3070; display:flex; align-items:center; justify-content:center; padding:40px 20px; position:relative;">
+    <a href="index.html" style="position:absolute; top:14px; left:14px; padding:6px 12px; border:1px solid rgba(255,255,255,0.25); border-radius:20px; font:600 11px Sora,sans-serif; color:rgba(255,255,255,0.75); text-decoration:none; background:rgba(255,255,255,0.06);">← Home</a>
     <div style="width:100%; max-width:780px;">
       <div style="text-align:center; margin-bottom:28px;">
         <div style="display:inline-flex; align-items:center; gap:12px; background:#fff; border-radius:10px; padding:8px 14px; margin-bottom:18px;">
