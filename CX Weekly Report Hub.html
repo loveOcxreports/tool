@@ -773,6 +773,57 @@ function isZohoFormat(rows) {
            r.some(function (c) { return /CHANNEL/i.test(c); });
   });
 }
+
+// ---- Zoho "Report Overview" daily aggregate (New/Closed/Backlog + CSAT + response times) ----
+function isReportOverview(rows) {
+  return rows.slice(0, 4).some(function (r) {
+    var line = r.join(',').toLowerCase();
+    return /new tickets/.test(line) && /closed tickets/.test(line) && /resolution time/.test(line);
+  });
+}
+function parseHrsToSecs(v) {
+  var m = /(\d+):(\d+)/.exec(String(v || ''));
+  if (!m) return null;
+  return (parseInt(m[1], 10) * 3600) + (parseInt(m[2], 10) * 60);
+}
+function processReportOverview(rows) {
+  var hi = rows.findIndex(function (r) {
+    var line = r.join(',').toLowerCase();
+    return /new tickets/.test(line) && /closed tickets/.test(line);
+  });
+  if (hi < 0) { toast('\u26a0\ufe0f Report Overview header not found'); return; }
+  var H = rows[hi].map(function (h) { return String(h).trim(); });
+  function col(name) { return H.findIndex(function (h) { return h.toLowerCase() === name.toLowerCase(); }); }
+  var cDate = col('Date'), cNew = col('New Tickets'), cHold = col('On Hold Tickets'), cClosed = col('Closed Tickets'),
+      cBack = col('Backlog'), cGood = col('Good'), cOk = col('Okay'), cBad = col('Bad'),
+      cFR = col('First Response Time'), cRes = col('Resolution Time');
+  var totNew = 0, totClosed = 0, good = 0, ok = 0, bad = 0, lastBacklog = 0, lastHold = 0;
+  var frSecs = [], resSecs = [], days = [];
+  for (var i = hi + 1; i < rows.length; i++) {
+    var r = rows[i]; if (!r || !r[cDate] || !/\d{4}-\d{2}-\d{2}/.test(String(r[cDate]))) continue;
+    days.push(String(r[cDate]).trim());
+    totNew += parseInt(r[cNew], 10) || 0;
+    totClosed += parseInt(r[cClosed], 10) || 0;
+    good += parseInt(r[cGood], 10) || 0;
+    ok += parseInt(r[cOk], 10) || 0;
+    bad += parseInt(r[cBad], 10) || 0;
+    lastBacklog = parseInt(r[cBack], 10) || 0;
+    lastHold = parseInt(r[cHold], 10) || 0;
+    var fr = parseHrsToSecs(r[cFR]); if (fr != null) frSecs.push(fr);
+    var rs = parseHrsToSecs(r[cRes]); if (rs != null) resSecs.push(rs);
+  }
+  var avg = function (a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; };
+  var rated = good + ok + bad;
+  var overview = {
+    days: days, newTickets: totNew, closedTickets: totClosed, backlog: lastBacklog, onHold: lastHold,
+    csatGood: good, csatOkay: ok, csatBad: bad, csatRated: rated,
+    avgFirstResponseSecs: avg(frSecs), avgResolutionSecs: avg(resSecs)
+  };
+  var existing = state.liveData || {};
+  saveData(Object.assign({}, existing, { overview: overview }));
+  toast('\u2705 Report Overview \u00b7 ' + days.length + ' days \u00b7 New ' + totNew + ' \u00b7 Closed ' + totClosed +
+    ' \u00b7 Backlog ' + lastBacklog + ' \u00b7 CSAT ' + good + '/' + ok + '/' + bad + ' rated ' + rated);
+}
 function processZohoEmail(rows) {
   var hi = rows.findIndex(function (r) {
     return r.some(function (c) { return /TICKET ID/i.test(c); }) && r.some(function (c) { return /CHANNEL/i.test(c); });
@@ -794,12 +845,12 @@ function processZohoEmail(rows) {
   }
   var tickets = Object.keys(tk).map(function (k) { return tk[k]; });
   var email = tickets.filter(function (t) { return /email/i.test(t.chan); });
-  var social = tickets.filter(function (t) { return /twitter|social|instagram|facebook|\bx\b|meta/i.test(t.chan); });
+  var social = tickets.filter(function (t) { return /twitter|social|instagram|\big\b|facebook|\bfb\b|\bx\b|meta|ekedpng/i.test(t.chan); });
 
   function platformOf(chan) {
-    if (/twitter|\bx\b/i.test(chan)) return 'Twitter';
-    if (/facebook/i.test(chan)) return 'Facebook';
-    if (/instagram/i.test(chan)) return 'Instagram';
+    if (/instagram|\big\b/i.test(chan)) return 'Instagram';
+    if (/facebook|\bfb\b/i.test(chan)) return 'Facebook';
+    if (/twitter|\bx\b|ekedpng/i.test(chan)) return 'Twitter';
     return 'Social';
   }
 
@@ -843,7 +894,8 @@ function processZohoEmail(rows) {
   var existing = state.liveData || {};
   saveData(Object.assign({}, existing, {
     period: period, reportDate: reportDate,
-    total: email.length, resolved: closed, pending: pending,
+    total: social.length, resolved: socClosed, pending: Math.max(0, social.length - socClosed),
+    email: { total: email.length, closed: closed, pending: pending },
     categories: [], escalatedDistricts: existing.escalatedDistricts || [], totalEscalated: existing.totalEscalated || 0,
     dataQuality: eq, social: { total: social.length, closed: socClosed, quality: sq, byPlatform: byPlatform }
   }));
@@ -1092,6 +1144,7 @@ function processCSV(text) {
     const zt = classifyZohoFile(rows);
     if (zt) { processZohoBucketFile(rows, zt); return; }
   } catch (e) { /* not one of the four Zoho exports — fall through to legacy handling below */ }
+  if (isReportOverview(rows)) { processReportOverview(rows); return; }
   if (isZohoFormat(rows)) { processZohoEmail(rows); return; }
   const headers = rows[0].map(h => h.trim());
   const data = rows.slice(1).map(r => {
@@ -1909,6 +1962,20 @@ function buildBodyXml(o) {
     x += PARA('"Breached" counts tickets flagged IS_VIOLATED or carrying a non-empty breach time in the Zoho export.', { sz: 16 });
   }
 
+  // ---- RESOLUTION & SATISFACTION OVERVIEW (from Zoho Report Overview daily export) ----
+  var ov = h.overview;
+  if (ov) {
+    x += PARA('**RESOLUTION & SATISFACTION OVERVIEW**');
+    x += TABLE(['NEW', 'CLOSED', 'BACKLOG', 'AVG FIRST RESPONSE', 'AVG RESOLUTION'],
+      [[String(ov.newTickets || 0), String(ov.closedTickets || 0), String(ov.backlog || 0),
+        secondsToHuman(ov.avgFirstResponseSecs), secondsToHuman(ov.avgResolutionSecs)]],
+      [1600, 1600, 1600, 2300, 2300], { bigNums: false });
+    var rated = ov.csatRated || 0;
+    x += PARA('**CUSTOMER SATISFACTION (CSAT)** \u2014 ' + rated + ' of the period\u2019s chats/tickets were rated: ' +
+      (ov.csatGood || 0) + ' Good, ' + (ov.csatOkay || 0) + ' Okay, ' + (ov.csatBad || 0) + ' Bad.');
+    x += PARA('Figures above are Zoho system-wide metrics for the reporting window (all channels).', { sz: 16 });
+  }
+
   // ---- 2.0 mobile ----
   x += H3('2.0  Mobile App Channel (EKEDP Power App)');
   if (mTotal) {
@@ -2161,7 +2228,8 @@ function doExportWord(vals) {
       total: vals.total, resolved: vals.resolved, pending: pendingTotal,
       categories: cats, escalatedDistricts: vals._escalatedDistricts, totalEscalated: vals.totalEscalated,
       dataQuality: (liveData && liveData.dataQuality) || null,
-      sla: (liveData && liveData.sla) || null
+      sla: (liveData && liveData.sla) || null,
+      overview: (liveData && liveData.overview) || null
     },
     social: (liveData && liveData.social) || null,
     mobile: state.mobileData ? Object.assign({}, state.mobileData, { responsibleParties: vals.mobileRPRows }) : null,
