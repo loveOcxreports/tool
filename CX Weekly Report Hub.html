@@ -921,7 +921,7 @@ function classifyZohoFile(rows) {
   if (hi === -1) return null;
   var H = rows[hi].map(function (h) { return (h || '').trim(); });
   var has = function (re) { return H.some(function (h) { return re.test(h); }); };
-  if (has(/RECEIVED TIME/i) && has(/IS_VIOLATED/i)) return { type: 'incoming', headerIdx: hi };
+  if (has(/RECEIVED TIME/i) && has(/IS[ _]VIOLATED/i)) return { type: 'incoming', headerIdx: hi };
   if (has(/EVENT START TIME/i) && has(/STATUS UPDATED TO/i)) return { type: 'lifecycle', headerIdx: hi };
   if (has(/AGENT RESOLUTION TIME/i)) return { type: 'resolution', headerIdx: hi };
   if (has(/AGENT RESPONSE TIME/i) && has(/IS FIRST RESPONSE/i)) return { type: 'response', headerIdx: hi };
@@ -968,7 +968,7 @@ function mergeZohoTickets(bucket) {
   var hi = findZohoHeaderRowIndex(rows);
   var H = rows[hi].map(function (h) { return (h || '').trim(); });
   var cID = zohoColIndex(H, 'TICKET ID'), cSub = zohoColIndex(H, 'SUBJECT'), cFrom = zohoColIndex(H, 'FROM'),
-      cRecv = zohoColIndex(H, 'RECEIVED TIME'), cViol = zohoColIndex(H, 'IS_VIOLATED'), cBreach = zohoColIndex(H, 'BREACH TIME'),
+      cRecv = zohoColIndex(H, 'RECEIVED TIME'), cViol = (zohoColIndex(H, 'IS VIOLATED') >= 0 ? zohoColIndex(H, 'IS VIOLATED') : zohoColIndex(H, 'IS_VIOLATED')), cBreach = zohoColIndex(H, 'BREACH TIME'),
       cStat = zohoColIndex(H, 'STATUS'), cChan = zohoColIndex(H, 'CHANNEL');
   for (var i = hi + 1; i < rows.length; i++) {
     var r = rows[i]; var id = (r[cID] || '').trim(); if (!/^\d+$/.test(id)) continue;
@@ -1001,9 +1001,10 @@ function mergeZohoTickets(bucket) {
       var t2 = tickets[id2];
       t2.responded = true;
       if (secs == null) continue;
+      var respBy = (zohoColIndex(RH, 'RESPONDED BY') >= 0 ? (rr[zohoColIndex(RH, 'RESPONDED BY')] || '').trim() : '');
       var isFirst = /^(true|yes)$/i.test(String(rIsFirst >= 0 ? rr[rIsFirst] : '').trim());
-      if (isFirst) { t2.firstResponseSecs = secs; t2._firstLocked = true; }
-      else if (!t2._firstLocked && (t2.firstResponseSecs == null || secs < t2.firstResponseSecs)) { t2.firstResponseSecs = secs; }
+      if (isFirst) { t2.firstResponseSecs = secs; t2._firstLocked = true; if (respBy) t2.respondedBy = respBy; }
+      else if (!t2._firstLocked && (t2.firstResponseSecs == null || secs < t2.firstResponseSecs)) { t2.firstResponseSecs = secs; if (respBy && !t2.respondedBy) t2.respondedBy = respBy; }
     }
   }
 
@@ -1033,6 +1034,8 @@ function mergeZohoTickets(bucket) {
       var endT = new Date((lEnd >= 0 ? lr[lEnd] : '') || '');
       var toStatus = lTo >= 0 ? (lr[lTo] || '').trim() : '';
       if (isNaN(endT)) continue;
+      if (/escalat/i.test(toStatus)) tickets[id4].escalatedEver = true;
+      if (/re-?open/i.test(toStatus)) tickets[id4].reopenedEver = true;
       var prevLatest = latestByTicket[id4];
       if (!prevLatest || endT > prevLatest.endT) latestByTicket[id4] = { endT: endT, toStatus: toStatus };
       if (/closed/i.test(toStatus)) {
@@ -1072,16 +1075,19 @@ function computeSlaAggregates(tickets, bucket) {
     var breached = l.filter(function (t) { return t.violated === true; }).length;
     var withinSLA = l.filter(function (t) { return (t.responded || isResolved(t)) && !t.violated; }).length;
     var slaCompliancePct = (withinSLA + breached) ? (withinSLA / (withinSLA + breached)) * 100 : null;
+    var escalated = l.filter(function (t) { return t.escalatedEver; }).length;
+    var reopened = l.filter(function (t) { return t.reopenedEver; }).length;
     return {
       total: total, resolved: resolved, pending: pending,
       respondedCount: respondedList.length, responseRate: responseRate,
       avgFirstResponseSecs: avgFirstResponseSecs, medianFirstResponseSecs: medianFirstResponseSecs,
       resolvedWithTime: resList.length, avgResolutionSecs: avgResolutionSecs, medianResolutionSecs: medianResolutionSecs,
-      breached: breached, withinSLA: withinSLA, slaCompliancePct: slaCompliancePct
+      breached: breached, withinSLA: withinSLA, slaCompliancePct: slaCompliancePct,
+      escalated: escalated, reopened: reopened
     };
   }
   var emailList = list.filter(function (t) { return /email/i.test(t.channel); });
-  var socialList = list.filter(function (t) { return /twitter|social|instagram|facebook|\bx\b|meta/i.test(t.channel); });
+  var socialList = list.filter(function (t) { return /twitter|social|instagram|\big\b|facebook|\bfb\b|\bx\b|meta|ekedpng/i.test(t.channel); });
   var filesUsed = ['incoming'];
   if (bucket.lifecycle) filesUsed.push('lifecycle');
   if (bucket.resolution) filesUsed.push('resolution');
@@ -1090,11 +1096,28 @@ function computeSlaAggregates(tickets, bucket) {
   // returns (and everything the report's SLA SUMMARY table reads) are Social-channel tickets
   // only. email/social breakdowns are kept below in case they're needed again later; nothing
   // currently reads sla.email or sla.social.
+  // Per-agent social scoring (resolved + avg resolution by CLOSED BY; first responses by RESPONDED BY)
+  function human(s) { return secondsToHuman(s); }
+  var isSystem = function (n) { return !n || /^-+$/.test(n) || /ekedp|zoho|admin|unassigned|system|powerplatform|bot/i.test(n); };
+  var agentMap = {};
+  function agent(n) { if (!agentMap[n]) agentMap[n] = { name: n, resolved: 0, resSecs: [], firstResponses: 0, frSecs: [] }; return agentMap[n]; }
+  socialList.forEach(function (t) {
+    if (t.closedBy && !isSystem(t.closedBy)) { var a = agent(t.closedBy); a.resolved++; if (t.resolutionSecs != null) a.resSecs.push(t.resolutionSecs); }
+    if (t.respondedBy && !isSystem(t.respondedBy) && t.firstResponseSecs != null) { var b = agent(t.respondedBy); b.firstResponses++; b.frSecs.push(t.firstResponseSecs); }
+  });
+  var socialAgents = Object.keys(agentMap).map(function (k) {
+    var a = agentMap[k];
+    var avgRes = a.resSecs.length ? a.resSecs.reduce(function (x, y) { return x + y; }, 0) / a.resSecs.length : null;
+    var avgFr = a.frSecs.length ? a.frSecs.reduce(function (x, y) { return x + y; }, 0) / a.frSecs.length : null;
+    return { name: a.name, resolved: a.resolved, avgResolution: human(avgRes), firstResponses: a.firstResponses, avgFirstResponse: human(avgFr) };
+  }).sort(function (a, b) { return b.resolved - a.resolved; });
+
   var combined = bucketStats(socialList);
   return Object.assign({}, combined, {
     filesUsed: filesUsed,
     email: bucketStats(emailList),
-    social: bucketStats(socialList)
+    social: bucketStats(socialList),
+    agents: socialAgents
   });
 }
 
@@ -1233,6 +1256,7 @@ function processMobileCSV(text) {
     const obj = {}; headers.forEach((h, i) => { obj[h] = (r[i] || '').trim(); }); return obj;
   });
   const find = patterns => headers.find(h => patterns.some(p => p.test(h))) || '';
+  const closedByCol = headers.find(h => /closed.*by/i.test(h)) || '';
   const agentCandidates = headers.filter(h => [/^agent$/i, /^agents$/i, /agent.*name/i, /assigned.*to/i, /assigned.*agent/i, /resolved.*by/i, /handled.*by/i, /^assignee$/i, /^rep$/i, /representative/i, /^owner$/i, /staff/i].some(p => p.test(h)));
   let agentCol = '';
   let bestFill = 0;
@@ -1240,6 +1264,8 @@ function processMobileCSV(text) {
     const fill = data.filter(r => (r[h] || '').trim()).length;
     if (fill > bestFill) { bestFill = fill; agentCol = h; }
   });
+  // Prefer the helpdesk agent who CLOSED the ticket over the district 'Assigned to' party.
+  if (closedByCol && data.filter(r => (r[closedByCol] || '').trim()).length >= 1) { agentCol = closedByCol; }
   const mobileStatusCol = headers.find(h => /mobile.*app.*status/i.test(h));
   const statCol = mobileStatusCol || find([/^status$/i, /ticket.*status/i, /complaint.*status/i, /case.*status/i, /resolution.*status/i, /request.*status/i, /current.*status/i, /app.*status/i, /status$/i]);
   const catCol = find([/^category$/i, /complaint.*type/i, /complaint.*category/i, /issue.*type/i, /request.*type/i, /^type$/i]);
@@ -1937,6 +1963,9 @@ function buildBodyXml(o) {
   var noiseTotal = iN + iD + iJ;
   if (noiseTotal > 0) {
     x += PARA('Ongoing data-quality filtering removed ' + noiseTotal + ' non-genuine entries from this period\u2019s raw volume before reporting: internal @ekedp.com mail (' + iN + '), residual duplicates (' + iD + '), and junk/marketing items (' + iJ + '). Genuine customer complaint counts throughout this report reflect the figures after this filtering.');
+    var dupRawBase = socG + noiseTotal;
+    var dupPct = dupRawBase ? Math.round(iD / dupRawBase * 100) : 0;
+    x += PARA('**Duplicate rate:** approximately ' + dupPct + '% (' + iD + ' of ' + dupRawBase + ' tickets) this period, ' + (dupPct > 2 ? 'above the <2% data-accuracy target. The cause is system-level \u2014 Zoho opening new tickets instead of merging repeat contacts \u2014 and is being addressed with the project team through tightened duplicate-detection rules.' : 'within the <2% data-accuracy target.'));
   } else {
     x += PARA('No internal, duplicate, or junk entries were filtered out of this period\u2019s recorded volume.');
   }
@@ -1955,16 +1984,16 @@ function buildBodyXml(o) {
   if (sla) {
     var slaTotal = sla.total || 0, slaWithin = sla.withinSLA || 0, slaBreached = sla.breached || 0;
     var slaPending = Math.max(0, slaTotal - (slaWithin + slaBreached));
-    x += PARA('**SLA SUMMARY**');
-    x += TABLE(['RESPONDED WITHIN SLA', 'BREACHED', 'PENDING / NO RESPONSE', 'TOTAL', 'AVG FIRST RESPONSE', 'AVG RESOLUTION'],
-      [[String(slaWithin), String(slaBreached), String(slaPending), String(slaTotal), secondsToHuman(sla.avgFirstResponseSecs), secondsToHuman(sla.avgResolutionSecs)]],
-      [1900, 1500, 2100, 1300, 1900, 1900], { bigNums: false });
-    x += PARA('"Breached" counts tickets flagged IS_VIOLATED or carrying a non-empty breach time in the Zoho export.', { sz: 16 });
+    x += PARA('**RESOLUTION & RESPONSE (SOCIAL CHANNELS)**');
+    x += TABLE(['FIRST RESPONSE (AVG)', 'FIRST RESPONSE (MEDIAN)', 'RESOLUTION (AVG)', 'RESOLUTION (MEDIAN)', 'SLA COMPLIANCE'],
+      [[secondsToHuman(sla.avgFirstResponseSecs), secondsToHuman(sla.medianFirstResponseSecs), secondsToHuman(sla.avgResolutionSecs), secondsToHuman(sla.medianResolutionSecs), (sla.slaCompliancePct != null ? Math.round(sla.slaCompliancePct) + '%' : '\u2014')]],
+      [2100, 2100, 1900, 1900, 1400], { bigNums: false });
+    x += PARA('**ESCALATION & LIFECYCLE** \u2014 ' + (sla.escalated || 0) + ' ticket' + ((sla.escalated === 1) ? '' : 's') + ' escalated (' + (slaTotal ? Math.round((sla.escalated || 0) / slaTotal * 100) : 0) + '%), ' + (sla.reopened || 0) + ' reopened. ' + slaBreached + ' breached SLA; ' + slaWithin + ' of ' + slaTotal + ' within target.');
   }
 
-  // ---- RESOLUTION & SATISFACTION OVERVIEW (from Zoho Report Overview daily export) ----
+  // ---- RESOLUTION & SATISFACTION OVERVIEW (all-channel) — shown only as fallback when the social SLA merge is absent ----
   var ov = h.overview;
-  if (ov) {
+  if (ov && !sla) {
     x += PARA('**RESOLUTION & SATISFACTION OVERVIEW**');
     x += TABLE(['NEW', 'CLOSED', 'BACKLOG', 'AVG FIRST RESPONSE', 'AVG RESOLUTION'],
       [[String(ov.newTickets || 0), String(ov.closedTickets || 0), String(ov.backlog || 0),
@@ -2097,6 +2126,29 @@ function buildBodyXml(o) {
   }
 
   // ---- tail ----
+  // ---- KPI PERFORMANCE SUMMARY (auto-assessed against H2 targets) ----
+  (function () {
+    var dupRawBase2 = socG + noiseTotal;
+    var dupPct2 = dupRawBase2 ? Math.round(iD / dupRawBase2 * 100) : 0;
+    var frMed = sla ? sla.medianFirstResponseSecs : null;
+    var frMedTxt = sla ? secondsToHuman(frMed) : '\u2014';
+    var escPct = (sla && sla.total) ? Math.round((sla.escalated || 0) / sla.total * 100) : null;
+    var st = function (ok) { return ok ? 'Met' : 'Missed'; };
+    var resOK = (xRate >= 80) && (lcRate >= 80);
+    var resNote = 'Social ' + xRate + '%, Live Chat ' + lcRate + '%, Mobile App ' + mRate + '% (target: Mobile \u226595%, others \u226580%)';
+    var rows = [
+      ['1. Overall Complaint Resolution', resNote, (resOK && mRate >= 95) ? 'Met' : 'Partly'],
+      ['2. Escalation & Case Mgmt', (escPct != null ? escPct + '% escalations' : 'escalation data n/a') + ' (target \u226415%)', (escPct != null && escPct <= 15) ? 'Met' : '\u2014'],
+      ['3. Response Time Compliance', 'Social first response median ' + frMedTxt + ' (target \u22641 hr)', (frMed != null && frMed <= 3600) ? 'Met' : 'Review'],
+      ['4. Data Accuracy', 'Duplicates ' + dupPct2 + '% (target <2%)', dupPct2 < 2 ? 'Met' : 'Missed'],
+      ['5. QA & SLA Compliance', (sla && sla.slaCompliancePct != null ? 'SLA compliance ' + Math.round(sla.slaCompliancePct) + '%' : 'SLA n/a') + '; dropped chats 0', (sla && sla.slaCompliancePct != null && sla.slaCompliancePct >= 95) ? 'Met' : 'Partly']
+    ];
+    x += H2('KPI Performance Summary');
+    x += PARA('Performance for the period assessed against the HQ Helpdesk H2 KPIs:');
+    x += TABLE(['KPI', 'This Week', 'Status'], rows, [3600, 4200, 1600], { totalRow: false });
+    x += PARA('Status is auto-assessed from the imported Zoho data. First response is on the business-hours (agent) basis, the standard SLA clock.', { sz: 16 });
+  })();
+
   x += H2('Conclusion');
   // The conclusion's performance clause is filled in here (not by the caller) so it always uses
   // the SAME unit totals as the Executive Summary channel table, never a stale/hardcoded number.
@@ -2292,8 +2344,22 @@ function computeVals() {
   const unitResolved = resolved + mobileResolved;
   const unitRate = unitTotal ? Math.round(unitResolved / unitTotal * 100) : 0;
 
+  const socialAgents = (sla && sla.agents) || [];
+  const mobileAgents = (mobileData && mobileData.agents) || [];
+  const teamRows = [];
+  socialAgents.forEach(function (a) { teamRows.push({ name: a.name, channel: 'Social', resolved: a.resolved, note: a.resolved + ' resolved · avg ' + a.avgResolution + ' · ' + a.firstResponses + ' first responses (avg ' + a.avgFirstResponse + ')' }); });
+  mobileAgents.forEach(function (a) {
+    if (/yusuf|unassigned|^-/i.test(a.name)) return;
+    var rate = a.total ? Math.round(a.resolved / a.total * 100) : 0;
+    var existing = teamRows.find(function (r) { return r.name.toLowerCase() === a.name.toLowerCase(); });
+    if (existing) { existing.channel += ' + Mobile'; existing.resolved += a.resolved; existing.note += ' · Mobile ' + a.resolved + '/' + a.total + ' (' + rate + '%)'; }
+    else { teamRows.push({ name: a.name, channel: 'Mobile App', resolved: a.resolved, note: a.total + ' handled · ' + a.resolved + ' resolved · ' + rate + '% rate' }); }
+  });
+  teamRows.sort(function (a, b) { return b.resolved - a.resolved; });
+
   return {
-    tabOverview: activeTab === 'overview', tabEmail: activeTab === 'email', tabMobile: activeTab === 'mobile', tabLiveChat: activeTab === 'livechat', tabAmbassador: activeTab === 'ambassador',
+    tabOverview: activeTab === 'overview', tabEmail: activeTab === 'email', tabMobile: activeTab === 'mobile', tabLiveChat: activeTab === 'livechat', tabAmbassador: activeTab === 'ambassador', tabTeam: activeTab === 'team',
+    teamRows: teamRows,
     unitTotal, unitResolved, unitRate,
     mobileTotal, mobileResolved, mobileInProgress, mobileUnresolved, mobilePending, mobileRate,
     mobileBlankNote: mobileBlank > 0 ? (' · ' + mobileBlank + ' tickets have a blank status and are excluded') : '',
@@ -2373,6 +2439,7 @@ function render() {
         <div onclick="app.goTab('mobile')" style="${tabStyle(v.tabMobile)}">📱 Mobile App</div>
         <div onclick="app.goTab('livechat')" style="${tabStyle(v.tabLiveChat)}">💬 Live Chat</div>
         <div onclick="app.goTab('ambassador')" style="${tabStyle(v.tabAmbassador)}">🤝 Ambassadors</div>
+        <div onclick="app.goTab('team')" style="${tabStyle(v.tabTeam)}">👥 Team</div>
       </div>
     </div>
 
@@ -2669,6 +2736,27 @@ function render() {
       </div>
     </div>
     ` : ''}
+
+    ${v.tabTeam ? `
+    <div style="background:#fff; border:1px solid #D1D9F0; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(30,48,112,0.07); margin-bottom:20px;">
+      <div style="padding:14px 20px; border-bottom:1px solid #E8EDF5;">
+        <div style="font-size:13px; font-weight:700; color:#1E3070;">👥 Team Member Achievement (auto-calculated)</div>
+        <div style="font-size:10px; color:#9AA5C4; margin-top:1px;">Social from Zoho Resolution/Response (Closed By / Responded By) · Mobile from the Issue Tracker (Closed By). Agent-level — internal use.</div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:12px;">
+        <thead><tr style="background:#F5F7FF;">
+          <th style="text-align:left; padding:9px 14px; color:#6B7CAF; font-size:10px; text-transform:uppercase; letter-spacing:0.08em;">Agent</th>
+          <th style="text-align:left; padding:9px 14px; color:#6B7CAF; font-size:10px; text-transform:uppercase; letter-spacing:0.08em;">Channel</th>
+          <th style="text-align:center; padding:9px 14px; color:#6B7CAF; font-size:10px; text-transform:uppercase; letter-spacing:0.08em;">Resolved</th>
+          <th style="text-align:left; padding:9px 14px; color:#6B7CAF; font-size:10px; text-transform:uppercase; letter-spacing:0.08em;">Performance Note</th>
+        </tr></thead>
+        <tbody>
+          ${v.teamRows.length ? v.teamRows.map(function (a) { return '<tr style="border-top:1px solid #EEF1F8;"><td style="padding:10px 14px; font-weight:700; color:#1E3070;">' + a.name + '</td><td style="padding:10px 14px; color:#475569;">' + a.channel + '</td><td style="padding:10px 14px; text-align:center; font-weight:700; color:#16A34A;">' + a.resolved + '</td><td style="padding:10px 14px; color:#475569; font-size:11px;">' + a.note + '</td></tr>'; }).join('') : '<tr><td colspan="4" style="padding:18px; text-align:center; color:#9AA5C4;">Import the Zoho Resolution/Response exports and the Mobile Issue Tracker to populate.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px; color:#9AA5C4; line-height:1.6; margin-bottom:24px;">Use these auto-calculated actuals to fill your weekly scorecard. Agents on leave or redeployed will not appear until they log tickets again.</div>
+    ` : ``}
 
     ${v.tabAmbassador ? `
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;">
